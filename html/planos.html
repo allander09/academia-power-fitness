@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Planos | Power Fitness</title>
+
+<link rel="stylesheet" href="../css/modal.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/plano.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header>
+
+<h1>PLANOS POWER FITNESS</h1>
+
+<a href="index.html">← Voltar</a>
+
+</header>
+
+<section class="planos">
+
+<div class="card">
+
+<h2>Básico</h2>
+
+<h1>R$89</h1>
+
+<p>Musculação</p>
+
+<p>Área Cardio</p>
+
+<button onclick="abrirModal('Plano Básico', 'R$ 89,90/mês')">
+Escolher Plano
+</button>
+
+
+</div>
+
+<div class="card">
+
+<h2>Premium</h2>
+
+<h1>R$129</h1>
+
+<p>Musculação</p>
+
+<p>Funcional</p>
+
+<p>Avaliação Física</p>
+
+<button onclick="abrirModal('Plano Premium', 'R$ 149,90/mês')">
+Escolher Plano
+</button>
+</div>
+
+<div class="card">
+
+<h2>VIP</h2>
+
+<h1>R$179</h1>
+
+<p>Acesso Total</p>
+
+<p>Personal</p>
+
+<p>Nutricionista</p>
+
+<button onclick="abrirModal('Plano VIP', 'R$ 199,90/mês')">
+Escolher Plano
+</button>
+
+</div>
+
+</section>
+
+<section class="calculadora">
+
+<h2>Calculadora de Mensalidade</h2>
+
+<label>Plano escolhido</label>
+
+<input
+type="text"
+id="plano"
+readonly>
+
+<label>Adicionar Personal (R$60)</label>
+
+<select id="personal">
+
+<option value="0">Não</option>
+
+<option value="60">Sim</option>
+
+</select>
+
+<label>Adicionar Nutricionista (R$80)</label>
+
+<select id="nutri">
+
+<option value="0">Não</option>
+
+<option value="80">Sim</option>
+
+</select>
+
+<button onclick="calcular()">
+
+Calcular
+
+</button>
+
+<h2 id="resultado"></h2>
+
+</section>
+
+<script src="../js/mensalidade.js"></script>
+
+<div id="modal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="fechar" onclick="fecharModal()">&times;</span>
+
+        <h2 id="tituloPlano"></h2>
+
+        <p id="descricaoPlano"></p>
+
+        <button onclick="fecharModal()">
+            Fechar
+        </button>
+
+    </div>
+
+</div>
+
+<script src="../js/modal.js"></script>
+
+
+</body>
+
+</html>
