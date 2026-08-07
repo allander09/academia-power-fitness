@@ -1,40 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Calculadora de IMC</title>
-
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/imc.css">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de IMC | Power Fitness</title>
+  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/imc.css">
 </head>
-
 <body>
-
-<header>
-<h1>Calculadora de IMC</h1>
-<a href="index.html">← Voltar</a>
-</header>
-
-<section class="container-imc">
-
-<h2>Descubra seu IMC</h2>
-
-<input type="number" id="peso" placeholder="Peso (kg)">
-
-<input type="number" id="altura" placeholder="Altura (m)">
-
-<button onclick="calcularIMC()">
-Calcular
-</button>
-
-<div id="resultado"></div>
-
-</section>
-
-<script src="../js/imc.js"></script>
-
+  <header class="cabecalho-interno"><h1>Calculadora de IMC</h1><a href="index.html">← Voltar</a></header>
+  <main class="container-imc">
+    <h2>Descubra seu IMC</h2><p>Resultado apenas informativo.</p>
+    <label for="peso">Peso em kg</label><input type="number" id="peso" min="1" step="0.1" placeholder="Ex.: 75">
+    <label for="altura">Altura em metros</label><input type="number" id="altura" min="0.5" max="3" step="0.01" placeholder="Ex.: 1,75">
+    <button type="button" onclick="calcularIMC()">Calcular</button>
+    <p id="resultadoIMC" class="mensagem" aria-live="polite"></p>
+  </main>
+  <script src="../js/imc.js"></script>
 </body>
 </html>
