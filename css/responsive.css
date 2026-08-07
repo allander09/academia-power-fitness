@@ -1,63 +1,11 @@
 @media(max-width:900px){
-
-.cards-beneficios,
-.cards-servicos,
-.cards-planos,
-.cards-professores,
-.footer-container{
-
-grid-template-columns:1fr;
-
+  .cards-servicos,.cards-planos,.cards-professores,.footer-container,.estatisticas{grid-template-columns:1fr 1fr}
+  nav ul{display:none;position:absolute;top:80px;right:0;flex-direction:column;align-items:stretch;width:min(320px,100%);padding:22px;background:#111}
+  nav ul.ativo{display:flex}.menu-mobile{display:block}.destaque-plano{transform:none}
 }
-
-nav ul{
-
-display:none;
-
-flex-direction:column;
-
-background:#111;
-
-position:absolute;
-
-top:80px;
-
-right:0;
-
-width:220px;
-
-padding:20px;
-
+@media(max-width:600px){
+  section{padding:58px 0}.cards-servicos,.cards-planos,.cards-professores,.footer-container,.estatisticas{grid-template-columns:1fr}
+  .estatisticas{gap:18px}.hero-buttons{flex-direction:column}.hero-buttons a{width:100%}
+  .cabecalho-interno{align-items:flex-start;gap:12px;flex-direction:column}.form-card{padding:22px}
 }
-
-nav ul.ativo{
-
-display:flex;
-
-}
-
-.menu-mobile{
-
-display:block;
-
-}
-
-.hero-content h1{
-
-font-size:42px;
-
-}
-
-.hero-content h2{
-
-font-size:24px;
-
-}
-
-section h2{
-
-font-size:30px;
-
-}
-
-}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
