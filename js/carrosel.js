@@ -1,0 +1,1 @@
+// Carrossel será configurado após adicionar as imagens.
