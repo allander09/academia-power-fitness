@@ -1,16 +1,32 @@
-function validarContato() {
+function configurarContato() {
+  const form = document.getElementById("formContato");
+  if (!form) return;
 
-    let nome = document.getElementById("nome").value.trim();
-    let email = document.getElementById("email").value.trim();
-    let mensagem = document.getElementById("mensagem").value.trim();
+  const retorno = document.getElementById("retorno") || document.getElementById("mensagemContato");
 
-    if (nome === "" || email === "" || mensagem === "") {
-        alert("Preencha todos os campos.");
-        return;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const nome = form.querySelector('[name="nome"]').value.trim();
+    const email = form.querySelector('[name="email"]').value.trim();
+    const mensagem = form.querySelector('[name="mensagem"]').value.trim();
+
+    if (!nome || !email || !mensagem) {
+      retorno.textContent = "Preencha nome, e-mail e mensagem.";
+      retorno.className = "mensagem erro";
+      return;
     }
 
-    alert("Mensagem enviada com sucesso!");
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-    document.getElementById("formContato").reset();
-
+    retorno.textContent = "Mensagem registrada neste dispositivo.";
+    retorno.className = "mensagem sucesso";
+    sessionStorage.setItem("powerFitnessUltimoContato", JSON.stringify({ nome, email, mensagem }));
+    form.reset();
+  });
 }
+
+document.addEventListener("DOMContentLoaded", configurarContato);
