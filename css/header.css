@@ -1,0 +1,79 @@
+/* ===========================
+   HEADER
+=========================== */
+
+header{
+
+    position:fixed;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    background:#111;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 8%;
+
+    z-index:1000;
+
+}
+
+.logo img{
+
+    width:170px;
+
+}
+
+nav ul{
+
+    display:flex;
+
+    gap:35px;
+
+}
+
+nav ul li a{
+
+    color:#fff;
+
+    font-size:17px;
+
+    font-weight:500;
+
+    transition:.3s;
+
+}
+
+nav ul li a:hover{
+
+    color:#d62828;
+
+}
+
+.menu-mobile{
+
+    display:none;
+
+    color:#fff;
+
+    font-size:28px;
+
+    cursor:pointer;
+
+}
+
+/* Espaço para o header fixo */
+
+main{
+
+    margin-top:90px;
+
+}
