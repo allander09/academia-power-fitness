@@ -1,118 +1,62 @@
-// Importações do Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getFirestore, doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { firebaseConfig } from "./firebase-config.js";
 
-import {
-    getFirestore,
-    doc,
-    setDoc
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-import {
-    getAuth,
-    createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-
-// Configuração do Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAES4W-xwqBIAnqnNYTOfTtq1MOamc2AB0",
-    authDomain: "powerfitness-2a4a4.firebaseapp.com",
-    projectId: "powerfitness-2a4a4",
-    storageBucket: "powerfitness-2a4a4.firebasestorage.app",
-    messagingSenderId: "864803334343",
-    appId: "1:864803334343:web:f127b77a50e95bb43bf6e2",
-    measurementId: "G-C90V5WGZQH"
-};
-
-// Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-
-// Elementos da página
 const form = document.getElementById("cadastroForm");
-const toast = document.getElementById("toast");
+const feedback = document.getElementById("feedbackCadastro");
+const botao = form?.querySelector('button[type="submit"]');
 
-// Verifica se o formulário existe
+function mostrarFeedback(mensagem, tipo = "sucesso") {
+  if (!feedback) return;
+  feedback.textContent = mensagem;
+  feedback.className = `feedback ${tipo}`;
+  feedback.hidden = false;
+}
+
 if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-    form.addEventListener("submit", async (e) => {
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const senha = document.getElementById("senha").value;
 
-        e.preventDefault();
+    if (!nome || !email || !telefone || senha.length < 6) {
+      mostrarFeedback("Preencha todos os campos. A senha deve ter pelo menos 6 caracteres.", "erro");
+      return;
+    }
 
-        const nome = document.getElementById("nome").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const senha = document.getElementById("senha").value;
-        const telefone = document.getElementById("telefone").value.trim();
+    botao.disabled = true;
+    botao.textContent = "Cadastrando...";
 
-        // Validação
-        if (!nome || !email || !senha || !telefone) {
-            alert("Preencha todos os campos.");
-            return;
-        }
+    try {
+      const credencial = await createUserWithEmailAndPassword(auth, email, senha);
+      await setDoc(doc(db, "usuarios", credencial.user.uid), {
+        nome,
+        email,
+        telefone,
+        criadoEm: serverTimestamp()
+      });
 
-        if (senha.length < 6) {
-            alert("A senha deve possuir pelo menos 6 caracteres.");
-            return;
-        }
-
-        try {
-
-            // Cria usuário no Authentication
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                email,
-                senha
-            );
-
-            // Salva dados no Firestore
-            await setDoc(doc(db, "usuarios", userCredential.user.uid), {
-                nome: nome,
-                email: email,
-                telefone: telefone,
-                criadoEm: new Date()
-            });
-
-            // Toast de sucesso
-            if (toast) {
-                toast.classList.add("show");
-
-                setTimeout(() => {
-                    toast.classList.remove("show");
-                }, 3000);
-            }
-
-            form.reset();
-
-            console.log("Usuário cadastrado com sucesso!");
-
-        } catch (error) {
-
-            console.error(error);
-
-            switch (error.code) {
-
-                case "auth/email-already-in-use":
-                    alert("Este e-mail já está cadastrado.");
-                    break;
-
-                case "auth/invalid-email":
-                    alert("E-mail inválido.");
-                    break;
-
-                case "auth/weak-password":
-                    alert("A senha deve possuir pelo menos 6 caracteres.");
-                    break;
-
-                case "auth/network-request-failed":
-                    alert("Sem conexão com a internet.");
-                    break;
-
-                default:
-                    alert("Erro ao cadastrar: " + error.message);
-                    break;
-            }
-        }
-
-    });
-
+      form.reset();
+      mostrarFeedback("Cadastro realizado com sucesso!");
+    } catch (error) {
+      const mensagens = {
+        "auth/email-already-in-use": "Este e-mail já está cadastrado.",
+        "auth/invalid-email": "Informe um e-mail válido.",
+        "auth/weak-password": "A senha deve ter pelo menos 6 caracteres.",
+        "auth/network-request-failed": "Sem conexão com a internet."
+      };
+      mostrarFeedback(mensagens[error.code] || "Não foi possível concluir o cadastro.", "erro");
+      console.error("Falha no cadastro:", error.code);
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Cadastrar";
+    }
+  });
 }
