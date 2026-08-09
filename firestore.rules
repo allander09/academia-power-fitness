@@ -6,9 +6,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function emailVerificado() {
+      return autenticado() && request.auth.token.email_verified == true;
+    }
+
     function administrador() {
-      return autenticado()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return emailVerificado()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true;
     }
 
     function textoValido(valor, minimo, maximo) {
@@ -46,15 +51,16 @@ service cloud.firestore {
     }
 
     match /agendamentos/{agendamentoId} {
-      allow create: if autenticado()
+      allow create: if emailVerificado()
         && request.resource.data.usuarioId == request.auth.uid
         && request.resource.data.status == 'pendente'
         && request.resource.data.keys().hasOnly([
-          'usuarioId', 'nome', 'email', 'data', 'plano', 'status', 'criadoEm', 'atualizadoEm'
+          'usuarioId', 'nome', 'email', 'data', 'hora', 'plano', 'status', 'criadoEm', 'atualizadoEm'
         ])
         && textoValido(request.resource.data.nome, 3, 100)
         && textoValido(request.resource.data.email, 5, 254)
         && textoValido(request.resource.data.data, 10, 10)
+        && textoValido(request.resource.data.hora, 5, 5)
         && textoValido(request.resource.data.plano, 3, 100);
 
       allow read: if administrador()
