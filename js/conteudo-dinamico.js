@@ -1,4 +1,4 @@
-import { collection, getDocs, orderBy, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { db } from "./firebase-services.js";
 
 function elemento(tag, texto, classe) {
@@ -43,11 +43,12 @@ async function carregarProfessores() {
 }
 
 async function carregarHorarios() {
-  const snapshot = await getDocs(query(collection(db, "horarios"), where("ativo", "==", true), orderBy("hora")));
+  const snapshot = await getDocs(query(collection(db, "horarios"), where("ativo", "==", true)));
   if (snapshot.empty) return;
   const tbody = document.querySelector("#horarios tbody");
   tbody.replaceChildren();
-  snapshot.docs.forEach((documento) => {
+  const ordenados = [...snapshot.docs].sort((a, b) => a.data().hora.localeCompare(b.data().hora));
+  ordenados.forEach((documento) => {
     const dados = documento.data();
     const tr = document.createElement("tr");
     tr.append(elemento("td", dados.hora), elemento("td", dados.atividade));
