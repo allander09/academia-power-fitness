@@ -31,7 +31,7 @@ function renderizarAgendamentos(documentos) {
     const dados = item.data();
     const card = criar("article", "", "item-lista");
     card.append(
-      criar("strong", dados.data),
+      criar("strong", dados.hora ? `${dados.data} às ${dados.hora}` : dados.data),
       criar("span", `Plano: ${dados.plano || "Não informado"}`),
       criar("span", `Status: ${dados.status}`),
       criar("small", `Criado em ${formatarData(dados.criadoEm)}`)
@@ -65,7 +65,7 @@ async function carregarPainel(usuario) {
     document.getElementById("perfilTelefone").value = perfil.telefone || "";
   }
   document.getElementById("perfilEmail").value = usuario.email || "";
-  document.getElementById("linkAdmin").hidden = !adminSnap.exists();
+  document.getElementById("linkAdmin").hidden = !adminSnap.exists() || !usuario.emailVerified;
 
   const status = document.getElementById("emailVerificado");
   status.textContent = usuario.emailVerified ? "E-mail verificado" : "E-mail ainda não verificado";
