@@ -233,7 +233,7 @@ onAuthStateChanged(auth, async (usuario) => {
     await getIdToken(usuario, true);
 
     const admin = await getDoc(doc(db, "admins", usuario.uid));
-    if (!admin.exists()) {
+    if (!admin.exists() || admin.data().ativo !== true) {
       carregando.textContent = "Acesso negado: esta conta não é administradora.";
       return;
     }
