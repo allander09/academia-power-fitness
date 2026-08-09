@@ -22,7 +22,7 @@ async function carregarPlanos() {
     (dados.beneficios || []).forEach((beneficio) => lista.appendChild(elemento("li", beneficio)));
     const botao = elemento("button", "Escolher");
     botao.type = "button";
-    botao.addEventListener("click", () => abrirModal(dados.nome, Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês"));
+    botao.addEventListener("click", () => window.abrirModal(dados.nome, Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês"));
     card.append(lista, botao);
     container.appendChild(card);
   });
