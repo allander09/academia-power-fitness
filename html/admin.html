@@ -1,26 +1,79 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex">
   <title>Administração | Power Fitness</title>
-  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/painel.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/painel.css">
 </head>
 <body>
-  <header class="painel-header"><a class="logo" href="index.html"><span>POWER</span> FITNESS</a><nav><a href="index.html">Site</a><button id="sair" type="button">Sair</button></nav></header>
+  <header class="painel-header">
+    <a class="logo" href="index.html"><span>POWER</span> FITNESS</a>
+    <nav><a href="index.html">Site</a><button id="sair" type="button">Sair</button></nav>
+  </header>
+
   <main class="painel-container" id="adminConteudo" hidden>
     <section class="boas-vindas"><div><p>Administração</p><h1>Painel da academia</h1></div></section>
-    <section class="metricas"><article><strong id="totalAlunos">0</strong><span>Alunos</span></article><article><strong id="totalAgendamentos">0</strong><span>Agendamentos</span></article><article><strong id="totalContatos">0</strong><span>Contatos</span></article></section>
-    <section class="painel-card"><h2>Agendamentos</h2><div class="tabela-admin"><table><thead><tr><th>Aluno</th><th>Data</th><th>Plano</th><th>Status</th><th>Ação</th></tr></thead><tbody id="agendamentosAdmin"></tbody></table></div></section>
-    <section class="painel-card"><h2>Contatos</h2><div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Mensagem</th><th>Status</th><th>Ação</th></tr></thead><tbody id="contatosAdmin"></tbody></table></div></section>
-    <section class="painel-card"><h2>Alunos</h2><div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th></tr></thead><tbody id="alunosAdmin"></tbody></table></div></section>
+    <section class="metricas">
+      <article><strong id="totalAlunos">0</strong><span>Alunos</span></article>
+      <article><strong id="totalAgendamentos">0</strong><span>Agendamentos</span></article>
+      <article><strong id="totalContatos">0</strong><span>Contatos</span></article>
+    </section>
+
+    <section class="painel-card">
+      <h2>Agendamentos</h2>
+      <div class="tabela-admin"><table><thead><tr><th>Aluno</th><th>Data</th><th>Hora</th><th>Plano</th><th>Status</th><th>Ação</th></tr></thead><tbody id="agendamentosAdmin"></tbody></table></div>
+    </section>
+
+    <section class="painel-card">
+      <h2>Contatos</h2>
+      <div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Mensagem</th><th>Status</th><th>Ação</th></tr></thead><tbody id="contatosAdmin"></tbody></table></div>
+    </section>
+
+    <section class="painel-card">
+      <h2>Alunos</h2>
+      <label for="buscaAlunos">Buscar aluno</label>
+      <input class="campo-busca" id="buscaAlunos" type="search" placeholder="Nome, e-mail ou telefone">
+      <div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th></tr></thead><tbody id="alunosAdmin"></tbody></table></div>
+    </section>
+
     <section class="painel-grid">
-      <article class="painel-card"><h2>Novo plano</h2><form id="planoForm"><label for="planoNomeAdmin">Nome</label><input id="planoNomeAdmin" required><label for="planoValorAdmin">Valor mensal</label><input id="planoValorAdmin" type="number" min="0" step="0.01" required><label for="planoBeneficiosAdmin">Benefícios</label><textarea id="planoBeneficiosAdmin" placeholder="Separe por vírgulas" required></textarea><button type="submit">Salvar plano</button></form><div id="listaPlanosAdmin"></div></article>
-      <article class="painel-card"><h2>Novo professor</h2><form id="professorForm"><label for="professorNomeAdmin">Nome</label><input id="professorNomeAdmin" required><label for="professorEspecialidadeAdmin">Especialidade</label><input id="professorEspecialidadeAdmin" required><button type="submit">Salvar professor</button></form><div id="listaProfessoresAdmin"></div></article>
-      <article class="painel-card"><h2>Novo horário</h2><form id="horarioForm"><label for="horarioHoraAdmin">Horário</label><input id="horarioHoraAdmin" type="time" required><label for="horarioAtividadeAdmin">Atividade</label><input id="horarioAtividadeAdmin" required><button type="submit">Salvar horário</button></form><div id="listaHorariosAdmin"></div></article>
+      <article class="painel-card">
+        <h2>Novo plano</h2>
+        <form id="planoForm">
+          <label for="planoNomeAdmin">Nome</label><input id="planoNomeAdmin" required>
+          <label for="planoValorAdmin">Valor mensal</label><input id="planoValorAdmin" type="number" min="0" step="0.01" required>
+          <label for="planoBeneficiosAdmin">Benefícios</label><textarea id="planoBeneficiosAdmin" placeholder="Separe por vírgulas" required></textarea>
+          <button type="submit">Salvar plano</button>
+        </form>
+        <div id="listaPlanosAdmin"></div>
+      </article>
+
+      <article class="painel-card">
+        <h2>Novo professor</h2>
+        <form id="professorForm">
+          <label for="professorNomeAdmin">Nome</label><input id="professorNomeAdmin" required>
+          <label for="professorEspecialidadeAdmin">Especialidade</label><input id="professorEspecialidadeAdmin" required>
+          <button type="submit">Salvar professor</button>
+        </form>
+        <div id="listaProfessoresAdmin"></div>
+      </article>
+
+      <article class="painel-card">
+        <h2>Novo horário</h2>
+        <form id="horarioForm">
+          <label for="horarioHoraAdmin">Horário</label><input id="horarioHoraAdmin" type="time" required>
+          <label for="horarioAtividadeAdmin">Atividade</label><input id="horarioAtividadeAdmin" required>
+          <button type="submit">Salvar horário</button>
+        </form>
+        <div id="listaHorariosAdmin"></div>
+      </article>
     </section>
     <p id="feedbackAdmin" class="mensagem" aria-live="polite"></p>
   </main>
+
   <div id="carregando" class="tela-carregando">Verificando permissão…</div>
   <script type="module" src="../js/admin.js"></script>
 </body>
