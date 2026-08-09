@@ -7,27 +7,56 @@ const carregando = document.getElementById("carregando");
 const feedback = document.getElementById("feedbackPerfil");
 let usuarioAtual;
 
+function criar(tag, texto, classe) {
+  const elemento = document.createElement(tag);
+  elemento.textContent = texto;
+  if (classe) elemento.className = classe;
+  return elemento;
+}
+
 function formatarData(timestamp) {
   return timestamp?.toDate ? timestamp.toDate().toLocaleString("pt-BR") : "Data pendente";
 }
 
 function renderizarAgendamentos(documentos) {
   const lista = document.getElementById("listaAgendamentos");
+  lista.replaceChildren();
+
   if (!documentos.length) {
-    lista.innerHTML = '<p class="lista-vazia">Você ainda não possui agendamentos.</p>';
+    lista.appendChild(criar("p", "Você ainda não possui agendamentos.", "lista-vazia"));
     return;
   }
 
-  lista.innerHTML = documentos.map((item) => {
+  documentos.forEach((item) => {
     const dados = item.data();
-    return `<article class="item-lista"><strong>${dados.data}</strong><span>Plano: ${dados.plano || "Não informado"}</span><span>Status: ${dados.status}</span><small>Criado em ${formatarData(dados.criadoEm)}</small></article>`;
-  }).join("");
+    const card = criar("article", "", "item-lista");
+    card.append(
+      criar("strong", dados.data),
+      criar("span", `Plano: ${dados.plano || "Não informado"}`),
+      criar("span", `Status: ${dados.status}`),
+      criar("small", `Criado em ${formatarData(dados.criadoEm)}`)
+    );
+
+    if (dados.status === "pendente" || dados.status === "confirmado") {
+      const cancelar = criar("button", "Cancelar agendamento");
+      cancelar.type = "button";
+      cancelar.addEventListener("click", async () => {
+        if (!confirm("Deseja cancelar este agendamento?")) return;
+        await updateDoc(doc(db, "agendamentos", item.id), { status: "cancelado", atualizadoEm: serverTimestamp() });
+        await carregarPainel(usuarioAtual);
+      });
+      card.appendChild(cancelar);
+    }
+    lista.appendChild(card);
+  });
 }
 
 async function carregarPainel(usuario) {
   usuarioAtual = usuario;
-  const perfilRef = doc(db, "usuarios", usuario.uid);
-  const perfilSnap = await getDoc(perfilRef);
+  const [perfilSnap, adminSnap] = await Promise.all([
+    getDoc(doc(db, "usuarios", usuario.uid)),
+    getDoc(doc(db, "admins", usuario.uid))
+  ]);
 
   if (perfilSnap.exists()) {
     const perfil = perfilSnap.data();
@@ -36,6 +65,7 @@ async function carregarPainel(usuario) {
     document.getElementById("perfilTelefone").value = perfil.telefone || "";
   }
   document.getElementById("perfilEmail").value = usuario.email || "";
+  document.getElementById("linkAdmin").hidden = !adminSnap.exists();
 
   const status = document.getElementById("emailVerificado");
   status.textContent = usuario.emailVerified ? "E-mail verificado" : "E-mail ainda não verificado";
