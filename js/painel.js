@@ -1,5 +1,5 @@
 import { onAuthStateChanged, reload, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
 
 const conteudo = document.getElementById("conteudoPainel");
@@ -42,9 +42,10 @@ async function carregarPainel(usuario) {
   status.className = `status ${usuario.emailVerified ? "verificado" : "pendente"}`;
   document.getElementById("reenviarVerificacao").hidden = usuario.emailVerified;
 
-  const consulta = query(collection(db, "agendamentos"), where("usuarioId", "==", usuario.uid), orderBy("criadoEm", "desc"));
+  const consulta = query(collection(db, "agendamentos"), where("usuarioId", "==", usuario.uid));
   const agendamentos = await getDocs(consulta);
-  renderizarAgendamentos(agendamentos.docs);
+  const ordenados = [...agendamentos.docs].sort((a, b) => (b.data().criadoEm?.seconds || 0) - (a.data().criadoEm?.seconds || 0));
+  renderizarAgendamentos(ordenados);
 
   carregando.hidden = true;
   conteudo.hidden = false;
