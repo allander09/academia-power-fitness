@@ -12,7 +12,8 @@ service cloud.firestore {
 
     function administrador() {
       return emailVerificado()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true;
     }
 
     function textoValido(valor, minimo, maximo) {
