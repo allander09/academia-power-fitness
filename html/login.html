@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Acesse sua conta Power Fitness.">
+  <title>Entrar | Power Fitness</title>
+  <link rel="stylesheet" href="../css/formularios.css">
+</head>
+<body>
+  <main class="container">
+    <a class="voltar" href="index.html">← Voltar ao início</a>
+    <h1>Entrar</h1><p class="subtitulo-form">Acesse seus dados e agendamentos.</p>
+    <form id="loginForm">
+      <label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required>
+      <label for="senha">Senha</label><input type="password" id="senha" autocomplete="current-password" required>
+      <button class="botao-secundario" id="alternarSenha" type="button" aria-pressed="false">Mostrar senha</button>
+      <button type="submit">Entrar</button>
+      <p id="feedbackLogin" class="feedback" aria-live="polite" hidden></p>
+    </form>
+    <button class="link-button" id="recuperarSenha" type="button">Esqueci minha senha</button>
+    <p class="alternativa">Ainda não tem uma conta? <a href="formularios.html">Cadastre-se</a></p>
+  </main>
+  <script type="module" src="../js/login.js"></script>
+</body>
+</html>

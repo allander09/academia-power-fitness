@@ -1,32 +1,44 @@
-function configurarContato() {
-  const form = document.getElementById("formContato");
-  if (!form) return;
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { auth, db } from "./firebase-services.js";
 
-  const retorno = document.getElementById("retorno") || document.getElementById("mensagemContato");
+const form = document.getElementById("formContato");
+const retorno = document.getElementById("retorno") || document.getElementById("mensagemContato");
 
-  form.addEventListener("submit", (event) => {
+if (form) {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-
-    const nome = form.querySelector('[name="nome"]').value.trim();
-    const email = form.querySelector('[name="email"]').value.trim();
-    const mensagem = form.querySelector('[name="mensagem"]').value.trim();
-
-    if (!nome || !email || !mensagem) {
-      retorno.textContent = "Preencha nome, e-mail e mensagem.";
-      retorno.className = "mensagem erro";
-      return;
-    }
 
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
-    retorno.textContent = "Mensagem registrada neste dispositivo.";
-    retorno.className = "mensagem sucesso";
-    sessionStorage.setItem("powerFitnessUltimoContato", JSON.stringify({ nome, email, mensagem }));
-    form.reset();
+    const botao = form.querySelector('button[type="submit"]');
+    botao.disabled = true;
+    botao.textContent = "Enviando...";
+
+    try {
+      await auth.authStateReady();
+      await addDoc(collection(db, "contatos"), {
+        usuarioId: auth.currentUser?.uid || null,
+        nome: form.querySelector('[name="nome"]').value.trim(),
+        email: form.querySelector('[name="email"]').value.trim().toLowerCase(),
+        telefone: form.querySelector('[name="telefone"]')?.value.trim() || "",
+        mensagem: form.querySelector('[name="mensagem"]').value.trim(),
+        status: "novo",
+        criadoEm: serverTimestamp()
+      });
+
+      retorno.textContent = "Mensagem enviada. Entraremos em contato.";
+      retorno.className = "mensagem sucesso";
+      form.reset();
+    } catch (error) {
+      retorno.textContent = "Não foi possível enviar a mensagem agora.";
+      retorno.className = "mensagem erro";
+      console.error("Falha no contato:", error.code);
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Enviar mensagem";
+    }
   });
 }
-
-document.addEventListener("DOMContentLoaded", configurarContato);

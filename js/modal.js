@@ -4,6 +4,7 @@ function abrirModal(plano, valor) {
   if (!modal) return;
   document.getElementById("tituloPlano").textContent = plano;
   document.getElementById("descricaoPlano").textContent = `Valor da mensalidade: ${valor}`;
+  sessionStorage.setItem("powerFitnessPlano", plano);
   modal.classList.add("aberto");
   modal.setAttribute("aria-hidden", "false");
   modal.querySelector(".fechar")?.focus();

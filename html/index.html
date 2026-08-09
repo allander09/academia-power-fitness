@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Power Fitness: planos, horários, equipe e aula experimental.">
+  <meta name="description" content="Power Fitness: planos, horários, equipe, cadastro e aula experimental.">
+  <meta name="theme-color" content="#111111">
+  <meta property="og:title" content="Power Fitness">
+  <meta property="og:description" content="Treine, evolua e supere seus limites.">
+  <meta property="og:type" content="website">
   <title>Power Fitness</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="../site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,6 +38,8 @@
         <li><a href="#imc">IMC</a></li>
         <li><a href="#agendamento">Agendamento</a></li>
         <li><a href="#contato">Contato</a></li>
+        <li><a href="login.html">Entrar</a></li>
+        <li><a href="painel.html">Área do aluno</a></li>
       </ul>
     </nav>
 
@@ -136,6 +144,7 @@
         <label for="nomeAgendamento">Nome</label><input type="text" id="nomeAgendamento" name="nome" autocomplete="name" required>
         <label for="emailAgendamento">E-mail</label><input type="email" id="emailAgendamento" name="email" autocomplete="email" required>
         <label for="dataAgendamento">Data</label><input type="date" id="dataAgendamento" name="data" required>
+        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Plano Básico</option><option>Plano Premium</option><option>Plano VIP</option><option>Ainda não decidi</option></select>
         <button type="submit">Solicitar aula experimental</button>
         <p id="mensagemAgendamento" class="mensagem" aria-live="polite"></p>
       </form>
@@ -147,8 +156,10 @@
         <form id="formContato" class="form-card">
           <label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" required>
           <label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" required>
-          <label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" required></textarea>
-          <button type="submit">Registrar mensagem</button>
+          <label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel">
+          <label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea>
+          <label class="consentimento"><input type="checkbox" required> Concordo com o uso dos dados para resposta, conforme a <a href="privacidade.html">Política de Privacidade</a>.</label>
+          <button type="submit">Enviar mensagem</button>
           <p id="mensagemContato" class="mensagem" aria-live="polite"></p>
         </form>
       </div>
@@ -159,7 +170,7 @@
     <div class="footer-container container">
       <div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div>
       <div><h3>Contato</h3><p>(11) 99999-9999</p><p>contato@powerfitness.com</p></div>
-      <div><h3>Atendimento</h3><p>Segunda a sexta: 06h às 22h</p><p>Sábado: 08h às 14h</p></div>
+      <div><h3>Atendimento</h3><p>Segunda a sexta: 06h às 22h</p><p>Sábado: 08h às 14h</p><p><a href="privacidade.html">Política de Privacidade</a></p></div>
     </div>
     <p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p>
   </footer>
@@ -174,9 +185,10 @@
 
   <script src="../js/script.js"></script>
   <script src="../js/modal.js"></script>
-  <script src="../js/imc.js"></script>
-  <script src="../js/mensalidade.js"></script>
-  <script src="../js/agendamento.js"></script>
-  <script src="../js/contato.js"></script>
+  <script type="module" src="../js/imc.js"></script>
+  <script type="module" src="../js/mensalidade.js"></script>
+  <script type="module" src="../js/agendamento.js"></script>
+  <script type="module" src="../js/contato.js"></script>
+  <script type="module" src="../js/conteudo-dinamico.js"></script>
 </body>
 </html>

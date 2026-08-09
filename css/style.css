@@ -31,3 +31,5 @@ input,select,textarea{width:100%;padding:13px;border:1px solid #bbb;border-radiu
 textarea{resize:vertical}.form-card button{width:100%;margin-top:12px}
 .mensagem{min-height:28px;margin-top:16px;font-weight:600;text-align:center}.mensagem.sucesso,.sucesso{color:#15723a}.mensagem.erro,.erro{color:#b00020}
 .cabecalho-interno{position:static!important;display:flex;justify-content:space-between;align-items:center;background:#111;color:#fff;padding:20px 6%}.cabecalho-interno a{font-weight:600}
+
+.consentimento{display:flex;align-items:flex-start;gap:10px;margin:16px 0;font-size:.88rem;font-weight:400}.consentimento input{width:auto;margin-top:4px}.consentimento a{text-decoration:underline;color:#8f1616}.pagina-texto{padding:60px 0;max-width:850px}.pagina-texto h2{text-align:left;margin:30px 0 10px}.pagina-texto ul{list-style:disc;padding-left:24px}

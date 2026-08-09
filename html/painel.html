@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Área do aluno Power Fitness.">
+  <title>Área do Aluno | Power Fitness</title>
+  <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/painel.css">
+</head>
+<body>
+  <header class="painel-header"><a class="logo" href="index.html"><span>POWER</span> FITNESS</a><nav><a href="index.html">Site</a><a id="linkAdmin" href="admin.html" hidden>Administração</a><button id="sair" type="button">Sair</button></nav></header>
+  <main class="painel-container" id="conteudoPainel" hidden>
+    <section class="boas-vindas"><div><p>Área do aluno</p><h1 id="saudacao">Olá!</h1><span id="emailVerificado" class="status"></span></div><button id="reenviarVerificacao" type="button">Reenviar verificação</button></section>
+    <section class="painel-grid">
+      <article class="painel-card"><h2>Meu perfil</h2><form id="perfilForm"><label for="perfilNome">Nome</label><input id="perfilNome" required><label for="perfilTelefone">Telefone</label><input id="perfilTelefone" required><label for="perfilEmail">E-mail</label><input id="perfilEmail" readonly><button type="submit">Salvar alterações</button><p id="feedbackPerfil" class="mensagem" aria-live="polite"></p></form></article>
+      <article class="painel-card"><h2>Meus agendamentos</h2><div id="listaAgendamentos" class="lista-vazia">Carregando...</div></article>
+    </section>
+  </main>
+  <div id="carregando" class="tela-carregando">Carregando sua conta…</div>
+  <script type="module" src="../js/painel.js"></script>
+</body>
+</html>
