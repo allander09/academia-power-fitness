@@ -1,11 +1,11 @@
 {
   "name": "academia-power-fitness",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check js/calculos.mjs && node --check js/auth-utils.js && node --check js/firebase-services.js && node --check js/formularios.js && node --check js/login.js && node --check js/painel.js && node --check js/admin.js && node --check js/agendamento.js && node --check js/contato.js && node --check js/conteudo-dinamico.js"
+    "check": "node --check js/calculos.mjs && node --check js/validacoes.mjs && node --check js/auth-utils.js && node --check js/firebase-services.js && node --check js/formularios.js && node --check js/login.js && node --check js/painel.js && node --check js/admin.js && node --check js/agendamento.js && node --check js/contato.js && node --check js/conteudo-dinamico.js"
   },
   "engines": {
     "node": ">=20"
