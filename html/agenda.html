@@ -13,10 +13,11 @@
       <label for="nome">Nome</label><input type="text" id="nome" name="nome" autocomplete="name" required>
       <label for="email">E-mail</label><input type="email" id="email" name="email" autocomplete="email" required>
       <label for="data">Data</label><input type="date" id="data" name="data" required>
+      <label for="plano">Plano de interesse</label><select id="plano" name="plano"><option>Plano Básico</option><option>Plano Premium</option><option>Plano VIP</option><option>Ainda não decidi</option></select>
       <button type="submit">Solicitar agendamento</button>
       <p id="msg" class="mensagem" aria-live="polite"></p>
     </form>
   </main>
-  <script src="../js/agendamento.js"></script>
+  <script type="module" src="../js/agendamento.js"></script>
 </body>
 </html>
