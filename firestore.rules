@@ -36,7 +36,7 @@ service cloud.firestore {
       allow update: if administrador() || (
         autenticado()
         && request.auth.uid == userId
-        && request.resource.data.papel == resource.data.papel
+        && request.resource.data.get('papel', 'aluno') == resource.data.get('papel', 'aluno')
         && request.resource.data.email == resource.data.email
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['nome', 'telefone', 'atualizadoEm'])
