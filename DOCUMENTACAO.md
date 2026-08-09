@@ -105,9 +105,22 @@ Para cada academia, substituir:
 - nome, logotipo, cores e domínio;
 - telefone, e-mail e endereço;
 - planos, preços, professores e horários;
+- fotos da estrutura e retratos da equipe;
 - identificação do controlador e canal de privacidade;
 - regras comerciais de cancelamento e capacidade das aulas.
 
-## 11. Limites do MVP
+## 11. Imagens do site
+
+As imagens em `assets/images/` são demonstrações geradas para apresentar o layout de forma realista. Antes da entrega a um cliente:
+
+1. obtenha autorização escrita das pessoas fotografadas;
+2. substitua os retratos fictícios pelas fotos da equipe real;
+3. substitua as imagens de ambiente por fotos da academia real;
+4. mantenha os arquivos em WebP, com dimensões semelhantes e sem inserir textos dentro da imagem;
+5. atualize o texto alternativo (`alt`) para descrever a foto nova.
+
+No painel administrativo, o cadastro de professor aceita uma URL de foto opcional. Use HTTPS ou um caminho local do próprio projeto. Se a imagem não carregar, o site exibe as iniciais do professor.
+
+## 12. Limites do MVP
 
 O projeto não inclui pagamento online, controle financeiro, catraca, frequência, prescrição de treino ou suporte a várias academias no mesmo banco. Esses módulos devem ser contratados e desenvolvidos separadamente.
