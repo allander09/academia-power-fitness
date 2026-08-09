@@ -18,7 +18,7 @@ window.selecionarPlano = function selecionarPlano(nome, valor) {
   const planoValor = document.getElementById("planoValor");
   if (planoNome) planoNome.value = nome;
   if (planoValor) planoValor.value = String(valor);
-  abrirModal(nome, `${formatarMoeda(valor)} por mês`);
+  window.abrirModal(nome, `${formatarMoeda(valor)} por mês`);
 };
 
 window.calcular = function calcular() {
