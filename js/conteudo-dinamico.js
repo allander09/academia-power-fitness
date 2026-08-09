@@ -1,11 +1,52 @@
 import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { db } from "./firebase-services.js";
 
+const fotosPadrao = {
+  "carlos silva": "../assets/images/professor-carlos.webp",
+  "ana souza": "../assets/images/professora-ana.webp",
+  "lucas martins": "../assets/images/professor-lucas.webp"
+};
+
 function elemento(tag, texto, classe) {
   const item = document.createElement(tag);
   item.textContent = texto;
   if (classe) item.className = classe;
   return item;
+}
+
+function normalizarNome(valor = "") {
+  return valor.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+}
+
+function iniciais(nome) {
+  return nome.split(" ").filter(Boolean).slice(0, 2).map((parte) => parte[0]).join("").toUpperCase();
+}
+
+function urlFotoSegura(valor) {
+  if (!valor) return "";
+  try {
+    const url = new URL(valor, window.location.href);
+    if (url.protocol === "https:" || url.origin === window.location.origin) return url.href;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function avatarProfessor(dados) {
+  const padrao = fotosPadrao[normalizarNome(dados.nome)];
+  const fotoUrl = urlFotoSegura(dados.fotoUrl || padrao);
+  if (!fotoUrl) return elemento("div", iniciais(dados.nome), "avatar");
+
+  const imagem = document.createElement("img");
+  imagem.className = "foto-professor";
+  imagem.src = fotoUrl;
+  imagem.alt = `Retrato de ${dados.nome}, ${dados.especialidade}`;
+  imagem.width = 640;
+  imagem.height = 640;
+  imagem.loading = "lazy";
+  imagem.addEventListener("error", () => imagem.replaceWith(elemento("div", iniciais(dados.nome), "avatar")), { once: true });
+  return imagem;
 }
 
 async function carregarPlanos() {
@@ -36,8 +77,7 @@ async function carregarProfessores() {
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
     const card = elemento("article", "", "professor");
-    const iniciais = dados.nome.split(" ").slice(0, 2).map((parte) => parte[0]).join("").toUpperCase();
-    card.append(elemento("div", iniciais, "avatar"), elemento("h3", dados.nome), elemento("p", dados.especialidade));
+    card.append(avatarProfessor(dados), elemento("h3", dados.nome), elemento("p", dados.especialidade));
     container.appendChild(card);
   });
 }

@@ -1,11 +1,12 @@
 @media(max-width:900px){
-  .cards-servicos,.cards-planos,.cards-professores,.footer-container,.estatisticas{grid-template-columns:1fr 1fr}
+  .cards-servicos,.cards-planos,.cards-professores,.galeria-grid,.footer-container,.estatisticas{grid-template-columns:1fr 1fr}
+  .galeria-grid figure:last-child{grid-column:1/-1}
   nav ul{display:none;position:absolute;top:80px;right:0;flex-direction:column;align-items:stretch;width:min(320px,100%);padding:22px;background:#111}
   nav ul.ativo{display:flex}.menu-mobile{display:block}.destaque-plano{transform:none}
 }
 @media(max-width:600px){
-  section{padding:58px 0}.cards-servicos,.cards-planos,.cards-professores,.footer-container,.estatisticas{grid-template-columns:1fr}
-  .estatisticas{gap:18px}.hero-buttons{flex-direction:column}.hero-buttons a{width:100%}
+  section{padding:58px 0}.cards-servicos,.cards-planos,.cards-professores,.galeria-grid,.footer-container,.estatisticas{grid-template-columns:1fr}
+  .galeria-grid figure:last-child{grid-column:auto}.estatisticas{gap:18px}.hero{background-position:62% center}.hero-overlay{background:rgba(0,0,0,.25)}.hero-content{text-align:center}.hero-content>p:not(.destaque){margin:0 auto 34px}.hero-buttons{flex-direction:column}.hero-buttons a{width:100%}
   .cabecalho-interno{align-items:flex-start;gap:12px;flex-direction:column}.form-card{padding:22px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
