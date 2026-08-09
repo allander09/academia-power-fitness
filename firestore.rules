@@ -2,11 +2,91 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function administrador() {
+      return autenticado()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function textoValido(valor, minimo, maximo) {
+      return valor is string && valor.size() >= minimo && valor.size() <= maximo;
+    }
+
+    match /admins/{userId} {
+      allow read: if autenticado() && (request.auth.uid == userId || administrador());
+      allow write: if false;
+    }
+
     match /usuarios/{userId} {
-      allow create: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.data.keys().hasOnly(['nome', 'email', 'telefone', 'criadoEm']);
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if autenticado()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          'nome', 'email', 'telefone', 'papel', 'criadoEm', 'atualizadoEm'
+        ])
+        && request.resource.data.papel == 'aluno'
+        && textoValido(request.resource.data.nome, 3, 100)
+        && textoValido(request.resource.data.email, 5, 254)
+        && textoValido(request.resource.data.telefone, 8, 20);
+
+      allow read: if autenticado() && (request.auth.uid == userId || administrador());
+
+      allow update: if administrador() || (
+        autenticado()
+        && request.auth.uid == userId
+        && request.resource.data.papel == resource.data.papel
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['nome', 'telefone', 'atualizadoEm'])
+      );
+
+      allow delete: if administrador() || (autenticado() && request.auth.uid == userId);
+    }
+
+    match /agendamentos/{agendamentoId} {
+      allow create: if autenticado()
+        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.keys().hasOnly([
+          'usuarioId', 'nome', 'email', 'data', 'plano', 'status', 'criadoEm', 'atualizadoEm'
+        ])
+        && textoValido(request.resource.data.nome, 3, 100)
+        && textoValido(request.resource.data.email, 5, 254)
+        && textoValido(request.resource.data.data, 10, 10)
+        && textoValido(request.resource.data.plano, 3, 100);
+
+      allow read: if administrador()
+        || (autenticado() && resource.data.usuarioId == request.auth.uid);
+
+      allow update: if administrador() || (
+        autenticado()
+        && resource.data.usuarioId == request.auth.uid
+        && request.resource.data.status == 'cancelado'
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'atualizadoEm'])
+      );
+
+      allow delete: if administrador();
+    }
+
+    match /contatos/{contatoId} {
+      allow create: if request.resource.data.status == 'novo'
+        && request.resource.data.keys().hasOnly([
+          'usuarioId', 'nome', 'email', 'telefone', 'mensagem', 'status', 'criadoEm'
+        ])
+        && textoValido(request.resource.data.nome, 3, 100)
+        && textoValido(request.resource.data.email, 5, 254)
+        && textoValido(request.resource.data.telefone, 0, 20)
+        && textoValido(request.resource.data.mensagem, 10, 1000);
+
+      allow read, update, delete: if administrador();
+    }
+
+    match /{colecao}/{documentoId} {
+      allow read: if colecao in ['planos', 'professores', 'horarios'];
+      allow create, update, delete: if administrador();
     }
 
     match /{document=**} {
