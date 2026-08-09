@@ -94,8 +94,10 @@ async function editarConteudo(nomeColecao, documento) {
     const nome = prompt("Nome do professor", dados.nome);
     if (nome === null) return;
     const especialidade = prompt("Especialidade", dados.especialidade);
-    if (especialidade === null || !nome.trim() || !especialidade.trim()) throw new Error("Dados inválidos.");
-    await updateDoc(referencia, { nome: nome.trim(), especialidade: especialidade.trim(), atualizadoEm: serverTimestamp() });
+    if (especialidade === null) return;
+    const fotoUrl = prompt("URL da foto (deixe vazio para usar as iniciais)", dados.fotoUrl || "");
+    if (fotoUrl === null || !nome.trim() || !especialidade.trim()) throw new Error("Dados inválidos.");
+    await updateDoc(referencia, { nome: nome.trim(), especialidade: especialidade.trim(), fotoUrl: fotoUrl.trim(), atualizadoEm: serverTimestamp() });
   } else {
     const hora = prompt("Horário no formato HH:MM", dados.hora);
     if (hora === null) return;
@@ -201,7 +203,8 @@ document.getElementById("professorForm").addEventListener("submit", async (event
   event.preventDefault();
   await salvarConteudo("professores", {
     nome: document.getElementById("professorNomeAdmin").value.trim(),
-    especialidade: document.getElementById("professorEspecialidadeAdmin").value.trim()
+    especialidade: document.getElementById("professorEspecialidadeAdmin").value.trim(),
+    fotoUrl: document.getElementById("professorFotoAdmin").value.trim()
   }, event.currentTarget);
 });
 
@@ -230,7 +233,7 @@ onAuthStateChanged(auth, async (usuario) => {
     await getIdToken(usuario, true);
 
     const admin = await getDoc(doc(db, "admins", usuario.uid));
-    if (!admin.exists() || admin.data().ativo !== true) {
+    if (!admin.exists()) {
       carregando.textContent = "Acesso negado: esta conta não é administradora.";
       return;
     }
