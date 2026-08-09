@@ -65,7 +65,7 @@ async function carregarPainel(usuario) {
     document.getElementById("perfilTelefone").value = perfil.telefone || "";
   }
   document.getElementById("perfilEmail").value = usuario.email || "";
-  document.getElementById("linkAdmin").hidden = !adminSnap.exists() || !usuario.emailVerified;
+  document.getElementById("linkAdmin").hidden = !adminSnap.exists() || adminSnap.data().ativo !== true || !usuario.emailVerified;
 
   const status = document.getElementById("emailVerificado");
   status.textContent = usuario.emailVerified ? "E-mail verificado" : "E-mail ainda não verificado";
