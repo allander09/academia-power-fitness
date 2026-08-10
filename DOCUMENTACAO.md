@@ -1,4 +1,4 @@
-# Documentação simples — Power Fitness
+# Documentação — Power Fitness
 
 ## 1. Objetivo
 
