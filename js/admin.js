@@ -1,12 +1,25 @@
 import { getIdToken, onAuthStateChanged, reload, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
-import { normalizarBusca } from "./validacoes.mjs";
+import { formatarDataISO, normalizarBusca } from "./validacoes.mjs";
 
 const conteudo = document.getElementById("adminConteudo");
 const carregando = document.getElementById("carregando");
 const feedback = document.getElementById("feedbackAdmin");
 let alunosCache = [];
+
+const rotulosStatus = {
+  pendente: "Aguardando confirmação",
+  confirmado: "Confirmado",
+  cancelado: "Cancelado",
+  recusado: "Não aprovado",
+  novo: "Novo",
+  respondido: "Respondido"
+};
+
+function rotuloStatus(status) {
+  return rotulosStatus[status] || status || "Não informado";
+}
 
 function mostrarFeedback(mensagem, tipo = "sucesso") {
   feedback.textContent = mensagem;
@@ -144,30 +157,37 @@ async function carregarAdmin() {
     carregarTabela("agendamentos", "agendamentosAdmin", (documento) => {
       const dados = documento.data();
       const tr = document.createElement("tr");
-      tr.append(celula(dados.nome), celula(dados.data), celula(dados.hora), celula(dados.plano), celula(dados.status));
+      tr.append(celula(dados.nome), celula(formatarDataISO(dados.data)), celula(dados.hora), celula(dados.plano), celula(rotuloStatus(dados.status)));
       const acoes = document.createElement("td");
-      acoes.append(
-        botaoAcao("Confirmar", async () => {
+      if (dados.status !== "confirmado" && dados.status !== "cancelado") {
+        acoes.append(botaoAcao("Confirmar", async () => {
           await updateDoc(doc(db, "agendamentos", documento.id), { status: "confirmado", atualizadoEm: serverTimestamp() });
           await carregarAdmin();
-        }, "Agendamento confirmado."),
-        botaoAcao("Cancelar", async () => {
+        }, "Agendamento confirmado."));
+      }
+      if (dados.status === "pendente" || dados.status === "confirmado") {
+        acoes.append(botaoAcao("Cancelar", async () => {
           await updateDoc(doc(db, "agendamentos", documento.id), { status: "cancelado", atualizadoEm: serverTimestamp() });
           await carregarAdmin();
-        }, "Agendamento cancelado.")
-      );
+        }, "Agendamento cancelado."));
+      }
+      if (!acoes.childElementCount) acoes.textContent = "Sem ações";
       tr.append(acoes);
       return tr;
     }),
     carregarTabela("contatos", "contatosAdmin", (documento) => {
       const dados = documento.data();
       const tr = document.createElement("tr");
-      tr.append(celula(dados.nome), celula(dados.email), celula(dados.mensagem), celula(dados.status));
+      tr.append(celula(dados.nome), celula(dados.email), celula(dados.mensagem), celula(rotuloStatus(dados.status)));
       const acoes = document.createElement("td");
-      acoes.append(botaoAcao("Marcar respondido", async () => {
-        await updateDoc(doc(db, "contatos", documento.id), { status: "respondido", atualizadoEm: serverTimestamp() });
-        await carregarAdmin();
-      }, "Contato marcado como respondido."));
+      if (dados.status !== "respondido") {
+        acoes.append(botaoAcao("Marcar respondido", async () => {
+          await updateDoc(doc(db, "contatos", documento.id), { status: "respondido", atualizadoEm: serverTimestamp() });
+          await carregarAdmin();
+        }, "Contato marcado como respondido."));
+      } else {
+        acoes.textContent = "Concluído";
+      }
       tr.append(acoes);
       return tr;
     })
@@ -250,3 +270,4 @@ document.getElementById("sair").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "login.html";
 });
+
