@@ -13,7 +13,9 @@ Não publique credenciais, tokens, senhas ou dados pessoais em issues. Em uso co
 - papel administrativo por documento protegido em `admins/{uid}`;
 - App Check com reCAPTCHA Enterprise e renovação automática de token;
 - provedor de depuração restrito a `localhost` e `127.0.0.1`;
-- validação de campos no cliente e no Firestore;
+- validação de campos, e-mail da conta e timestamps no cliente e no Firestore;
+- identificador determinístico de agendamento para reduzir duplicidades;
+- leitura pública limitada a conteúdo ativo;
 - renderização administrativa sem inserir conteúdo do usuário como HTML;
 - cabeçalhos de segurança no Firebase Hosting;
 - integração contínua com verificação de sintaxe e testes automatizados.
@@ -27,10 +29,11 @@ Não publique credenciais, tokens, senhas ou dados pessoais em issues. Em uso co
 5. use senha exclusiva e forte na conta administradora;
 6. cadastre somente administradores confiáveis;
 7. configure limites, alertas de uso e orçamento;
-8. substitua contatos e conteúdo fictícios;
+8. confirme planos, preços, equipe, horários e imagens com a academia real;
 9. revise a política de privacidade com orientação jurídica;
 10. não armazene dados médicos ou documentos pessoais neste projeto.
 
 ## Dados e recuperação
 
 Defina uma rotina de cópia de segurança antes do uso comercial. A exportação gerenciada do Firestore exige faturamento habilitado; avalie custos e mantenha um procedimento documentado de restauração.
+
