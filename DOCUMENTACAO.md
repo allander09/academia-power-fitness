@@ -22,7 +22,7 @@ Visualiza serviços, planos, professores e horários. Também pode calcular o IM
 
 ### Aluno
 
-Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos.
+Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos. Quando o login é iniciado pelo formulário de agendamento, o sistema retorna ao mesmo ponto após autenticar.
 
 ### Administrador
 
@@ -34,7 +34,7 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 |---|---|
 | `usuarios` | Perfil do aluno |
 | `admins` | Permissão administrativa pelo UID |
-| `agendamentos` | Solicitações de aula experimental |
+| `agendamentos` | Solicitações de aula experimental; o ID usa `UID_data_hora` para impedir duplicidade |
 | `contatos` | Mensagens enviadas pelo site |
 | `planos` | Planos exibidos publicamente |
 | `professores` | Equipe exibida publicamente |
@@ -45,6 +45,9 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 - Cada aluno lê e altera apenas o próprio perfil e os próprios agendamentos.
 - Somente administradores consultam todos os alunos, contatos e agendamentos.
 - Agendamentos e administração exigem e-mail verificado.
+- O e-mail salvo no agendamento deve ser o mesmo da conta autenticada.
+- Timestamps de criação e atualização são validados pelas regras do Firestore.
+- Visitantes leem somente planos, professores e horários marcados como ativos.
 - Ninguém consegue criar administradores pelo site.
 - O App Check reduz solicitações feitas fora do site legítimo.
 - Senhas permanecem no Firebase Authentication e nunca são salvas no Firestore.
@@ -71,7 +74,8 @@ Antes de entregar, testar:
 - login e recuperação de senha;
 - atualização do perfil;
 - criação e cancelamento de agendamento;
-- bloqueio de solicitação duplicada;
+- bloqueio de solicitação duplicada, inclusive em cliques rápidos;
+- rejeição de data passada, domingo e horário fora do atendimento;
 - acesso administrativo e negação para aluno comum;
 - edição e desativação de conteúdo;
 - envio e tratamento de contatos;
@@ -87,6 +91,8 @@ firebase deploy
 ```
 
 O comando publica o Hosting e as regras do Firestore configuradas no projeto `powerfitness-2a4a4`.
+
+Endereço principal: **https://powerfitness-2a4a4.web.app/**. O Firebase Hosting redireciona a raiz para `/html/`.
 
 ## 9. Configuração do primeiro administrador
 
@@ -121,6 +127,29 @@ As imagens em `assets/images/` são demonstrações geradas para apresentar o la
 
 No painel administrativo, o cadastro de professor aceita uma URL de foto opcional. Use HTTPS ou um caminho local do próprio projeto. Se a imagem não carregar, o site exibe as iniciais do professor.
 
-## 12. Limites do MVP
+## 12. Fluxo do agendamento
 
-O projeto não inclui pagamento online, controle financeiro, catraca, frequência, prescrição de treino ou suporte a várias academias no mesmo banco. Esses módulos devem ser contratados e desenvolvidos separadamente.
+1. O visitante escolhe plano, data e horário.
+2. Se não estiver autenticado, o retorno ao formulário fica salvo na sessão.
+3. O e-mail verificado da conta é usado no registro.
+4. Datas passadas, domingos e horários fora do atendimento são rejeitados.
+5. O documento recebe o ID `UID_data_hora`, impedindo uma segunda solicitação ativa igual.
+6. Solicitações canceladas ou recusadas podem ser reenviadas pelo mesmo aluno.
+7. O administrador confirma ou cancela a solicitação.
+
+## 13. Alterações da versão 2.2.0
+
+- reforço das regras do Firestore;
+- agendamento idempotente e validação de horário;
+- retorno ao formulário depois do login;
+- datas e status em português;
+- feedback de erro ao cancelar ou atualizar perfil;
+- modal com retenção de foco e restauração do elemento anterior;
+- link para pular ao conteúdo;
+- remoção de estatísticas e contatos fictícios;
+- acesso pela URL principal do Hosting.
+
+## 14. Limites do MVP
+
+O projeto não inclui controle de capacidade automática por turma, pagamento online, controle financeiro, catraca, frequência, prescrição de treino ou suporte a várias academias no mesmo banco. Esses módulos devem ser contratados e desenvolvidos separadamente.
+
