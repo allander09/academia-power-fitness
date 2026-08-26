@@ -16,6 +16,9 @@
       "**/.*"
     ],
     "cleanUrls": true,
+    "redirects": [
+      { "source": "/", "destination": "/html/", "type": 301 }
+    ],
     "headers": [
       {
         "source": "**",
@@ -35,7 +38,7 @@
       {
         "source": "**/*.@(webp|png|svg)",
         "headers": [
-          { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
+          { "key": "Cache-Control", "value": "public,max-age=86400" }
         ]
       }
     ]

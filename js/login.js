@@ -7,6 +7,20 @@ const email = document.getElementById("email");
 const senha = document.getElementById("senha");
 const feedback = document.getElementById("feedbackLogin");
 const botao = form.querySelector('button[type="submit"]');
+let redirecionando = false;
+
+function destinoAposLogin() {
+  const retorno = sessionStorage.getItem("powerFitnessRetornoLogin");
+  return retorno === "index.html#agendamento" ? retorno : "painel.html";
+}
+
+function concluirLogin() {
+  if (redirecionando) return;
+  redirecionando = true;
+  const destino = destinoAposLogin();
+  sessionStorage.removeItem("powerFitnessRetornoLogin");
+  window.location.href = destino;
+}
 
 function mostrarFeedback(mensagem, tipo = "sucesso") {
   feedback.textContent = mensagem;
@@ -23,7 +37,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     await signInWithEmailAndPassword(auth, email.value.trim().toLowerCase(), senha.value);
-    window.location.href = "painel.html";
+    concluirLogin();
   } catch (error) {
     mostrarFeedback(mensagemAuth(error), "erro");
   } finally {
@@ -48,5 +62,5 @@ document.getElementById("recuperarSenha").addEventListener("click", async () => 
 });
 
 onAuthStateChanged(auth, (usuario) => {
-  if (usuario) window.location.href = "painel.html";
+  if (usuario) concluirLogin();
 });

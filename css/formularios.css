@@ -6,3 +6,6 @@ input:focus{outline:3px solid #ffd0d0;border-color:#d62828}button{width:100%;mar
 .feedback{padding:12px;margin-top:16px;border-radius:8px;text-align:center;font-weight:600}.feedback.sucesso{background:#e6f7ed;color:#146c37}.feedback.erro{background:#ffe8eb;color:#a30d27}
 
 .botao-secundario{margin-top:10px;background:#f0f0f0;color:#222;border:1px solid #bbb}.botao-secundario:hover{background:#e2e2e2}.consentimento{display:flex;align-items:flex-start;gap:10px;font-size:.88rem;font-weight:400}.consentimento input{width:auto;margin-top:4px}.consentimento a,.alternativa a{color:#9c1111;text-decoration:underline}.alternativa{text-align:center;margin-top:20px}.link-button{margin-top:12px;background:transparent;color:#9c1111;text-decoration:underline}.link-button:hover{background:#fdecec;color:#7a0d0d}.feedback.aviso{background:#fff5d8;color:#795300}
+input[readonly]{background:#f2f3f5;color:#444;cursor:not-allowed}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ffb3b3;outline-offset:3px}
+
