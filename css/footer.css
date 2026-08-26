@@ -44,3 +44,5 @@ footer{
     padding-top:20px;
 
 }
+.footer-container a{text-decoration:underline;text-underline-offset:3px}
+
