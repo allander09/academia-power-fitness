@@ -11,7 +11,7 @@
   <main class="painel-container" id="conteudoPainel" hidden>
     <section class="boas-vindas"><div><p>Área do aluno</p><h1 id="saudacao">Olá!</h1><span id="emailVerificado" class="status"></span></div><button id="reenviarVerificacao" type="button">Reenviar verificação</button></section>
     <section class="painel-grid">
-      <article class="painel-card"><h2>Meu perfil</h2><form id="perfilForm"><label for="perfilNome">Nome</label><input id="perfilNome" required><label for="perfilTelefone">Telefone</label><input id="perfilTelefone" required><label for="perfilEmail">E-mail</label><input id="perfilEmail" readonly><button type="submit">Salvar alterações</button><p id="feedbackPerfil" class="mensagem" aria-live="polite"></p></form></article>
+      <article class="painel-card"><h2>Meu perfil</h2><form id="perfilForm"><label for="perfilNome">Nome</label><input id="perfilNome" autocomplete="name" minlength="3" required><label for="perfilTelefone">Telefone</label><input id="perfilTelefone" type="tel" autocomplete="tel" inputmode="tel" minlength="8" maxlength="20" required><label for="perfilEmail">E-mail</label><input id="perfilEmail" type="email" autocomplete="email" readonly><button type="submit">Salvar alterações</button><p id="feedbackPerfil" class="mensagem" aria-live="polite"></p></form></article>
       <article class="painel-card"><h2>Meus agendamentos</h2><div id="listaAgendamentos" class="lista-vazia">Carregando...</div></article>
     </section>
   </main>
@@ -19,3 +19,4 @@
   <script type="module" src="../js/painel.js"></script>
 </body>
 </html>
+
