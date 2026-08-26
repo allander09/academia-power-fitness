@@ -1,6 +1,6 @@
 # Power Fitness
 
-MVP web para uma academia, desenvolvido com HTML, CSS, JavaScript e Firebase.
+Aplicação web para uma academia, desenvolvida com HTML, CSS, JavaScript e Firebase.
 
 ## Funcionalidades
 
@@ -15,10 +15,11 @@ MVP web para uma academia, desenvolvido com HTML, CSS, JavaScript e Firebase.
 
 - cadastro com confirmação de senha e consentimento;
 - autenticação por e-mail e senha;
-- verificação e recuperação de e-mail;
+- verificação de e-mail e recuperação de senha;
 - atualização de nome e telefone;
 - solicitação de aula experimental com data e horário;
-- bloqueio de solicitação ativa duplicada;
+- bloqueio de solicitação ativa duplicada com identificador estável no Firestore;
+- validação de data futura e do horário de atendimento;
 - consulta e cancelamento dos próprios agendamentos.
 
 ### Administração
@@ -39,6 +40,8 @@ MVP web para uma academia, desenvolvido com HTML, CSS, JavaScript e Firebase.
 - GitHub Actions.
 
 ## Executar localmente
+
+O endereço publicado é **https://powerfitness-2a4a4.web.app/**. A raiz redireciona para a página principal.
 
 Use um servidor local porque o projeto utiliza módulos JavaScript. No VS Code, abra a raiz pelo Live Server.
 
@@ -64,7 +67,7 @@ firebase login
 firebase deploy
 ```
 
-7. Teste o domínio publicado.
+7. Teste o domínio publicado, inclusive o acesso pela raiz `/`.
 8. Verifique as métricas do App Check e só então aplique a proteção ao Firestore e Authentication.
 
 A configuração web e a chave pública do App Check podem permanecer no cliente. Senhas, chaves privadas e tokens de depuração nunca devem ser publicados.
@@ -102,8 +105,19 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - o sistema atende uma única academia por projeto Firebase;
 - os dados e contatos exibidos devem ser personalizados antes da venda;
 - a política de privacidade deve identificar o controlador real e ser revisada para o cliente;
-- capacidade máxima por horário depende da confirmação do administrador;
+- o bloqueio impede duplicidade por aluno, mas a capacidade total por horário ainda depende da confirmação do administrador;
 - configure backup, alertas e suporte antes de armazenar dados reais.
+
+## Melhorias da versão 2.2.0
+
+- agendamento idempotente para evitar duplicidades por cliques rápidos ou abas diferentes;
+- retorno automático ao formulário após o login iniciado pelo agendamento;
+- preenchimento do nome e do e-mail autenticado no formulário;
+- datas e status legíveis na área do aluno e no painel administrativo;
+- regras que validam proprietário, e-mail da conta, timestamps e conteúdo público ativo;
+- navegação por teclado melhorada no menu e no modal;
+- remoção de telefone, e-mail e estatísticas fictícias da página pública;
+- redirecionamento do domínio raiz para o site.
 
 ## Segurança
 
@@ -113,6 +127,11 @@ Consulte [SECURITY.md](SECURITY.md). Não envie senhas, chaves privadas, tokens 
 
 Consulte [DOCUMENTACAO.md](DOCUMENTACAO.md) para instalação, perfis, banco de dados, testes e entrega.
 
+## Pendências para uso comercial
+
+A política de privacidade ainda precisa receber a identificação legal e o canal do controlador real. Planos, preços, equipe, horários, imagens e regras comerciais devem ser confirmados pela academia contratante.
+
 ## Observação de saúde
 
 O cálculo de IMC é apenas informativo e não substitui avaliação de um profissional de saúde.
+
