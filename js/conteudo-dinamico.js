@@ -1,5 +1,6 @@
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { db } from "./firebase-services.js";
+import { DIAS_SEMANA, formatarFuncionamento, normalizarFuncionamento } from "./operacao.mjs";
 
 const fotosPadrao = {
   "carlos silva": "../assets/images/professor-carlos.webp",
@@ -82,18 +83,24 @@ async function carregarProfessores() {
   });
 }
 
-async function carregarHorarios() {
-  const snapshot = await getDocs(query(collection(db, "horarios"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
+async function carregarFuncionamento() {
+  const snapshot = await getDoc(doc(db, "configuracoes", "funcionamento"));
+  const funcionamento = normalizarFuncionamento(snapshot.exists() ? snapshot.data() : {});
   const tbody = document.querySelector("#horarios tbody");
   tbody.replaceChildren();
-  const ordenados = [...snapshot.docs].sort((a, b) => a.data().hora.localeCompare(b.data().hora));
-  ordenados.forEach((documento) => {
-    const dados = documento.data();
+  DIAS_SEMANA.forEach(({ id, rotulo }) => {
     const tr = document.createElement("tr");
-    tr.append(elemento("td", dados.hora), elemento("td", dados.atividade));
+    tr.append(elemento("td", rotulo), elemento("td", formatarFuncionamento(funcionamento.dias[id])));
     tbody.appendChild(tr);
   });
+
+  const diasAbertos = DIAS_SEMANA.filter(({ id }) => funcionamento.dias[id].modo !== "fechado");
+  const destaque = document.getElementById("resumoFuncionamento");
+  if (destaque) destaque.textContent = diasAbertos.length === 7 ? "Todos os dias" : "Horários flexíveis";
+  const rodape = document.getElementById("funcionamentoRodape");
+  if (rodape) {
+    rodape.replaceChildren(...DIAS_SEMANA.map(({ id, rotulo }) => elemento("p", `${rotulo}: ${formatarFuncionamento(funcionamento.dias[id])}`)));
+  }
 }
 
-Promise.allSettled([carregarPlanos(), carregarProfessores(), carregarHorarios()]);
+Promise.allSettled([carregarPlanos(), carregarProfessores(), carregarFuncionamento()]);

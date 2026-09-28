@@ -1,6 +1,7 @@
 import { getIdToken, reload } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
+import { capacidadeDoHorario, horarioDisponivelNoDia, indiceDiaDaData, normalizarFuncionamento } from "./operacao.mjs";
 import { dataLocalISO, idAgendamento, possuiAgendamentoAtivo, validarHorarioAgendamento } from "./validacoes.mjs";
 
 const form = document.getElementById("agendamentoForm");
@@ -10,6 +11,9 @@ const hora = form?.querySelector('[name="hora"]');
 const campoNome = form?.querySelector('[name="nome"]');
 const campoEmail = form?.querySelector('[name="email"]');
 const campoPlano = form?.querySelector('[name="plano"]');
+const ajudaHorario = document.getElementById("horarioAgendamentoAjuda");
+let horariosAtivos = [];
+let funcionamento = normalizarFuncionamento();
 
 function mostrarMensagem(texto, tipo = "erro") {
   mensagem.replaceChildren();
@@ -44,25 +48,59 @@ async function preencherDadosDaConta() {
   }
 }
 
-async function carregarHorarios() {
+function atualizarOpcoesHorario() {
+  if (!hora) return;
+  const dataSelecionada = data?.value;
+  hora.replaceChildren(new Option(dataSelecionada ? "Selecione um horário" : "Escolha a data primeiro", ""));
+  hora.disabled = !dataSelecionada;
+  if (!dataSelecionada) {
+    if (ajudaHorario) ajudaHorario.textContent = "Os horários disponíveis dependem do dia escolhido.";
+    return;
+  }
+
+  const indiceDia = indiceDiaDaData(dataSelecionada);
+  const disponiveis = horariosAtivos.filter(({ dados }) => horarioDisponivelNoDia(dados, indiceDia, funcionamento));
+  disponiveis.forEach(({ id, dados }) => {
+    const capacidade = capacidadeDoHorario(dados, funcionamento);
+    const option = new Option(`${dados.hora} — ${dados.atividade} (${capacidade} vagas)`, dados.hora);
+    option.dataset.horarioId = id;
+    option.dataset.atividade = dados.atividade;
+    hora.appendChild(option);
+  });
+
+  if (ajudaHorario) {
+    ajudaHorario.textContent = disponiveis.length
+      ? "A vaga é confirmada pela academia. Se a turma lotar, sua solicitação poderá entrar na lista de espera."
+      : "Não há atividades disponíveis para esse dia.";
+  }
+}
+
+async function carregarOperacao() {
   try {
-    const snapshot = await getDocs(query(collection(db, "horarios"), where("ativo", "==", true)));
-    if (snapshot.empty) return;
-
-    const horarios = snapshot.docs
-      .map((documento) => documento.data())
-      .sort((a, b) => a.hora.localeCompare(b.hora));
-
-    hora.replaceChildren(new Option("Selecione um horário", ""));
-    horarios.forEach((item) => hora.appendChild(new Option(`${item.hora} — ${item.atividade}`, item.hora)));
+    const [horariosSnapshot, funcionamentoSnapshot] = await Promise.all([
+      getDocs(query(collection(db, "horarios"), where("ativo", "==", true))),
+      getDoc(doc(db, "configuracoes", "funcionamento"))
+    ]);
+    horariosAtivos = horariosSnapshot.docs
+      .map((documento) => ({ id: documento.id, dados: documento.data() }))
+      .sort((a, b) => a.dados.hora.localeCompare(b.dados.hora));
+    if (funcionamentoSnapshot.exists()) funcionamento = normalizarFuncionamento(funcionamentoSnapshot.data());
+    atualizarOpcoesHorario();
   } catch (error) {
-    console.warn("Não foi possível atualizar os horários; usando opções padrão.", error.code);
+    console.warn("Não foi possível atualizar a operação; usando a configuração padrão.", error.code);
+    atualizarOpcoesHorario();
   }
 }
 
 if (form && data && hora) {
   data.min = dataLocalISO();
-  carregarHorarios();
+  const opcoesIniciais = [...hora.options]
+    .filter((option) => option.value)
+    .map((option) => ({ id: `padrao-${option.value}`, dados: { hora: option.value, atividade: option.textContent, diasSemana: [1, 2, 3, 4, 5, 6] } }));
+  horariosAtivos = opcoesIniciais;
+  data.addEventListener("change", atualizarOpcoesHorario);
+  atualizarOpcoesHorario();
+  carregarOperacao();
   preencherDadosDaConta();
 
   const planoSalvo = sessionStorage.getItem("powerFitnessPlano");
@@ -90,7 +128,7 @@ if (form && data && hora) {
       return;
     }
 
-    const validacao = validarHorarioAgendamento(data.value, hora.value);
+    const validacao = validarHorarioAgendamento(data.value, hora.value, new Date(), funcionamento);
     if (!validacao.valido) {
       mostrarMensagem(validacao.mensagem);
       return;
@@ -112,10 +150,13 @@ if (form && data && hora) {
       const identificador = idAgendamento(usuario.uid, data.value, hora.value);
       const referencia = doc(db, "agendamentos", identificador);
       const existenteDeterministico = existentes.docs.find((documento) => documento.id === identificador);
+      const opcaoHorario = hora.selectedOptions[0];
       const valores = {
         nome: campoNome.value.trim(),
         email: usuario.email,
         plano: campoPlano?.value || "Não informado",
+        horarioId: opcaoHorario?.dataset.horarioId || `padrao-${hora.value}`,
+        atividade: opcaoHorario?.dataset.atividade || "Aula experimental",
         status: "pendente",
         atualizadoEm: serverTimestamp()
       };
@@ -135,6 +176,7 @@ if (form && data && hora) {
       mostrarMensagem("Agendamento salvo! Acompanhe o status na Área do Aluno.", "sucesso");
       form.reset();
       data.min = dataLocalISO();
+      atualizarOpcoesHorario();
       sessionStorage.removeItem("powerFitnessPlano");
       await preencherDadosDaConta();
     } catch (error) {
@@ -146,4 +188,3 @@ if (form && data && hora) {
     }
   });
 }
-

@@ -19,17 +19,20 @@ Aplicação web para uma academia, desenvolvida com HTML, CSS, JavaScript e Fire
 - atualização de nome e telefone;
 - solicitação de aula experimental com data e horário;
 - bloqueio de solicitação ativa duplicada com identificador estável no Firestore;
-- validação de data futura e do horário de atendimento;
+- validação de data futura e do funcionamento configurado pela academia;
 - consulta e cancelamento dos próprios agendamentos.
+- exportação dos próprios dados e solicitação de exclusão.
 
 ### Administração
 
 - acesso apenas com e-mail verificado e UID autorizado;
-- indicadores de alunos, agendamentos e contatos;
+- indicadores de alunos, agendamentos, contatos e solicitações LGPD;
 - busca de alunos;
-- confirmação e cancelamento de agendamentos;
+- confirmação, cancelamento, capacidade por atividade e lista de espera;
 - acompanhamento de mensagens;
-- cadastro, edição, ativação e desativação de planos, professores e horários.
+- funcionamento semanal configurável, incluindo dias fechados, 24 horas e horários personalizados;
+- cadastro, edição, ativação e desativação de planos, professores e atividades;
+- histórico das ações administrativas.
 
 ## Tecnologias
 
@@ -93,6 +96,7 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - `html/painel.html`: área do aluno;
 - `html/admin.html`: administração;
 - `js/firebase-services.js`: Firebase e App Check;
+- `js/operacao.mjs`: funcionamento, capacidade e regras de disponibilidade;
 - `js/validacoes.mjs`: regras reutilizáveis e testáveis;
 - `firestore.rules`: regras de acesso;
 - `tests/`: testes automatizados;
@@ -105,10 +109,22 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - o sistema atende uma única academia por projeto Firebase;
 - os dados e contatos exibidos devem ser personalizados antes da venda;
 - a política de privacidade deve identificar o controlador real e ser revisada para o cliente;
-- o bloqueio impede duplicidade por aluno, mas a capacidade total por horário ainda depende da confirmação do administrador;
+- a solicitação do aluno não reserva uma vaga; a capacidade é aplicada na confirmação administrativa;
+- o atendimento da solicitação de exclusão continua sendo responsabilidade da academia;
 - configure backup, alertas e suporte antes de armazenar dados reais.
 
-## Melhorias da versão 2.2.0
+## Melhorias da versão 2.3.0 — em revisão
+
+- funcionamento semanal configurável por dia, inclusive 24 horas;
+- atividades associadas a dias da semana e capacidade máxima;
+- ocupação exibida ao administrador e lista de espera quando a turma lota;
+- promoção da primeira pessoa da fila após liberação de vaga;
+- download dos dados pessoais e fluxo de solicitação de exclusão;
+- histórico das últimas ações administrativas;
+- regras do Firestore ampliadas para os novos fluxos;
+- 18 testes automatizados de lógica e estrutura.
+
+## Base herdada da versão 2.2.0
 
 - agendamento idempotente para evitar duplicidades por cliques rápidos ou abas diferentes;
 - retorno automático ao formulário após o login iniciado pelo agendamento;
@@ -134,4 +150,3 @@ A política de privacidade ainda precisa receber a identificação legal e o can
 ## Observação de saúde
 
 O cálculo de IMC é apenas informativo e não substitui avaliação de um profissional de saúde.
-

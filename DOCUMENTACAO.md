@@ -22,11 +22,11 @@ Visualiza serviços, planos, professores e horários. Também pode calcular o IM
 
 ### Aluno
 
-Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos. Quando o login é iniciado pelo formulário de agendamento, o sistema retorna ao mesmo ponto após autenticar.
+Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos. Também pode baixar uma cópia dos dados e solicitar exclusão. Quando o login é iniciado pelo formulário de agendamento, o sistema retorna ao mesmo ponto após autenticar.
 
 ### Administrador
 
-Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no Firestore. Pode consultar alunos, contatos e agendamentos, alterar status e administrar planos, professores e horários.
+Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no Firestore. Pode consultar alunos, contatos e agendamentos, configurar o funcionamento semanal, controlar capacidade e lista de espera, tratar solicitações de privacidade e administrar planos, professores e atividades.
 
 ## 4. Coleções do Firestore
 
@@ -39,6 +39,9 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 | `planos` | Planos exibidos publicamente |
 | `professores` | Equipe exibida publicamente |
 | `horarios` | Horários e atividades |
+| `configuracoes/funcionamento` | Funcionamento de cada dia e capacidade padrão |
+| `auditoria` | Histórico imutável das ações administrativas |
+| `solicitacoes_privacidade` | Pedidos de exclusão enviados pelos alunos |
 
 ## 5. Segurança
 
@@ -48,7 +51,9 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 - O e-mail salvo no agendamento deve ser o mesmo da conta autenticada.
 - Timestamps de criação e atualização são validados pelas regras do Firestore.
 - Visitantes leem somente planos, professores e horários marcados como ativos.
+- Visitantes leem a configuração pública de funcionamento.
 - Ninguém consegue criar administradores pelo site.
+- Somente administradores leem e criam registros de auditoria; esses registros não podem ser alterados pelo site.
 - O App Check reduz solicitações feitas fora do site legítimo.
 - Senhas permanecem no Firebase Authentication e nunca são salvas no Firestore.
 
@@ -75,9 +80,12 @@ Antes de entregar, testar:
 - atualização do perfil;
 - criação e cancelamento de agendamento;
 - bloqueio de solicitação duplicada, inclusive em cliques rápidos;
-- rejeição de data passada, domingo e horário fora do atendimento;
+- rejeição de data passada, dia fechado e horário fora do funcionamento configurado;
+- capacidade, lista de espera e promoção após cancelamento;
 - acesso administrativo e negação para aluno comum;
 - edição e desativação de conteúdo;
+- exportação de dados e solicitação de exclusão;
+- registro das ações administrativas;
 - envio e tratamento de contatos;
 - visualização em celular e computador.
 
@@ -132,12 +140,24 @@ No painel administrativo, o cadastro de professor aceita uma URL de foto opciona
 1. O visitante escolhe plano, data e horário.
 2. Se não estiver autenticado, o retorno ao formulário fica salvo na sessão.
 3. O e-mail verificado da conta é usado no registro.
-4. Datas passadas, domingos e horários fora do atendimento são rejeitados.
+4. Datas passadas, dias fechados e horários fora do funcionamento configurado são rejeitados.
 5. O documento recebe o ID `UID_data_hora`, impedindo uma segunda solicitação ativa igual.
 6. Solicitações canceladas ou recusadas podem ser reenviadas pelo mesmo aluno.
 7. O administrador confirma ou cancela a solicitação.
+8. Se a capacidade estiver completa, a solicitação vai para a lista de espera.
+9. Quando uma vaga confirmada é cancelada, a primeira pessoa da fila volta para análise.
 
-## 13. Alterações da versão 2.2.0
+## 13. Alterações da versão 2.3.0 — candidata para revisão
+
+- funcionamento semanal configurável: fechado, 24 horas ou personalizado;
+- atividades por dia da semana e capacidade máxima;
+- ocupação, lista de espera e promoção da fila;
+- download dos dados do aluno e solicitação de exclusão;
+- painel de solicitações LGPD;
+- histórico de ações administrativas;
+- novos testes de lógica, IDs, referências locais e contratos entre HTML e JavaScript.
+
+## 14. Base herdada da versão 2.2.0
 
 - reforço das regras do Firestore;
 - agendamento idempotente e validação de horário;
@@ -149,7 +169,6 @@ No painel administrativo, o cadastro de professor aceita uma URL de foto opciona
 - remoção de estatísticas e contatos fictícios;
 - acesso pela URL principal do Hosting.
 
-## 14. Limites do MVP
+## 15. Limites do MVP
 
-O projeto não inclui controle de capacidade automática por turma, pagamento online, controle financeiro, catraca, frequência, prescrição de treino ou suporte a várias academias no mesmo banco. Esses módulos devem ser contratados e desenvolvidos separadamente.
-
+O projeto não inclui pagamento online, controle financeiro, catraca, frequência, prescrição de treino, envio automático de e-mail/WhatsApp ou suporte a várias academias no mesmo banco. A solicitação não reserva a vaga antes da confirmação do administrador, e a exclusão efetiva dos dados e da conta continua sendo uma operação administrativa. Esses módulos e automações devem ser contratados e desenvolvidos separadamente.
