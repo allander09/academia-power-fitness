@@ -97,6 +97,10 @@
 
     <section id="planos" class="planos">
       <div class="container">
+        <div class="marca-planos" aria-label="Power Fitness">
+          <img src="../assets/favicon.svg" alt="" width="48" height="48">
+          <span><strong>POWER</strong> FITNESS</span>
+        </div>
         <h2>Nossos planos</h2>
         <div class="cards-planos">
           <article class="plano"><h3>Básico</h3><p class="preco">R$ 89,90<small>/mês</small></p><ul><li>Musculação</li><li>Avaliação física</li></ul><button type="button" class="escolher-plano" data-plano="Plano Básico" data-valor="R$ 89,90/mês">Escolher</button></article>
@@ -129,12 +133,12 @@
     </section>
 
     <section id="horarios" class="secao-clara">
-      <div class="container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td>Segunda a sexta</td><td>06:00 às 22:00</td></tr><tr><td>Sábado</td><td>08:00 às 14:00</td></tr><tr><td>Domingo</td><td>Fechado</td></tr></tbody></table></div></div>
+      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td>Segunda a sexta</td><td>06:00 às 22:00</td></tr><tr><td>Sábado</td><td>08:00 às 14:00</td></tr><tr><td>Domingo</td><td>Fechado</td></tr></tbody></table></div></div>
     </section>
 
     <section id="imc" class="container secao-formulario">
       <h2>Calculadora de IMC</h2><p class="aviso">O resultado é apenas informativo e não substitui avaliação profissional.</p>
-      <div class="form-card"><label for="peso">Peso em kg</label><input type="number" id="peso" min="1" step="0.1" placeholder="Ex.: 75"><label for="altura">Altura em metros</label><input type="number" id="altura" min="0.5" max="3" step="0.01" placeholder="Ex.: 1,75"><button type="button" onclick="calcularIMC()">Calcular IMC</button><p id="resultadoIMC" class="mensagem" aria-live="polite"></p></div>
+      <form id="imcForm" class="form-card" novalidate><label for="peso">Peso em kg</label><input type="text" id="peso" name="peso" inputmode="decimal" autocomplete="off" placeholder="Ex.: 75,5" required><label for="altura">Altura em metros</label><input type="text" id="altura" name="altura" inputmode="decimal" autocomplete="off" placeholder="Ex.: 1,75" required><button type="submit">Calcular IMC</button><p id="resultadoIMC" class="mensagem" aria-live="polite"></p></form>
     </section>
 
     <section class="secao-clara secao-formulario">

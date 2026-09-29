@@ -1,6 +1,9 @@
 export function calcularImcValor(peso, altura) {
-  const pesoNumero = Number(peso);
-  const alturaNumero = Number(altura);
+  const normalizarDecimal = (valor) => typeof valor === "string"
+    ? Number(valor.trim().replace(",", "."))
+    : Number(valor);
+  const pesoNumero = normalizarDecimal(peso);
+  const alturaNumero = normalizarDecimal(altura);
 
   if (!Number.isFinite(pesoNumero) || !Number.isFinite(alturaNumero) || pesoNumero <= 0 || alturaNumero <= 0 || alturaNumero > 3) {
     throw new RangeError("Peso ou altura inválidos.");
