@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="Área do professor Power Fitness.">
+  <title>Área do Professor | Power Fitness</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/painel.css">
+</head>
+<body>
+  <header class="painel-header">
+    <a class="logo" href="index.html"><span>POWER</span> FITNESS</a>
+    <nav><a href="index.html">Site</a><a href="painel.html">Área do aluno</a><a id="linkAdminProfessor" href="admin.html" hidden>Administração</a><button id="sair" type="button">Sair</button></nav>
+  </header>
+
+  <main class="painel-container" id="professorConteudo" hidden>
+    <section class="boas-vindas"><div><p>Área do professor</p><h1 id="professorSaudacao">Olá!</h1><span id="professorEspecialidade" class="status verificado"></span></div></section>
+
+    <section class="metricas metricas-professor">
+      <article><strong id="totalAtividadesProfessor">0</strong><span>Atividades</span></article>
+      <article><strong id="totalAulasProfessor">0</strong><span>Agendamentos ativos</span></article>
+      <article><strong id="totalAlunosProfessor">0</strong><span>Alunos vinculados</span></article>
+    </section>
+
+    <section class="painel-card">
+      <h2>Minhas atividades</h2>
+      <div id="atividadesProfessor" class="lista-vazia">Carregando...</div>
+    </section>
+
+    <section class="painel-card">
+      <h2>Alunos agendados</h2>
+      <p class="ajuda-campo">A presença pode ser registrada somente em agendamentos confirmados.</p>
+      <div class="tabela-admin"><table><thead><tr><th>Data</th><th>Hora</th><th>Aluno</th><th>Atividade</th><th>Status</th><th>Presença</th><th>Ação</th></tr></thead><tbody id="agendamentosProfessor"></tbody></table></div>
+    </section>
+    <p id="feedbackProfessor" class="mensagem" aria-live="polite"></p>
+  </main>
+
+  <div id="carregando" class="tela-carregando">Verificando acesso do professor…</div>
+  <script type="module" src="../js/professor.js"></script>
+</body>
+</html>

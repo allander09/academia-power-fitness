@@ -18,6 +18,11 @@ const rotulosStatus = {
   lista_espera: "Lista de espera"
 };
 
+const rotulosPresenca = {
+  presente: "Presente",
+  ausente: "Ausente"
+};
+
 function criar(tag, texto, classe) {
   const elemento = document.createElement(tag);
   elemento.textContent = texto;
@@ -51,8 +56,11 @@ function renderizarAgendamentos(documentos) {
     const status = criar("span", `Status: ${rotulosStatus[dados.status] || dados.status || "Não informado"}`, `status-agendamento status-${dados.status || "desconhecido"}`);
     card.append(
       criar("strong", dados.hora ? `${formatarDataISO(dados.data)} às ${dados.hora}` : formatarDataISO(dados.data)),
+      criar("span", `Atividade: ${dados.atividade || "Aula experimental"}`),
+      criar("span", `Professor: ${dados.professorNome || "A definir"}`),
       criar("span", `Plano: ${dados.plano || "Não informado"}`),
       status,
+      criar("small", `Presença: ${rotulosPresenca[dados.presenca] || "Não registrada"}`),
       criar("small", `Solicitado em ${formatarTimestamp(dados.criadoEm)}`)
     );
 
@@ -83,9 +91,10 @@ function renderizarAgendamentos(documentos) {
 async function carregarPainel(usuario) {
   usuarioAtual = usuario;
   await reload(usuario);
-  const [perfilSnap, adminSnap, privacidadeSnap] = await Promise.all([
+  const [perfilSnap, adminSnap, professorSnap, privacidadeSnap] = await Promise.all([
     getDoc(doc(db, "usuarios", usuario.uid)),
     getDoc(doc(db, "admins", usuario.uid)),
+    getDoc(doc(db, "professores_acesso", usuario.uid)),
     getDoc(doc(db, "solicitacoes_privacidade", usuario.uid))
   ]);
 
@@ -98,6 +107,7 @@ async function carregarPainel(usuario) {
   }
   document.getElementById("perfilEmail").value = usuario.email || "";
   document.getElementById("linkAdmin").hidden = !adminSnap.exists() || adminSnap.data().ativo !== true || !usuario.emailVerified;
+  document.getElementById("linkProfessor").hidden = !professorSnap.exists() || professorSnap.data().ativo !== true || !usuario.emailVerified;
 
   const status = document.getElementById("emailVerificado");
   status.textContent = usuario.emailVerified ? "E-mail verificado" : "E-mail ainda não verificado";

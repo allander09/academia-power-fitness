@@ -11,7 +11,7 @@
 <body>
   <header class="painel-header">
     <a class="logo" href="index.html"><span>POWER</span> FITNESS</a>
-    <nav><a href="index.html">Site</a><button id="sair" type="button">Sair</button></nav>
+    <nav><a href="index.html">Site</a><a href="painel.html">Área do aluno</a><button id="sair" type="button">Sair</button></nav>
   </header>
 
   <main class="painel-container" id="adminConteudo" hidden>
@@ -20,6 +20,7 @@
       <article><strong id="totalAlunos">0</strong><span>Alunos</span></article>
       <article><strong id="totalAgendamentos">0</strong><span>Agendamentos</span></article>
       <article><strong id="totalContatos">0</strong><span>Contatos</span></article>
+      <article><strong id="totalProfessoresAcesso">0</strong><span>Professores com acesso</span></article>
       <article><strong id="totalPrivacidade">0</strong><span>Solicitações LGPD</span></article>
     </section>
 
@@ -36,7 +37,7 @@
 
     <section class="painel-card">
       <h2>Agendamentos</h2>
-      <div class="tabela-admin"><table><thead><tr><th>Aluno</th><th>Data</th><th>Hora</th><th>Atividade</th><th>Plano</th><th>Vagas</th><th>Status</th><th>Ação</th></tr></thead><tbody id="agendamentosAdmin"></tbody></table></div>
+      <div class="tabela-admin"><table><thead><tr><th>Aluno</th><th>Data</th><th>Hora</th><th>Atividade</th><th>Professor</th><th>Plano</th><th>Vagas</th><th>Status</th><th>Presença</th><th>Ação</th></tr></thead><tbody id="agendamentosAdmin"></tbody></table></div>
     </section>
 
     <section class="painel-card">
@@ -49,6 +50,17 @@
       <label for="buscaAlunos">Buscar aluno</label>
       <input class="campo-busca" id="buscaAlunos" type="search" placeholder="Nome, e-mail ou telefone">
       <div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th></tr></thead><tbody id="alunosAdmin"></tbody></table></div>
+    </section>
+
+    <section class="painel-card">
+      <h2>Acessos dos professores</h2>
+      <p class="ajuda-campo">O profissional deve criar uma conta e verificar o e-mail. Depois, selecione a conta abaixo para liberar a área do professor.</p>
+      <form id="professorAcessoForm" class="form-grade-acesso">
+        <div><label for="professorContaAdmin">Conta cadastrada</label><select id="professorContaAdmin" required><option value="">Selecione uma conta</option></select></div>
+        <div><label for="professorAcessoEspecialidadeAdmin">Especialidade</label><input id="professorAcessoEspecialidadeAdmin" minlength="2" maxlength="100" required></div>
+        <button type="submit">Liberar acesso</button>
+      </form>
+      <div id="listaProfessoresAcessoAdmin"></div>
     </section>
 
     <section class="painel-card">
@@ -86,6 +98,7 @@
         <form id="horarioForm">
           <label for="horarioHoraAdmin">Horário</label><input id="horarioHoraAdmin" type="time" required>
           <label for="horarioAtividadeAdmin">Atividade</label><input id="horarioAtividadeAdmin" required>
+          <label for="horarioProfessorAdmin">Professor responsável</label><select id="horarioProfessorAdmin"><option value="">Sem professor definido</option></select>
           <label for="horarioCapacidadeAdmin">Capacidade máxima</label><input id="horarioCapacidadeAdmin" type="number" min="1" max="500" value="20" required>
           <fieldset class="dias-atividade"><legend>Dias da atividade</legend>
             <label><input type="checkbox" name="horarioDias" value="0"> Dom</label>

@@ -23,15 +23,23 @@ Aplicação web para uma academia, desenvolvida com HTML, CSS, JavaScript e Fire
 - consulta e cancelamento dos próprios agendamentos.
 - exportação dos próprios dados e solicitação de exclusão.
 
+### Professor
+
+- acesso com a mesma conta cadastrada e e-mail verificado;
+- painel exclusivo liberado por um administrador;
+- visualização apenas das próprias atividades e dos alunos vinculados;
+- registro de presença ou ausência em agendamentos confirmados.
+
 ### Administração
 
 - acesso apenas com e-mail verificado e UID autorizado;
-- indicadores de alunos, agendamentos, contatos e solicitações LGPD;
+- indicadores de alunos, professores com acesso, agendamentos, contatos e solicitações LGPD;
 - busca de alunos;
 - confirmação, cancelamento, capacidade por atividade e lista de espera;
 - acompanhamento de mensagens;
 - funcionamento semanal configurável, incluindo dias fechados, 24 horas e horários personalizados;
 - cadastro, edição, ativação e desativação de planos, professores e atividades;
+- liberação de acesso para professores e vínculo do responsável com cada atividade;
 - histórico das ações administrativas.
 
 ## Tecnologias
@@ -88,12 +96,23 @@ O painel não permite que um usuário transforme a própria conta em administrad
 
 Não existe senha administrativa separada. O administrador usa o e-mail e a senha da conta correspondente ao UID autorizado.
 
+## Liberar a área do professor
+
+1. O professor cria uma conta pelo cadastro normal e verifica o e-mail.
+2. O administrador entra no painel e abre **Acessos dos professores**.
+3. Seleciona a conta, informa a especialidade e libera o acesso.
+4. Em **Nova atividade**, escolhe o professor responsável.
+5. No próximo login, o professor é direcionado automaticamente para `html/professor.html`.
+
+O professor não recebe acesso a contatos, dados financeiros, configurações ou alunos de outros profissionais.
+
 ## Estrutura principal
 
 - `html/index.html`: página pública;
 - `html/login.html`: autenticação;
 - `html/formularios.html`: cadastro;
 - `html/painel.html`: área do aluno;
+- `html/professor.html`: atividades, alunos vinculados e presença;
 - `html/admin.html`: administração;
 - `js/firebase-services.js`: Firebase e App Check;
 - `js/operacao.mjs`: funcionamento, capacidade e regras de disponibilidade;
@@ -102,10 +121,11 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - `tests/`: testes automatizados;
 - `.github/workflows/ci.yml`: validação contínua;
 - `DOCUMENTACAO.md`: documentação funcional e operacional.
+- `REVISAO_2_4.md`: roteiro de validação para o professor.
 
 ## Limitações comerciais
 
-- não há pagamento, matrícula financeira, controle de presença ou prescrição de treino;
+- não há pagamento, matrícula financeira, catraca ou prescrição de treino;
 - o sistema atende uma única academia por projeto Firebase;
 - os dados e contatos exibidos devem ser personalizados antes da venda;
 - a política de privacidade deve identificar o controlador real e ser revisada para o cliente;
@@ -113,7 +133,18 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - o atendimento da solicitação de exclusão continua sendo responsabilidade da academia;
 - configure backup, alertas e suporte antes de armazenar dados reais.
 
-## Melhorias da versão 2.3.0 — em revisão
+## Melhorias da versão 2.4.0 — em revisão
+
+- login com redirecionamento automático por perfil;
+- área do professor com atividades e alunos vinculados;
+- permissão de professor administrada pelo UID da conta;
+- professor responsável associado a cada atividade e agendamento;
+- registro de presença e ausência;
+- isolamento das consultas e regras do Firestore por professor;
+- ajustes visuais solicitados pelo professor avaliador;
+- 24 testes automatizados de lógica, segurança estrutural e integração entre HTML e JavaScript.
+
+## Base herdada da versão 2.3.0
 
 - funcionamento semanal configurável por dia, inclusive 24 horas;
 - atividades associadas a dias da semana e capacidade máxima;
@@ -122,7 +153,7 @@ Não existe senha administrativa separada. O administrador usa o e-mail e a senh
 - download dos dados pessoais e fluxo de solicitação de exclusão;
 - histórico das últimas ações administrativas;
 - regras do Firestore ampliadas para os novos fluxos;
-- 18 testes automatizados de lógica e estrutura.
+- 19 testes automatizados de lógica e estrutura antes da inclusão dos perfis.
 
 ## Base herdada da versão 2.2.0
 

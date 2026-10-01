@@ -2,6 +2,7 @@ import { getIdToken, onAuthStateChanged, reload, signOut } from "https://www.gst
 import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
 import { capacidadeDoHorario, contarConfirmados, DIAS_SEMANA, diasDoHorario, formatarFuncionamento, horarioDisponivelNoDia, normalizarFuncionamento, proximoDaLista } from "./operacao.mjs";
+import { professorDoHorario } from "./perfis.mjs";
 import { formatarDataISO, normalizarBusca } from "./validacoes.mjs";
 
 const conteudo = document.getElementById("adminConteudo");
@@ -10,6 +11,7 @@ const feedback = document.getElementById("feedbackAdmin");
 let alunosCache = [];
 let agendamentosCache = [];
 let horariosCache = [];
+let professoresAcessoCache = [];
 let funcionamentoAtual = normalizarFuncionamento();
 
 const rotulosStatus = {
@@ -21,6 +23,11 @@ const rotulosStatus = {
   novo: "Novo",
   respondido: "Respondido",
   atendida: "Atendida"
+};
+
+const rotulosPresenca = {
+  presente: "Presente",
+  ausente: "Ausente"
 };
 
 function rotuloStatus(status) {
@@ -97,6 +104,65 @@ function renderizarAlunos(termo = "") {
     });
 }
 
+function preencherContasProfessor() {
+  const select = document.getElementById("professorContaAdmin");
+  const valorAtual = select.value;
+  select.replaceChildren(new Option("Selecione uma conta", ""));
+  alunosCache
+    .sort((a, b) => (a.dados.nome || "").localeCompare(b.dados.nome || ""))
+    .forEach(({ id, dados }) => select.appendChild(new Option(`${dados.nome || "Sem nome"} — ${dados.email || "sem e-mail"}`, id)));
+  if ([...select.options].some((opcao) => opcao.value === valorAtual)) select.value = valorAtual;
+}
+
+function preencherProfessoresDasAtividades() {
+  const select = document.getElementById("horarioProfessorAdmin");
+  const valorAtual = select.value;
+  select.replaceChildren(new Option("Sem professor definido", ""));
+  professoresAcessoCache
+    .filter(({ dados }) => dados.ativo === true)
+    .sort((a, b) => a.dados.nome.localeCompare(b.dados.nome))
+    .forEach(({ id, dados }) => select.appendChild(new Option(`${dados.nome} — ${dados.especialidade}`, id)));
+  if ([...select.options].some((opcao) => opcao.value === valorAtual)) select.value = valorAtual;
+}
+
+function renderizarAcessosProfessores() {
+  const lista = document.getElementById("listaProfessoresAcessoAdmin");
+  lista.replaceChildren();
+  if (!professoresAcessoCache.length) {
+    lista.appendChild(document.createTextNode("Nenhum acesso de professor cadastrado."));
+    return;
+  }
+
+  professoresAcessoCache.forEach(({ id, dados }) => {
+    const ativo = dados.ativo === true;
+    const item = document.createElement("article");
+    item.className = "item-resumo item-admin-conteudo";
+    const texto = document.createElement("span");
+    texto.textContent = `${dados.nome} — ${dados.especialidade} — ${dados.email} — ${ativo ? "Ativo" : "Inativo"}`;
+    const acoes = document.createElement("div");
+    acoes.className = "acoes-admin";
+    acoes.append(botaoAcao(ativo ? "Desativar acesso" : "Reativar acesso", async () => {
+      await updateDoc(doc(db, "professores_acesso", id), {
+        ativo: !ativo,
+        atualizadoEm: serverTimestamp(),
+        atualizadoPor: auth.currentUser.uid
+      });
+      await registrarAuditoria(ativo ? "desativar_acesso" : "reativar_acesso", "professores_acesso", id, dados.email);
+      await carregarAcessosProfessores();
+    }, ativo ? "Acesso do professor desativado." : "Acesso do professor reativado."));
+    item.append(texto, acoes);
+    lista.appendChild(item);
+  });
+}
+
+async function carregarAcessosProfessores(snapshotRecebido) {
+  const snapshot = snapshotRecebido || await getDocs(collection(db, "professores_acesso"));
+  professoresAcessoCache = snapshot.docs.map((documento) => ({ id: documento.id, dados: documento.data() }));
+  renderizarAcessosProfessores();
+  preencherProfessoresDasAtividades();
+  document.getElementById("totalProfessoresAcesso").textContent = professoresAcessoCache.filter(({ dados }) => dados.ativo === true).length;
+}
+
 function textoDiasHorario(dados) {
   return diasDoHorario(dados)
     .map((indice) => DIAS_SEMANA.find((dia) => dia.indice === indice)?.rotulo.slice(0, 3))
@@ -107,7 +173,18 @@ function textoDiasHorario(dados) {
 function resumoConteudo(nomeColecao, dados) {
   if (nomeColecao === "planos") return `${dados.nome} — R$ ${Number(dados.valor).toFixed(2)}`;
   if (nomeColecao === "professores") return `${dados.nome} — ${dados.especialidade}`;
-  return `${dados.hora} — ${dados.atividade} — ${textoDiasHorario(dados)} — ${capacidadeDoHorario(dados, funcionamentoAtual)} vagas`;
+  const professor = professorDoHorario(dados);
+  return `${dados.hora} — ${dados.atividade} — ${textoDiasHorario(dados)} — ${capacidadeDoHorario(dados, funcionamentoAtual)} vagas — ${professor.nome || "sem professor"}`;
+}
+
+async function sincronizarProfessorAgendamentos(horarioId, professorUid, professorNome) {
+  const snapshot = await getDocs(query(collection(db, "agendamentos"), where("horarioId", "==", horarioId)));
+  await Promise.all(snapshot.docs.map((agendamento) => updateDoc(agendamento.ref, {
+    professorUid,
+    professorNome,
+    atualizadoEm: serverTimestamp(),
+    atualizadoPor: auth.currentUser.uid
+  })));
 }
 
 async function editarConteudo(nomeColecao, documento) {
@@ -145,6 +222,8 @@ async function editarConteudo(nomeColecao, documento) {
     if (capacidadeInformada === null) return;
     const diasInformados = prompt("Dias da semana (0=domingo até 6=sábado), separados por vírgulas", diasDoHorario(dados).join(","));
     if (diasInformados === null) return;
+    const professorUidInformado = prompt("UID do professor responsável (vazio = sem professor)", dados.professorUid || "");
+    if (professorUidInformado === null) return;
     const capacidade = Number(capacidadeInformada);
     const diasSemana = [...new Set(diasInformados.split(",").map(Number))];
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(hora) || !atividade.trim() || !Number.isInteger(capacidade) || capacidade < 1 || capacidade > 500 || !diasSemana.length || diasSemana.some((dia) => !Number.isInteger(dia) || dia < 0 || dia > 6)) {
@@ -153,7 +232,12 @@ async function editarConteudo(nomeColecao, documento) {
     if (diasSemana.some((dia) => !horarioDisponivelNoDia({ hora, diasSemana: [dia] }, dia, funcionamentoAtual))) {
       throw new Error("A atividade precisa estar dentro do funcionamento dos dias escolhidos.");
     }
-    await updateDoc(referencia, { hora, atividade: atividade.trim(), capacidade, diasSemana, atualizadoEm: serverTimestamp() });
+    const professorUid = professorUidInformado.trim();
+    const acessoProfessor = professorUid ? professoresAcessoCache.find((item) => item.id === professorUid && item.dados.ativo === true) : null;
+    if (professorUid && !acessoProfessor) throw new Error("Informe o UID de um professor com acesso ativo.");
+    const professorNome = acessoProfessor?.dados.nome || "";
+    await updateDoc(referencia, { hora, atividade: atividade.trim(), capacidade, diasSemana, professorUid, professorNome, atualizadoEm: serverTimestamp() });
+    await sincronizarProfessorAgendamentos(documento.id, professorUid, professorNome);
   }
 
   await registrarAuditoria("editar", nomeColecao, documento.id, resumoConteudo(nomeColecao, { ...dados }));
@@ -268,9 +352,11 @@ function renderizarAgendamentos(documentos) {
       celula(formatarDataISO(dados.data)),
       celula(dados.hora),
       celula(dados.atividade || horario.atividade),
+      celula(dados.professorNome || horario.professorNome || "Não definido"),
       celula(dados.plano),
       celula(`${confirmados}/${capacidade}`),
-      celula(rotuloStatus(dados.status))
+      celula(rotuloStatus(dados.status)),
+      celula(rotulosPresenca[dados.presenca] || "Não registrada")
     );
     const acoes = document.createElement("td");
     if (["pendente", "lista_espera"].includes(dados.status)) {
@@ -412,11 +498,12 @@ async function carregarAuditoria() {
 
 async function carregarAdmin() {
   await carregarFuncionamento();
-  const [alunos, agendamentosIniciais, contatos, privacidade] = await Promise.all([
+  const [alunos, agendamentosIniciais, contatos, privacidade, acessosProfessores] = await Promise.all([
     getDocs(collection(db, "usuarios")),
     getDocs(query(collection(db, "agendamentos"), orderBy("criadoEm", "desc"))),
     getDocs(query(collection(db, "contatos"), orderBy("criadoEm", "desc"))),
     getDocs(query(collection(db, "solicitacoes_privacidade"), orderBy("criadoEm", "desc"))),
+    getDocs(collection(db, "professores_acesso")),
     ...["planos", "professores", "horarios"].map(carregarConteudo)
   ]);
 
@@ -426,6 +513,8 @@ async function carregarAdmin() {
   }
 
   alunosCache = alunos.docs.map((documento) => ({ id: documento.id, dados: documento.data() }));
+  preencherContasProfessor();
+  await carregarAcessosProfessores(acessosProfessores);
   renderizarAlunos(document.getElementById("buscaAlunos").value);
   renderizarAgendamentos(agendamentos.docs);
   renderizarContatos(contatos.docs);
@@ -494,6 +583,34 @@ document.getElementById("professorForm").addEventListener("submit", async (event
   }, event.currentTarget);
 });
 
+document.getElementById("professorAcessoForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const botao = form.querySelector('button[type="submit"]');
+  await executarAcao(botao, async () => {
+    const usuarioId = document.getElementById("professorContaAdmin").value;
+    const conta = alunosCache.find((item) => item.id === usuarioId);
+    const especialidade = document.getElementById("professorAcessoEspecialidadeAdmin").value.trim();
+    if (!conta || especialidade.length < 2) throw new Error("Selecione uma conta válida e informe a especialidade.");
+    const referencia = doc(db, "professores_acesso", usuarioId);
+    const existente = await getDoc(referencia);
+    const dados = {
+      nome: conta.dados.nome,
+      email: conta.dados.email,
+      especialidade,
+      ativo: true,
+      atualizadoEm: serverTimestamp(),
+      atualizadoPor: auth.currentUser.uid
+    };
+    if (existente.exists()) await updateDoc(referencia, dados);
+    else await setDoc(referencia, { ...dados, criadoEm: serverTimestamp() });
+    await registrarAuditoria(existente.exists() ? "atualizar_acesso" : "criar_acesso", "professores_acesso", usuarioId, conta.dados.email);
+    form.reset();
+    await carregarAcessosProfessores();
+    return "Acesso do professor liberado.";
+  });
+});
+
 document.getElementById("horarioForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   const diasSemana = [...event.currentTarget.querySelectorAll('input[name="horarioDias"]:checked')].map((campo) => Number(campo.value));
@@ -510,7 +627,9 @@ document.getElementById("horarioForm").addEventListener("submit", async (event) 
     hora,
     atividade: document.getElementById("horarioAtividadeAdmin").value.trim(),
     capacidade: Number(document.getElementById("horarioCapacidadeAdmin").value),
-    diasSemana
+    diasSemana,
+    professorUid: document.getElementById("horarioProfessorAdmin").value,
+    professorNome: professoresAcessoCache.find((item) => item.id === document.getElementById("horarioProfessorAdmin").value)?.dados.nome || ""
   }, event.currentTarget);
 });
 

@@ -16,8 +16,18 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true;
     }
 
+    function professorAutorizado() {
+      return emailVerificado()
+        && exists(/databases/$(database)/documents/professores_acesso/$(request.auth.uid))
+        && get(/databases/$(database)/documents/professores_acesso/$(request.auth.uid)).data.ativo == true;
+    }
+
     function textoValido(valor, minimo, maximo) {
       return valor is string && valor.size() >= minimo && valor.size() <= maximo;
+    }
+
+    function textoOpcional(valor, maximo) {
+      return valor is string && valor.size() <= maximo;
     }
 
     function emailDaConta(valor) {
@@ -36,7 +46,7 @@ service cloud.firestore {
     function agendamentoValido(dados) {
       return dados.keys().hasOnly([
           'usuarioId', 'nome', 'email', 'data', 'hora', 'plano', 'horarioId', 'atividade',
-          'status', 'criadoEm', 'atualizadoEm'
+          'professorUid', 'professorNome', 'status', 'presenca', 'criadoEm', 'atualizadoEm'
         ])
         && dados.usuarioId == request.auth.uid
         && emailDaConta(dados.email)
@@ -44,12 +54,31 @@ service cloud.firestore {
         && textoValido(dados.plano, 3, 100)
         && textoValido(dados.horarioId, 3, 150)
         && textoValido(dados.atividade, 3, 100)
+        && textoOpcional(dados.get('professorUid', ''), 128)
+        && textoOpcional(dados.get('professorNome', ''), 100)
+        && dados.get('presenca', 'nao_registrada') in ['nao_registrada']
         && dataHoraValidas(dados);
+    }
+
+    function vinculoProfessorValido(dados) {
+      return exists(/databases/$(database)/documents/horarios/$(dados.horarioId))
+        && dados.get('professorUid', '') == get(/databases/$(database)/documents/horarios/$(dados.horarioId)).data.get('professorUid', '')
+        && dados.get('professorNome', '') == get(/databases/$(database)/documents/horarios/$(dados.horarioId)).data.get('professorNome', '');
+    }
+
+    function vinculoHorarioProfessorValido(dados) {
+      let professorUid = dados.get('professorUid', '');
+      let professorNome = dados.get('professorNome', '');
+      return (professorUid == '' && professorNome == '')
+        || (exists(/databases/$(database)/documents/professores_acesso/$(professorUid))
+          && get(/databases/$(database)/documents/professores_acesso/$(professorUid)).data.ativo == true
+          && get(/databases/$(database)/documents/professores_acesso/$(professorUid)).data.nome == professorNome);
     }
 
     function horarioValido(dados) {
       return dados.keys().hasOnly([
-          'hora', 'atividade', 'capacidade', 'diasSemana', 'ativo', 'criadoEm', 'atualizadoEm'
+          'hora', 'atividade', 'capacidade', 'diasSemana', 'professorUid', 'professorNome',
+          'ativo', 'criadoEm', 'atualizadoEm'
         ])
         && dados.hora is string
         && dados.hora.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
@@ -60,12 +89,40 @@ service cloud.firestore {
         && dados.get('diasSemana', [1, 2, 3, 4, 5, 6]) is list
         && dados.get('diasSemana', [1, 2, 3, 4, 5, 6]).size() >= 1
         && dados.get('diasSemana', [1, 2, 3, 4, 5, 6]).size() <= 7
+        && textoOpcional(dados.get('professorUid', ''), 128)
+        && textoOpcional(dados.get('professorNome', ''), 100)
+        && vinculoHorarioProfessorValido(dados)
         && dados.ativo is bool;
+    }
+
+    function acessoProfessorValido(dados) {
+      return dados.keys().hasOnly([
+          'nome', 'email', 'especialidade', 'ativo', 'criadoEm', 'atualizadoEm', 'atualizadoPor'
+        ])
+        && textoValido(dados.nome, 3, 100)
+        && textoValido(dados.email, 5, 254)
+        && textoValido(dados.especialidade, 2, 100)
+        && dados.ativo is bool
+        && dados.atualizadoEm == request.time
+        && dados.atualizadoPor == request.auth.uid;
     }
 
     match /admins/{userId} {
       allow read: if autenticado() && (request.auth.uid == userId || administrador());
       allow write: if false;
+    }
+
+    match /professores_acesso/{userId} {
+      allow read: if administrador() || (emailVerificado() && request.auth.uid == userId);
+      allow create: if administrador()
+        && acessoProfessorValido(request.resource.data)
+        && request.resource.data.criadoEm == request.time;
+      allow update: if administrador()
+        && acessoProfessorValido(request.resource.data)
+        && request.resource.data.criadoEm == resource.data.criadoEm
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['nome', 'email', 'especialidade', 'ativo', 'atualizadoEm', 'atualizadoPor']);
+      allow delete: if administrador();
     }
 
     match /usuarios/{userId} {
@@ -101,20 +158,32 @@ service cloud.firestore {
     match /agendamentos/{agendamentoId} {
       allow create: if emailVerificado()
         && agendamentoValido(request.resource.data)
+        && vinculoProfessorValido(request.resource.data)
         && agendamentoId == request.auth.uid + '_' + request.resource.data.data + '_' + request.resource.data.hora
         && request.resource.data.status == 'pendente'
         && request.resource.data.criadoEm == request.time
         && request.resource.data.atualizadoEm == request.time;
 
       allow read: if administrador()
+        || (professorAutorizado() && resource.data.get('professorUid', '') == request.auth.uid)
         || (autenticado() && resource.data.usuarioId == request.auth.uid);
 
       allow update: if (administrador()
         && request.resource.data.status in ['pendente', 'confirmado', 'lista_espera', 'cancelado', 'recusado']
+        && request.resource.data.get('presenca', 'nao_registrada') in ['nao_registrada', 'presente', 'ausente']
         && request.resource.data.atualizadoEm == request.time
         && request.resource.data.atualizadoPor == request.auth.uid
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'atualizadoEm', 'atualizadoPor']))
+          .hasOnly(['status', 'professorUid', 'professorNome', 'presenca', 'atualizadoEm', 'atualizadoPor']))
+        || (professorAutorizado()
+          && resource.data.get('professorUid', '') == request.auth.uid
+          && resource.data.status == 'confirmado'
+          && request.resource.data.status == resource.data.status
+          && request.resource.data.presenca in ['presente', 'ausente']
+          && request.resource.data.atualizadoEm == request.time
+          && request.resource.data.atualizadoPor == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['presenca', 'atualizadoEm', 'atualizadoPor']))
         || (autenticado()
           && resource.data.usuarioId == request.auth.uid
           && request.resource.data.atualizadoEm == request.time
@@ -134,9 +203,12 @@ service cloud.firestore {
           && textoValido(request.resource.data.plano, 3, 100)
           && textoValido(request.resource.data.horarioId, 3, 150)
           && textoValido(request.resource.data.atividade, 3, 100)
+          && textoOpcional(request.resource.data.get('professorUid', ''), 128)
+          && textoOpcional(request.resource.data.get('professorNome', ''), 100)
+          && vinculoProfessorValido(request.resource.data)
           && request.resource.data.atualizadoEm == request.time
           && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['nome', 'email', 'plano', 'horarioId', 'atividade', 'status', 'atualizadoEm']));
+            .hasOnly(['nome', 'email', 'plano', 'horarioId', 'atividade', 'professorUid', 'professorNome', 'status', 'atualizadoEm']));
 
       allow delete: if administrador();
     }
@@ -223,7 +295,9 @@ service cloud.firestore {
     }
 
     match /horarios/{horarioId} {
-      allow read: if resource.data.ativo == true || administrador();
+      allow read: if resource.data.ativo == true
+        || administrador()
+        || (professorAutorizado() && resource.data.get('professorUid', '') == request.auth.uid);
       allow create, update: if administrador() && horarioValido(request.resource.data);
       allow delete: if administrador();
     }

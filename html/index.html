@@ -46,7 +46,7 @@
         <li><a href="#agendamento">Agendamento</a></li>
         <li><a href="#contato">Contato</a></li>
         <li><a href="login.html">Entrar</a></li>
-        <li><a href="painel.html">Área do aluno</a></li>
+        <li><a href="painel.html">Minha área</a></li>
       </ul>
     </nav>
     <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
@@ -142,7 +142,7 @@
     </section>
 
     <section class="secao-clara secao-formulario">
-      <div class="container"><h2>Calcule sua mensalidade</h2><div class="form-card"><label for="plano">Plano</label><select id="plano"><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1"><button type="button" onclick="calcularMensalidade()">Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></div></div>
+      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano"><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit">Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
     </section>
 
     <section id="agendamento" class="container secao-formulario">

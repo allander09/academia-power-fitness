@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-O Power Fitness é um site institucional com cadastro de alunos, solicitação de aula experimental e painel administrativo para uma única academia.
+O Power Fitness é um sistema web para uma única academia, com página pública, cadastro de alunos, solicitação de aula experimental e áreas separadas para aluno, professor e administrador.
 
 ## 2. Tecnologias
 
@@ -24,9 +24,13 @@ Visualiza serviços, planos, professores e horários. Também pode calcular o IM
 
 Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos. Também pode baixar uma cópia dos dados e solicitar exclusão. Quando o login é iniciado pelo formulário de agendamento, o sistema retorna ao mesmo ponto após autenticar.
 
+### Professor
+
+Usa a mesma tela de login. O administrador libera o acesso em `professores_acesso/{UID}` e vincula o profissional às atividades. O professor visualiza somente as próprias atividades e os alunos agendados nelas, podendo registrar presença ou ausência quando o agendamento estiver confirmado.
+
 ### Administrador
 
-Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no Firestore. Pode consultar alunos, contatos e agendamentos, configurar o funcionamento semanal, controlar capacidade e lista de espera, tratar solicitações de privacidade e administrar planos, professores e atividades.
+Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no Firestore. Pode consultar alunos, contatos e agendamentos, liberar contas de professores, vincular responsáveis às atividades, configurar o funcionamento semanal, controlar capacidade e lista de espera, tratar solicitações de privacidade e administrar o conteúdo.
 
 ## 4. Coleções do Firestore
 
@@ -34,11 +38,12 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 |---|---|
 | `usuarios` | Perfil do aluno |
 | `admins` | Permissão administrativa pelo UID |
+| `professores_acesso` | Permissão, identificação e especialidade do professor pelo UID |
 | `agendamentos` | Solicitações de aula experimental; o ID usa `UID_data_hora` para impedir duplicidade |
 | `contatos` | Mensagens enviadas pelo site |
 | `planos` | Planos exibidos publicamente |
 | `professores` | Equipe exibida publicamente |
-| `horarios` | Horários e atividades |
+| `horarios` | Horários, atividades, capacidade e professor responsável |
 | `configuracoes/funcionamento` | Funcionamento de cada dia e capacidade padrão |
 | `auditoria` | Histórico imutável das ações administrativas |
 | `solicitacoes_privacidade` | Pedidos de exclusão enviados pelos alunos |
@@ -47,6 +52,8 @@ Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no 
 
 - Cada aluno lê e altera apenas o próprio perfil e os próprios agendamentos.
 - Somente administradores consultam todos os alunos, contatos e agendamentos.
+- Cada professor lê somente o próprio acesso, suas atividades e os agendamentos vinculados ao seu UID.
+- O professor altera somente a presença de agendamentos confirmados sob sua responsabilidade.
 - Agendamentos e administração exigem e-mail verificado.
 - O e-mail salvo no agendamento deve ser o mesmo da conta autenticada.
 - Timestamps de criação e atualização são validados pelas regras do Firestore.
@@ -83,6 +90,9 @@ Antes de entregar, testar:
 - rejeição de data passada, dia fechado e horário fora do funcionamento configurado;
 - capacidade, lista de espera e promoção após cancelamento;
 - acesso administrativo e negação para aluno comum;
+- redirecionamento correto para aluno, professor e administrador;
+- professor impedido de visualizar atividades e alunos de outros profissionais;
+- registro de presença apenas em agendamento confirmado;
 - edição e desativação de conteúdo;
 - exportação de dados e solicitação de exclusão;
 - registro das ações administrativas;
@@ -111,6 +121,15 @@ Endereço principal: **https://powerfitness-2a4a4.web.app/**. O Firebase Hosting
 5. Saia e entre novamente.
 
 Não existe senha administrativa separada. A conta usa o e-mail e a senha cadastrados no Firebase Authentication.
+
+### Configuração dos professores
+
+1. O professor cria uma conta e verifica o e-mail.
+2. O administrador seleciona essa conta em **Acessos dos professores** e informa a especialidade.
+3. O administrador escolhe o profissional no cadastro ou na edição da atividade.
+4. Novos agendamentos dessa atividade recebem `professorUid` e `professorNome`.
+5. Se o responsável de uma atividade for alterado, os agendamentos já vinculados são sincronizados.
+6. Ao desativar o acesso, o professor perde imediatamente a leitura protegida pelas regras do Firestore.
 
 ## 10. Personalização antes da venda
 
@@ -146,8 +165,21 @@ No painel administrativo, o cadastro de professor aceita uma URL de foto opciona
 7. O administrador confirma ou cancela a solicitação.
 8. Se a capacidade estiver completa, a solicitação vai para a lista de espera.
 9. Quando uma vaga confirmada é cancelada, a primeira pessoa da fila volta para análise.
+10. Quando a atividade possui professor, o agendamento recebe o UID desse profissional.
+11. O professor registra presença ou ausência somente depois da confirmação administrativa.
 
-## 13. Alterações da versão 2.3.0 — candidata para revisão
+## 13. Alterações da versão 2.4.0 — candidata para revisão
+
+- login único com prioridade de redirecionamento: administrador, professor e aluno;
+- área do professor com métricas, atividades, alunos e presença;
+- gerenciamento dos acessos de professores pelo painel administrativo;
+- vínculo do responsável com atividade e agendamento;
+- regras de segurança específicas para o professor;
+- sincronização dos agendamentos quando o responsável muda;
+- ajustes do quadro de horários, marca nos planos e calculadora de IMC;
+- 24 testes automatizados de lógica, segurança estrutural e integração entre HTML e JavaScript.
+
+## 14. Base herdada da versão 2.3.0
 
 - funcionamento semanal configurável: fechado, 24 horas ou personalizado;
 - atividades por dia da semana e capacidade máxima;
@@ -157,7 +189,7 @@ No painel administrativo, o cadastro de professor aceita uma URL de foto opciona
 - histórico de ações administrativas;
 - novos testes de lógica, IDs, referências locais e contratos entre HTML e JavaScript.
 
-## 14. Base herdada da versão 2.2.0
+## 15. Base herdada da versão 2.2.0
 
 - reforço das regras do Firestore;
 - agendamento idempotente e validação de horário;
@@ -169,6 +201,10 @@ No painel administrativo, o cadastro de professor aceita uma URL de foto opciona
 - remoção de estatísticas e contatos fictícios;
 - acesso pela URL principal do Hosting.
 
-## 15. Limites do MVP
+## 16. Limites do MVP
 
-O projeto não inclui pagamento online, controle financeiro, catraca, frequência, prescrição de treino, envio automático de e-mail/WhatsApp ou suporte a várias academias no mesmo banco. A solicitação não reserva a vaga antes da confirmação do administrador, e a exclusão efetiva dos dados e da conta continua sendo uma operação administrativa. Esses módulos e automações devem ser contratados e desenvolvidos separadamente.
+O projeto não inclui pagamento online, controle financeiro, catraca, prescrição de treino, envio automático de e-mail/WhatsApp ou suporte a várias academias no mesmo banco. A solicitação não reserva a vaga antes da confirmação do administrador, e a exclusão efetiva dos dados e da conta continua sendo uma operação administrativa. Esses módulos e automações devem ser contratados e desenvolvidos separadamente.
+
+## 17. Possível troca do banco de dados
+
+O HTML e o CSS podem ser preservados em uma migração, mas autenticação, consultas, gravações, regras de segurança e publicação precisam ser adaptadas. Antes de trocar o Firebase, compare com o professor requisitos de custo, banco relacional, hospedagem, autenticação e conhecimento da equipe. Para um futuro produto com relatórios e integrações contábeis, PostgreSQL ou Supabase podem ser avaliados; para a apresentação atual, o Firebase permanece como base estável.

@@ -5,7 +5,7 @@ import { capacidadeDoHorario, horarioDisponivelNoDia, indiceDiaDaData, normaliza
 import { dataLocalISO, idAgendamento, possuiAgendamentoAtivo, validarHorarioAgendamento } from "./validacoes.mjs";
 
 const form = document.getElementById("agendamentoForm");
-const mensagem = document.getElementById("mensagemAgendamento") || document.getElementById("msg");
+const mensagem = document.getElementById("mensagemAgendamento");
 const data = form?.querySelector('input[type="date"]');
 const hora = form?.querySelector('[name="hora"]');
 const campoNome = form?.querySelector('[name="nome"]');
@@ -14,6 +14,7 @@ const campoPlano = form?.querySelector('[name="plano"]');
 const ajudaHorario = document.getElementById("horarioAgendamentoAjuda");
 let horariosAtivos = [];
 let funcionamento = normalizarFuncionamento();
+let operacaoCarregada = false;
 
 function mostrarMensagem(texto, tipo = "erro") {
   mensagem.replaceChildren();
@@ -65,6 +66,8 @@ function atualizarOpcoesHorario() {
     const option = new Option(`${dados.hora} — ${dados.atividade} (${capacidade} vagas)`, dados.hora);
     option.dataset.horarioId = id;
     option.dataset.atividade = dados.atividade;
+    option.dataset.professorUid = dados.professorUid || "";
+    option.dataset.professorNome = dados.professorNome || "";
     hora.appendChild(option);
   });
 
@@ -85,10 +88,14 @@ async function carregarOperacao() {
       .map((documento) => ({ id: documento.id, dados: documento.data() }))
       .sort((a, b) => a.dados.hora.localeCompare(b.dados.hora));
     if (funcionamentoSnapshot.exists()) funcionamento = normalizarFuncionamento(funcionamentoSnapshot.data());
+    operacaoCarregada = true;
     atualizarOpcoesHorario();
   } catch (error) {
-    console.warn("Não foi possível atualizar a operação; usando a configuração padrão.", error.code);
+    operacaoCarregada = false;
+    horariosAtivos = [];
+    console.warn("Não foi possível carregar os horários da academia.", error.code);
     atualizarOpcoesHorario();
+    if (ajudaHorario) ajudaHorario.textContent = "Não foi possível carregar os horários. Atualize a página e tente novamente.";
   }
 }
 
@@ -123,6 +130,11 @@ if (form && data && hora) {
     }
     await getIdToken(usuario, true);
 
+    if (!operacaoCarregada) {
+      mostrarMensagem("Aguarde o carregamento dos horários antes de agendar.");
+      return;
+    }
+
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -155,8 +167,10 @@ if (form && data && hora) {
         nome: campoNome.value.trim(),
         email: usuario.email,
         plano: campoPlano?.value || "Não informado",
-        horarioId: opcaoHorario?.dataset.horarioId || `padrao-${hora.value}`,
+        horarioId: opcaoHorario?.dataset.horarioId || "",
         atividade: opcaoHorario?.dataset.atividade || "Aula experimental",
+        professorUid: opcaoHorario?.dataset.professorUid || "",
+        professorNome: opcaoHorario?.dataset.professorNome || "",
         status: "pendente",
         atualizadoEm: serverTimestamp()
       };

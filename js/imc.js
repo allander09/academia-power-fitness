@@ -1,7 +1,7 @@
 import { calcularImcValor } from "./calculos.mjs";
 
 function calcularIMC() {
-  const resultado = document.getElementById("resultadoIMC") || document.getElementById("resultado");
+  const resultado = document.getElementById("resultadoIMC");
   if (!resultado) return;
 
   try {
@@ -21,5 +21,3 @@ document.getElementById("imcForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
   calcularIMC();
 });
-
-window.calcularIMC = calcularIMC;

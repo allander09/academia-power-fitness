@@ -1,4 +1,4 @@
-# Power Fitness 2.3 — roteiro de revisão
+# Power Fitness 2.4 — roteiro de revisão final
 
 Esta versão é uma candidata para avaliação técnica antes da publicação definitiva.
 
@@ -16,7 +16,12 @@ Validar se o projeto está bem estruturado para ser apresentado e comercializado
 - solicitação de exclusão e acompanhamento pelo administrador;
 - histórico das ações administrativas;
 - regras do Firestore adaptadas aos novos dados;
-- testes automatizados de lógica e integração estrutural.
+- testes automatizados de lógica e integração estrutural;
+- áreas separadas para aluno, professor e administrador;
+- acesso do professor liberado pelo administrador;
+- atividades e agendamentos associados ao professor responsável;
+- presença e ausência registradas somente pelo profissional vinculado;
+- quadro de horários compacto, marca na seção de planos e IMC corrigido.
 
 ## Perguntas para o professor
 
@@ -26,6 +31,8 @@ Validar se o projeto está bem estruturado para ser apresentado e comercializado
 4. A solicitação manual de exclusão atende ao escopo acadêmico ou deve excluir Authentication e Firestore automaticamente?
 5. O histórico administrativo possui dados suficientes para suporte e rastreabilidade?
 6. Quais itens ele considera obrigatórios antes de cobrar pela instalação e personalização?
+7. Para a evolução comercial, vale manter Firebase ou migrar para PostgreSQL, Supabase ou outro banco?
+8. O vínculo entre `professores_acesso`, `horarios` e `agendamentos` está adequado?
 
 ## Teste manual sugerido
 
@@ -38,12 +45,18 @@ Validar se o projeto está bem estruturado para ser apresentado e comercializado
 7. Baixar os dados de um aluno e abrir o arquivo JSON.
 8. Enviar uma solicitação de exclusão e marcá-la como atendida no painel.
 9. Conferir o histórico administrativo.
-10. Repetir em celular e computador.
+10. Criar uma conta para professor, verificar o e-mail e liberar o acesso pelo administrador.
+11. Vincular o professor a uma atividade e criar um agendamento de aluno.
+12. Confirmar o agendamento e registrar presença pela área do professor.
+13. Conferir que o professor não visualiza alunos de outra atividade.
+14. Testar o redirecionamento automático dos três perfis.
+15. Repetir em celular e computador.
 
 ## Critérios para aprovação
 
 - nenhuma página com erro no Console do navegador;
 - aluno comum sem acesso ao painel administrativo;
+- professor sem acesso às áreas de outros professores ou à administração;
 - dados de um aluno invisíveis para outros alunos;
 - horários fora do funcionamento não aparecem para agendamento;
 - capacidade e fila apresentam o resultado esperado;
@@ -53,6 +66,6 @@ Validar se o projeto está bem estruturado para ser apresentado e comercializado
 ## Decisões após a revisão
 
 - aprovar ou ajustar a modelagem;
-- decidir se a versão 2.3 será mesclada à `main`;
+- decidir se a versão 2.4 será mesclada à `main`;
 - fechar escopo comercial, preço de implantação e valor da manutenção;
-- separar módulos futuros: pagamentos, mensalidades, presença, ficha de treino, notificações e WhatsApp.
+- separar módulos futuros: pagamentos, mensalidades, ficha de treino, notificações e WhatsApp.
