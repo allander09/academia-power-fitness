@@ -1,5 +1,6 @@
 import { getIdToken, onAuthStateChanged, reload, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
 import { DIAS_SEMANA, diasDoHorario } from "./operacao.mjs";
 import { formatarDataISO } from "./validacoes.mjs";
@@ -68,16 +69,12 @@ function botaoPresenca(texto, presenca, documento) {
   botao.addEventListener("click", async () => {
     botao.disabled = true;
     try {
-      await updateDoc(doc(db, "agendamentos", documento.id), {
-        presenca,
-        atualizadoEm: serverTimestamp(),
-        atualizadoPor: usuarioAtual.uid
-      });
+      await chamarBackend("alterarAgendamento", { aulaId: documento.data().aulaId, presenca });
       feedback.textContent = `Presença registrada como ${rotulosPresenca[presenca].toLowerCase()}.`;
       feedback.className = "mensagem sucesso";
       await carregarProfessor(usuarioAtual);
     } catch (error) {
-      feedback.textContent = "Não foi possível registrar a presença.";
+      feedback.textContent = mensagemBackend(error, "Não foi possível registrar a presença.");
       feedback.className = "mensagem erro";
       console.error("Falha ao registrar presença:", error.code);
     } finally {
@@ -141,15 +138,15 @@ async function carregarProfessor(usuario) {
 
   const [atividades, agendamentos] = await Promise.all([
     getDocs(query(collection(db, "horarios"), where("professorUid", "==", usuario.uid))),
-    getDocs(query(collection(db, "agendamentos"), where("professorUid", "==", usuario.uid)))
+    chamarBackend("listarAulasProfessor")
   ]);
-  const agendamentosAtivos = agendamentos.docs.filter((item) => !["cancelado", "recusado"].includes(item.data().status));
-  const alunos = new Set(agendamentosAtivos.map((item) => item.data().usuarioId));
+  const documentosAulas = agendamentos.aulas.map(dados => ({ data: () => dados }));
+  const agendamentosAtivos = documentosAulas.filter((item) => !["cancelado", "recusado"].includes(item.data().status));
   renderizarAtividades(atividades.docs);
-  renderizarAgendamentos(agendamentos.docs);
+  renderizarAgendamentos(documentosAulas);
   document.getElementById("totalAtividadesProfessor").textContent = atividades.docs.filter((item) => item.data().ativo !== false).length;
   document.getElementById("totalAulasProfessor").textContent = agendamentosAtivos.length;
-  document.getElementById("totalAlunosProfessor").textContent = alunos.size;
+  document.getElementById("totalAlunosProfessor").textContent = agendamentos.totalAlunos;
   carregando.hidden = true;
   conteudo.hidden = false;
 }

@@ -17,7 +17,7 @@
   <main class="painel-container" id="adminConteudo" hidden>
     <section class="boas-vindas"><div><p>Administração</p><h1>Painel da academia</h1></div></section>
     <section class="metricas">
-      <article><strong id="totalAlunos">0</strong><span>Alunos</span></article>
+      <article><strong id="totalAlunos">0</strong><span>Contas cadastradas</span></article>
       <article><strong id="totalAgendamentos">0</strong><span>Agendamentos</span></article>
       <article><strong id="totalContatos">0</strong><span>Contatos</span></article>
       <article><strong id="totalProfessoresAcesso">0</strong><span>Professores com acesso</span></article>
@@ -46,8 +46,8 @@
     </section>
 
     <section class="painel-card">
-      <h2>Alunos</h2>
-      <label for="buscaAlunos">Buscar aluno</label>
+      <h2>Contas cadastradas</h2>
+      <label for="buscaAlunos">Buscar conta</label>
       <input class="campo-busca" id="buscaAlunos" type="search" placeholder="Nome, e-mail ou telefone">
       <div class="tabela-admin"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th></tr></thead><tbody id="alunosAdmin"></tbody></table></div>
     </section>
@@ -65,15 +65,31 @@
 
     <section class="painel-card">
       <h2>Solicitações de privacidade</h2>
-      <p class="ajuda-campo">Registre a conclusão somente depois de cumprir a solicitação e conferir os dados relacionados.</p>
+      <p class="ajuda-campo">A exclusão remove a conta e os dados vinculados. Confira a identidade e eventuais obrigações de conservação antes de executar. Pedidos em processamento podem ser retomados após uma falha.</p>
       <div class="tabela-admin"><table><thead><tr><th>E-mail</th><th>Solicitação</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead><tbody id="privacidadeAdmin"></tbody></table></div>
+    </section>
+
+    <section class="painel-card">
+      <h2>Responsável e privacidade</h2>
+      <p class="ajuda-campo">Preencha os dados reais da academia e revise as finalidades e os prazos antes de coletar dados de clientes. Os prazos orientam a revisão periódica descrita no manual de entrega.</p>
+      <form id="privacidadeForm">
+        <label for="controladorNomeAdmin">Nome ou razão social</label><input id="controladorNomeAdmin" minlength="3" maxlength="150" required>
+        <label for="controladorDocumentoAdmin">CNPJ ou identificação do responsável</label><input id="controladorDocumentoAdmin" minlength="3" maxlength="30" required>
+        <label for="controladorEnderecoAdmin">Endereço</label><input id="controladorEnderecoAdmin" minlength="3" maxlength="250" required>
+        <label for="emailPrivacidadeAdmin">E-mail para privacidade</label><input id="emailPrivacidadeAdmin" type="email" maxlength="254" required>
+        <label for="agendamentosDiasAdmin">Revisão de agendamentos encerrados (dias)</label><input id="agendamentosDiasAdmin" type="number" min="1" max="3650" required>
+        <label for="contatosDiasAdmin">Revisão de contatos respondidos (dias)</label><input id="contatosDiasAdmin" type="number" min="1" max="3650" required>
+        <label for="auditoriaDiasAdmin">Revisão do histórico de segurança (dias)</label><input id="auditoriaDiasAdmin" type="number" min="1" max="3650" required>
+        <label><input id="privacidadePublicadaAdmin" type="checkbox"> Informações revisadas para uso com clientes reais</label>
+        <button type="submit">Salvar privacidade</button>
+      </form>
     </section>
 
     <section class="painel-grid">
       <article class="painel-card">
         <h2>Novo plano</h2>
         <form id="planoForm">
-          <label for="planoNomeAdmin">Nome</label><input id="planoNomeAdmin" required>
+          <label for="planoNomeAdmin">Nome</label><input id="planoNomeAdmin" minlength="3" maxlength="100" required>
           <label for="planoValorAdmin">Valor mensal</label><input id="planoValorAdmin" type="number" min="0" step="0.01" required>
           <label for="planoBeneficiosAdmin">Benefícios</label><textarea id="planoBeneficiosAdmin" placeholder="Separe por vírgulas" required></textarea>
           <button type="submit">Salvar plano</button>
@@ -84,8 +100,8 @@
       <article class="painel-card">
         <h2>Novo professor</h2>
         <form id="professorForm">
-          <label for="professorNomeAdmin">Nome</label><input id="professorNomeAdmin" required>
-          <label for="professorEspecialidadeAdmin">Especialidade</label><input id="professorEspecialidadeAdmin" required>
+          <label for="professorNomeAdmin">Nome</label><input id="professorNomeAdmin" minlength="3" maxlength="100" required>
+          <label for="professorEspecialidadeAdmin">Especialidade</label><input id="professorEspecialidadeAdmin" minlength="2" maxlength="100" required>
           <label for="professorFotoAdmin">URL da foto (opcional)</label><input id="professorFotoAdmin" type="text" inputmode="url" placeholder="https://... ou ../assets/images/foto.webp">
           <small class="ajuda-campo">Use uma foto WebP quadrada e autorizada pelo profissional.</small>
           <button type="submit">Salvar professor</button>

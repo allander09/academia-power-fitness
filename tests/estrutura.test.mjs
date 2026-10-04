@@ -58,15 +58,15 @@ test("scripts e folhas de estilo locais referenciados existem", () => {
   }
 });
 
-test("a versão 2.4 inclui os perfis e status comerciais esperados", () => {
+test("a versão inclui os perfis e fluxos comerciais esperados", () => {
   const regras = ler("firestore.rules");
   assert.match(regras, /match \/configuracoes\/\{configuracaoId\}/);
   assert.match(regras, /match \/auditoria\/\{registroId\}/);
   assert.match(regras, /match \/solicitacoes_privacidade\/\{userId\}/);
   assert.match(regras, /match \/professores_acesso\/\{userId\}/);
   assert.match(regras, /professorUid/);
-  assert.match(regras, /presente/);
-  assert.match(regras, /lista_espera/);
+  assert.match(ler("functions/service.mjs"), /presente/);
+  assert.match(ler("functions/domain.mjs"), /lista_espera/);
 });
 
 test("a área do professor consulta somente vínculos do próprio UID", () => {

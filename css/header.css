@@ -3,3 +3,6 @@ header{position:fixed;inset:0 0 auto;z-index:1000;display:flex;align-items:cente
 nav ul{display:flex;align-items:center;gap:24px}nav a{font-size:.95rem;font-weight:500}nav a:hover{color:#ff4545}
 .menu-mobile{display:none;padding:8px 10px;background:transparent;font-size:1.5rem}
 main#inicio{padding-top:80px}
+
+.controles-cabecalho{display:flex;align-items:center;gap:10px}.conta-cabecalho{position:relative}.conta-entrar{border:1px solid #ff4545;border-radius:8px;padding:9px 14px}.conta-botao{width:42px;height:42px;padding:0;border-radius:50%;background:#ff3b3b;color:#fff;font-weight:700}.conta-menu{position:absolute;right:0;top:54px;width:min(300px,calc(100vw - 32px));padding:18px;border:1px solid #444;border-radius:12px;background:#171717;box-shadow:0 10px 30px #0006;display:flex;flex-direction:column;gap:10px}.conta-menu[hidden],.conta-botao[hidden],.conta-entrar[hidden]{display:none}.conta-menu>span{font-size:.85rem;overflow-wrap:anywhere;color:#ccc}.conta-menu>small{color:#ff7777}.conta-menu>a,.conta-menu>button{padding:10px;text-align:left;border-radius:6px}.conta-menu>button{background:#333;color:#fff}.conta-menu a:hover{background:#333}.conta-menu p:empty{display:none}
+@media(min-width:1025px) and (max-width:1150px){header{padding-left:3%;padding-right:3%}nav ul{gap:12px}nav a{font-size:.85rem}.logo{font-size:1.1rem}}

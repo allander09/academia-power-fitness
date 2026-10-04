@@ -2,6 +2,7 @@ import { createUserWithEmailAndPassword, deleteUser, sendEmailVerification } fro
 import { doc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
 import { alternarSenha, mensagemAuth } from "./auth-utils.js";
+import { VERSAO_PRIVACIDADE } from "./privacidade-config.mjs";
 
 const form = document.getElementById("cadastroForm");
 const feedback = document.getElementById("feedbackCadastro");
@@ -58,6 +59,8 @@ form.addEventListener("submit", async (event) => {
         email,
         telefone,
         papel: "aluno",
+        privacidadeVersao: VERSAO_PRIVACIDADE,
+        privacidadeCienteEm: serverTimestamp(),
         criadoEm: serverTimestamp(),
         atualizadoEm: serverTimestamp()
       });

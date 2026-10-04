@@ -18,14 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
   menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", fecharMenu));
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
+    if (event.key === "Escape" && menu.classList.contains("ativo")) {
       fecharMenu();
       botaoMenu.focus();
     }
   });
 
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 900) fecharMenu();
+    if (window.innerWidth > 1024) fecharMenu();
   });
 });
 

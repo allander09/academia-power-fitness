@@ -45,11 +45,20 @@
         <li><a href="#imc">IMC</a></li>
         <li><a href="#agendamento">Agendamento</a></li>
         <li><a href="#contato">Contato</a></li>
-        <li><a href="login.html">Entrar</a></li>
-        <li><a href="painel.html">Minha área</a></li>
       </ul>
     </nav>
-    <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    <div class="controles-cabecalho">
+      <div class="conta-cabecalho">
+        <a id="contaEntrar" class="conta-entrar" href="login.html">Entrar</a>
+        <button id="contaBotao" class="conta-botao" type="button" aria-label="Abrir minha conta" aria-expanded="false" aria-controls="contaMenu" hidden><span id="contaIniciais" aria-hidden="true">PF</span></button>
+        <div id="contaMenu" class="conta-menu" hidden>
+          <strong id="contaNome">Minha conta</strong><span id="contaEmail"></span><small id="contaPerfil"></small>
+          <a id="contaArea" href="painel.html">Abrir meu painel</a><a href="painel.html">Perfil e privacidade</a>
+          <button id="contaSair" type="button">Sair da conta</button><p id="contaFeedback" aria-live="polite"></p>
+        </div>
+      </div>
+    <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
   </header>
 
   <main id="inicio">
@@ -158,7 +167,7 @@
     </section>
 
     <section id="contato" class="secao-clara secao-formulario">
-      <div class="container"><h2>Contato</h2><form id="formContato" class="form-card"><label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" required><label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" required><label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel"><label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea><label class="consentimento"><input type="checkbox" required> Concordo com o uso dos dados para resposta, conforme a <a href="privacidade.html">Política de Privacidade</a>.</label><button type="submit">Enviar mensagem</button><p id="mensagemContato" class="mensagem" aria-live="polite"></p></form></div>
+      <div class="container"><h2>Contato</h2><form id="formContato" class="form-card"><label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" minlength="3" maxlength="100" required><label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" maxlength="254" required><label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel" maxlength="20"><label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea><label class="consentimento"><input type="checkbox" required> Li as informações sobre o uso dos dados para resposta na <a href="privacidade.html">Política de Privacidade</a>.</label><button type="submit">Enviar mensagem</button><p id="mensagemContato" class="mensagem" aria-live="polite"></p></form></div>
     </section>
   </main>
 
@@ -170,8 +179,10 @@
   <script src="../js/modal.js"></script>
   <script type="module" src="../js/imc.js"></script>
   <script type="module" src="../js/mensalidade.js"></script>
+  <script type="module" src="../js/conta.js"></script>
   <script type="module" src="../js/agendamento.js"></script>
   <script type="module" src="../js/contato.js"></script>
   <script type="module" src="../js/conteudo-dinamico.js"></script>
+  <script type="module" src="../js/ambiente.js"></script>
 </body>
 </html>

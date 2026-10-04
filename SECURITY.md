@@ -1,40 +1,34 @@
-# Segurança
+# Segurança do Power Fitness 2.5
 
-## Relatar uma vulnerabilidade
+## Controles
 
-Não publique credenciais, tokens, senhas ou dados pessoais em issues. Em uso comercial, configure um canal privado do responsável pela academia.
+- Permissões de aluno, professor e administrador verificadas no servidor e/ou Firestore Rules.
+- Verificação de e-mail para operações críticas e conferência de conta ativa no Authentication.
+- Funções chamáveis com `enforceAppCheck: true` e tokens autenticados.
+- Nenhuma escrita direta de agendamento, presença, turma ou atividade pelo navegador.
+- Confirmação transacional de capacidade e agendamentos duplicados bloqueados.
+- Professor recebe campos mínimos e identificador aleatório, sem UID/e-mail do aluno.
+- Cadastro não permite elevação de privilégio; `admins` só pode ser alterado no Console/SDK administrativo.
+- Exclusão bloqueia sessões e não permite recriar perfil com token antigo.
+- Renderização de dados com textContent e validação de URLs de foto.
+- Política versionada, ciência persistida e rotas privadas sem indexação.
+- HTTPS e cabeçalhos contra interpretação de conteúdo e enquadramento; cache de scripts revalidado.
+- Código do servidor, testes, documentos e dependências excluídos do Hosting.
 
-## Controles implementados
+## Implantação e operação
 
-- autenticação por e-mail e senha;
-- verificação de e-mail para agendamentos e administração;
-- recuperação de senha sem confirmar se o endereço está cadastrado;
-- regras de acesso por proprietário;
-- papel administrativo por documento protegido em `admins/{uid}`;
-- papel de professor por documento protegido em `professores_acesso/{uid}`;
-- leitura do professor limitada aos horários e agendamentos associados ao próprio UID;
-- App Check com reCAPTCHA Enterprise e renovação automática de token;
-- provedor de depuração restrito a `localhost` e `127.0.0.1`;
-- validação de campos, e-mail da conta e timestamps no cliente e no Firestore;
-- identificador determinístico de agendamento para reduzir duplicidades;
-- leitura pública limitada a conteúdo ativo;
-- renderização administrativa sem inserir conteúdo do usuário como HTML;
-- cabeçalhos de segurança no Firebase Hosting;
-- integração contínua com verificação de sintaxe e testes automatizados.
+Use contas individuais, verificação de e-mail, senha forte e segundo fator na conta Google/Firebase do responsável. Não compartilhe senha nem mantenha conta do desenvolvedor como única proprietária. Revogue acessos ao encerrar o vínculo de um colaborador.
 
-## Antes de produção
+Registre os domínios de produção no Authentication e App Check/reCAPTCHA, confira métricas e habilite a proteção do Firestore. As funções já exigem App Check; token de depuração deve existir apenas em desenvolvimento. A configuração web contém identificadores públicos do Firebase, não uma chave privada administrativa. Restrições de API, permissões IAM e orçamento devem ser revisados na conta real.
 
-1. cadastre e proteja o token de depuração usado no computador de desenvolvimento;
-2. publique o site e as regras com `firebase deploy`;
-3. teste cadastro, verificação, login, recuperação e os painéis de aluno, professor e administrador no domínio publicado;
-4. confira as métricas do App Check e só então aplique a proteção ao Firestore e Authentication;
-5. use senha exclusiva e forte na conta administradora;
-6. cadastre somente administradores confiáveis;
-7. configure limites, alertas de uso e orçamento;
-8. confirme planos, preços, equipe, horários e imagens com a academia real;
-9. revise a política de privacidade com orientação jurídica;
-10. não armazene dados médicos ou documentos pessoais neste projeto.
+Functions utiliza Blaze, com limites de instâncias configurados; isso não garante custo zero nem substitui acompanhamento de orçamento. O teste local não verifica IAM, App Check real, região do banco, e-mails transacionais, DNS, quota ou restauração de produção.
 
-## Dados e recuperação
+Faça backup antes de migração, restaure uma cópia em ambiente separado e registre o resultado. Dados excluídos no banco ativo não devem ser reintroduzidos por restauração de backup. No descarte, trate também exportações, cópias locais e logs conforme a política do responsável.
 
-Defina uma rotina de cópia de segurança antes do uso comercial. A exportação gerenciada do Firestore exige faturamento habilitado; avalie custos e mantenha um procedimento documentado de restauração.
+A exclusão é uma operação administrativa intencional, confirmada na interface. Se o pedido possuir obrigação de conservação, a equipe deve resolver isso antes da execução integral. Não há um módulo de arquivos legais ou prontuários neste sistema. Para perfil público de profissional e fotos, a equipe remove/anônimiza o conteúdo publicado separadamente.
+
+## Incidentes e relatos
+
+Configure o canal de privacidade/segurança da academia. Relatos devem trazer horário, tela e passos de reprodução sem incluir senhas, tokens, dados pessoais ou chave de serviço em GitHub público. A equipe identifica o incidente, preserva evidências necessárias com acesso restrito, contém a exposição, avalia comunicação aplicável, corrige e registra a conclusão. Esta rotina operacional precisa de um responsável definido no cliente.
+
+Os testes cobrem cenários especificados, não uma certificação de segurança ou conformidade LGPD. A documentação legal e os procedimentos da academia devem ser revisados para a implantação real.

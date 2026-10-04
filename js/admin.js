@@ -1,7 +1,9 @@
 import { getIdToken, onAuthStateChanged, reload, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { chamarBackend, mensagemBackend } from "./backend.js";
+import { VERSAO_PRIVACIDADE, PRAZOS_PRIVACIDADE } from "./privacidade-config.mjs";
 import { auth, db } from "./firebase-services.js";
-import { capacidadeDoHorario, contarConfirmados, DIAS_SEMANA, diasDoHorario, formatarFuncionamento, horarioDisponivelNoDia, normalizarFuncionamento, proximoDaLista } from "./operacao.mjs";
+import { capacidadeDoHorario, contarConfirmados, DIAS_SEMANA, diasDoHorario, formatarFuncionamento, horarioDisponivelNoDia, normalizarFuncionamento } from "./operacao.mjs";
 import { professorDoHorario } from "./perfis.mjs";
 import { formatarDataISO, normalizarBusca } from "./validacoes.mjs";
 
@@ -13,6 +15,29 @@ let agendamentosCache = [];
 let horariosCache = [];
 let professoresAcessoCache = [];
 let funcionamentoAtual = normalizarFuncionamento();
+
+async function carregarPrivacidade() {
+  const snapshot = await getDoc(doc(db, "configuracoes", "privacidade"));
+  const dados = snapshot.data() || {};
+  for (const campo of ["controladorNome", "controladorDocumento", "controladorEndereco", "emailPrivacidade"]) document.getElementById(campo + "Admin").value = dados[campo] || "";
+  for (const [campo, padrao] of Object.entries(PRAZOS_PRIVACIDADE)) document.getElementById(campo + "Admin").value = dados[campo] || padrao;
+  document.getElementById("privacidadePublicadaAdmin").checked = dados.publicada === true;
+}
+
+document.getElementById("privacidadeForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  await executarAcao(event.currentTarget.querySelector('button[type="submit"]'), async () => {
+    const dados = { publicada: document.getElementById("privacidadePublicadaAdmin").checked, versao: VERSAO_PRIVACIDADE, atualizadoEm: serverTimestamp() };
+    for (const campo of ["controladorNome", "controladorDocumento", "controladorEndereco", "emailPrivacidade"]) dados[campo] = document.getElementById(campo + "Admin").value.trim();
+    for (const campo of Object.keys(PRAZOS_PRIVACIDADE)) {
+      dados[campo] = Number(document.getElementById(campo + "Admin").value);
+      if (!Number.isInteger(dados[campo]) || dados[campo] < 1 || dados[campo] > 3650) throw new Error("Confira os prazos de conservação.");
+    }
+    await setDoc(doc(db, "configuracoes", "privacidade"), dados);
+    await registrarAuditoria("configurar", "configuracoes", "privacidade", "Identificação e critérios de conservação atualizados.");
+    return "Política de privacidade atualizada.";
+  });
+});
 
 const rotulosStatus = {
   pendente: "Aguardando confirmação",
@@ -73,7 +98,7 @@ async function executarAcao(botao, acao, mensagem = "Alteração salva.") {
     const retorno = await acao();
     mostrarFeedback(retorno || mensagem);
   } catch (error) {
-    mostrarFeedback(error.message || "Não foi possível concluir a operação.", "erro");
+    mostrarFeedback(mensagemBackend(error, "Não foi possível concluir a operação."), "erro");
     console.error(error);
   } finally {
     botao.disabled = false;
@@ -177,16 +202,6 @@ function resumoConteudo(nomeColecao, dados) {
   return `${dados.hora} — ${dados.atividade} — ${textoDiasHorario(dados)} — ${capacidadeDoHorario(dados, funcionamentoAtual)} vagas — ${professor.nome || "sem professor"}`;
 }
 
-async function sincronizarProfessorAgendamentos(horarioId, professorUid, professorNome) {
-  const snapshot = await getDocs(query(collection(db, "agendamentos"), where("horarioId", "==", horarioId)));
-  await Promise.all(snapshot.docs.map((agendamento) => updateDoc(agendamento.ref, {
-    professorUid,
-    professorNome,
-    atualizadoEm: serverTimestamp(),
-    atualizadoPor: auth.currentUser.uid
-  })));
-}
-
 async function editarConteudo(nomeColecao, documento) {
   const dados = documento.data();
   const referencia = doc(db, nomeColecao, documento.id);
@@ -236,8 +251,7 @@ async function editarConteudo(nomeColecao, documento) {
     const acessoProfessor = professorUid ? professoresAcessoCache.find((item) => item.id === professorUid && item.dados.ativo === true) : null;
     if (professorUid && !acessoProfessor) throw new Error("Informe o UID de um professor com acesso ativo.");
     const professorNome = acessoProfessor?.dados.nome || "";
-    await updateDoc(referencia, { hora, atividade: atividade.trim(), capacidade, diasSemana, professorUid, professorNome, atualizadoEm: serverTimestamp() });
-    await sincronizarProfessorAgendamentos(documento.id, professorUid, professorNome);
+    await chamarBackend("salvarHorario", { id: documento.id, dados: { hora, atividade: atividade.trim(), capacidade, diasSemana, professorUid, professorNome } });
   }
 
   await registrarAuditoria("editar", nomeColecao, documento.id, resumoConteudo(nomeColecao, { ...dados }));
@@ -262,7 +276,8 @@ async function carregarConteudo(nomeColecao) {
     acoes.append(
       botaoAcao("Editar", () => editarConteudo(nomeColecao, documento), "Conteúdo atualizado."),
       botaoAcao(ativo ? "Desativar" : "Reativar", async () => {
-        await updateDoc(doc(db, nomeColecao, documento.id), { ativo: !ativo, atualizadoEm: serverTimestamp() });
+        if (nomeColecao === "horarios") await chamarBackend("salvarHorario", { id: documento.id, dados: { ativo: !ativo } });
+        else await updateDoc(doc(db, nomeColecao, documento.id), { ativo: !ativo, atualizadoEm: serverTimestamp() });
         await registrarAuditoria(ativo ? "desativar" : "reativar", nomeColecao, documento.id, resumoConteudo(nomeColecao, dados));
         await carregarConteudo(nomeColecao);
       }, ativo ? "Conteúdo desativado." : "Conteúdo reativado.")
@@ -279,61 +294,13 @@ function horarioDoAgendamento(dados) {
 }
 
 async function atualizarStatusAgendamento(documento, status) {
-  const dados = documento.data();
-  const referencia = doc(db, "agendamentos", documento.id);
-  await updateDoc(referencia, { status, atualizadoEm: serverTimestamp(), atualizadoPor: auth.currentUser.uid });
-  await registrarAuditoria("alterar_status", "agendamentos", documento.id, `${rotuloStatus(dados.status)} → ${rotuloStatus(status)}`);
+  return chamarBackend("alterarAgendamento", { id: documento.id, status });
 }
 
 async function confirmarAgendamento(documento) {
-  const dados = documento.data();
-  const horario = horarioDoAgendamento(dados);
-  const capacidade = capacidadeDoHorario(horario, funcionamentoAtual);
-  const snapshot = await getDocs(query(collection(db, "agendamentos"), where("data", "==", dados.data)));
-  const noMesmoDia = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-  const ocupadas = contarConfirmados(noMesmoDia, dados.data, dados.hora, documento.id);
-
-  if (ocupadas >= capacidade) {
-    await atualizarStatusAgendamento(documento, "lista_espera");
-    await carregarAdmin();
-    return `Turma lotada (${capacidade}/${capacidade}). Solicitação movida para a lista de espera.`;
-  }
-
-  await atualizarStatusAgendamento(documento, "confirmado");
+  const resultado = await atualizarStatusAgendamento(documento, "confirmado");
   await carregarAdmin();
-  return `Agendamento confirmado. Ocupação: ${ocupadas + 1}/${capacidade}.`;
-}
-
-async function promoverListaEspera(data, hora) {
-  const snapshot = await getDocs(query(collection(db, "agendamentos"), where("data", "==", data)));
-  const aguardando = snapshot.docs
-    .filter((item) => item.data().hora === hora && item.data().status === "lista_espera")
-    .sort((a, b) => (a.data().criadoEm?.seconds || 0) - (b.data().criadoEm?.seconds || 0));
-  if (!aguardando.length) return "";
-  await atualizarStatusAgendamento(aguardando[0], "pendente");
-  return " A primeira pessoa da lista de espera voltou para análise.";
-}
-
-async function reconciliarListasEspera(documentos) {
-  const grupos = new Map();
-  documentos.forEach((documento) => {
-    const dados = documento.data();
-    const chave = `${dados.data}_${dados.hora}`;
-    if (!grupos.has(chave)) grupos.set(chave, []);
-    grupos.get(chave).push(documento);
-  });
-
-  let promoveu = false;
-  for (const itens of grupos.values()) {
-    const referencia = itens[0].data();
-    const capacidade = capacidadeDoHorario(horarioDoAgendamento(referencia), funcionamentoAtual);
-    const proximo = proximoDaLista(itens.map((item) => ({ id: item.id, ...item.data() })), capacidade);
-    if (proximo) {
-      await atualizarStatusAgendamento(itens.find((item) => item.id === proximo.id), "pendente");
-      promoveu = true;
-    }
-  }
-  return promoveu;
+  return resultado.status === "lista_espera" ? "Turma lotada. Solicitação movida para a lista de espera." : "Agendamento confirmado.";
 }
 
 function renderizarAgendamentos(documentos) {
@@ -345,7 +312,7 @@ function renderizarAgendamentos(documentos) {
     const dados = documento.data();
     const horario = horarioDoAgendamento(dados);
     const capacidade = capacidadeDoHorario(horario, funcionamentoAtual);
-    const confirmados = contarConfirmados(agendamentosCache, dados.data, dados.hora);
+    const confirmados = contarConfirmados(agendamentosCache.filter(item => item.horarioId === dados.horarioId), dados.data, dados.hora);
     const tr = document.createElement("tr");
     tr.append(
       celula(dados.nome),
@@ -364,9 +331,8 @@ function renderizarAgendamentos(documentos) {
     }
     if (["pendente", "confirmado", "lista_espera"].includes(dados.status)) {
       acoes.append(botaoAcao("Cancelar", async () => {
-        const liberarVaga = dados.status === "confirmado";
-        await atualizarStatusAgendamento(documento, "cancelado");
-        const promocao = liberarVaga ? await promoverListaEspera(dados.data, dados.hora) : "";
+        const resultado = await atualizarStatusAgendamento(documento, "cancelado");
+        const promocao = resultado.promoveu ? " A primeira pessoa da fila voltou para análise." : "";
         await carregarAdmin();
         return `Agendamento cancelado.${promocao}`;
       }, "Agendamento cancelado."));
@@ -419,12 +385,14 @@ function renderizarPrivacidade(documentos) {
     const tr = document.createElement("tr");
     tr.append(celula(dados.email), celula(dados.tipo === "exclusao" ? "Exclusão de dados" : dados.tipo), celula(formatarTimestamp(dados.criadoEm)), celula(rotuloStatus(dados.status)));
     const acoes = document.createElement("td");
-    if (dados.status === "pendente") {
-      acoes.append(botaoAcao("Marcar atendida", async () => {
-        await updateDoc(doc(db, "solicitacoes_privacidade", documento.id), { status: "atendida", atualizadoEm: serverTimestamp(), atualizadoPor: auth.currentUser.uid });
-        await registrarAuditoria("atender", "solicitacoes_privacidade", documento.id, dados.email);
+    if (["pendente", "processando"].includes(dados.status)) {
+      acoes.append(botaoAcao(dados.status === "processando" ? "Retomar exclusão" : "Excluir conta e dados", async () => {
+        if (!confirm(`A conta de ${dados.email} e os dados vinculados serão excluídos. Confira antes se existe alguma obrigação legal de conservação. Deseja continuar?`)) return "Exclusão não iniciada.";
+        if (prompt("Para confirmar, digite EXCLUIR") !== "EXCLUIR") return "Exclusão não iniciada.";
+        const resultado = await chamarBackend("excluirConta", { usuarioId: documento.id, confirmacao: "EXCLUIR" });
         await carregarAdmin();
-      }, "Solicitação marcada como atendida."));
+        return `${resultado.mensagem} Protocolo: ${resultado.protocolo}`;
+      }));
     } else acoes.textContent = "Concluída";
     tr.append(acoes);
     tbody.appendChild(tr);
@@ -497,7 +465,7 @@ async function carregarAuditoria() {
 }
 
 async function carregarAdmin() {
-  await carregarFuncionamento();
+  await Promise.all([carregarFuncionamento(), carregarPrivacidade()]);
   const [alunos, agendamentosIniciais, contatos, privacidade, acessosProfessores] = await Promise.all([
     getDocs(collection(db, "usuarios")),
     getDocs(query(collection(db, "agendamentos"), orderBy("criadoEm", "desc"))),
@@ -507,10 +475,7 @@ async function carregarAdmin() {
     ...["planos", "professores", "horarios"].map(carregarConteudo)
   ]);
 
-  let agendamentos = agendamentosIniciais;
-  if (await reconciliarListasEspera(agendamentos.docs)) {
-    agendamentos = await getDocs(query(collection(db, "agendamentos"), orderBy("criadoEm", "desc")));
-  }
+  const agendamentos = agendamentosIniciais;
 
   alunosCache = alunos.docs.map((documento) => ({ id: documento.id, dados: documento.data() }));
   preencherContasProfessor();
@@ -522,14 +487,16 @@ async function carregarAdmin() {
   document.getElementById("totalAlunos").textContent = alunos.size;
   document.getElementById("totalAgendamentos").textContent = agendamentos.size;
   document.getElementById("totalContatos").textContent = contatos.size;
-  document.getElementById("totalPrivacidade").textContent = privacidade.docs.filter((item) => item.data().status === "pendente").length;
+  document.getElementById("totalPrivacidade").textContent = privacidade.docs.filter((item) => ["pendente", "processando"].includes(item.data().status)).length;
   await carregarAuditoria();
 }
 
 async function salvarConteudo(colecaoNome, dados, form) {
   const botao = form.querySelector('button[type="submit"]');
   await executarAcao(botao, async () => {
-    const referencia = await addDoc(collection(db, colecaoNome), { ...dados, ativo: true, criadoEm: serverTimestamp(), atualizadoEm: serverTimestamp() });
+    const referencia = colecaoNome === "horarios"
+      ? await chamarBackend("salvarHorario", { dados: { ...dados, ativo: true } })
+      : await addDoc(collection(db, colecaoNome), { ...dados, ativo: true, criadoEm: serverTimestamp(), atualizadoEm: serverTimestamp() });
     await registrarAuditoria("criar", colecaoNome, referencia.id, resumoConteudo(colecaoNome, dados));
     form.reset();
     if (colecaoNome === "horarios") {

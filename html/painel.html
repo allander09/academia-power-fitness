@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
   <meta name="description" content="Área do aluno Power Fitness.">
   <title>Área do Aluno | Power Fitness</title>
   <link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="../css/painel.css">
@@ -11,7 +12,7 @@
   <main class="painel-container" id="conteudoPainel" hidden>
     <section class="boas-vindas"><div><p>Área do aluno</p><h1 id="saudacao">Olá!</h1><span id="emailVerificado" class="status"></span></div><button id="reenviarVerificacao" type="button">Reenviar verificação</button></section>
     <section class="painel-grid">
-      <article class="painel-card"><h2>Meu perfil</h2><form id="perfilForm"><label for="perfilNome">Nome</label><input id="perfilNome" autocomplete="name" minlength="3" required><label for="perfilTelefone">Telefone</label><input id="perfilTelefone" type="tel" autocomplete="tel" inputmode="tel" minlength="8" maxlength="20" required><label for="perfilEmail">E-mail</label><input id="perfilEmail" type="email" autocomplete="email" readonly><button type="submit">Salvar alterações</button><p id="feedbackPerfil" class="mensagem" aria-live="polite"></p></form></article>
+      <article class="painel-card"><h2>Meu perfil</h2><form id="perfilForm"><label for="perfilNome">Nome</label><input id="perfilNome" autocomplete="name" maxlength="100" minlength="3" required><label for="perfilTelefone">Telefone</label><input id="perfilTelefone" type="tel" autocomplete="tel" inputmode="tel" minlength="8" maxlength="20" required><label for="perfilEmail">E-mail</label><input id="perfilEmail" type="email" autocomplete="email" readonly><button type="submit">Salvar alterações</button><p id="feedbackPerfil" class="mensagem" aria-live="polite"></p></form></article>
       <article class="painel-card"><h2>Meus agendamentos</h2><div id="listaAgendamentos" class="lista-vazia">Carregando...</div></article>
       <article class="painel-card"><h2>Meus dados e privacidade</h2><p>Baixe uma cópia dos seus dados ou envie uma solicitação de exclusão para a academia.</p><div class="acoes-privacidade"><button id="exportarDados" type="button">Baixar meus dados</button><button id="solicitarExclusao" type="button" class="botao-secundario">Solicitar exclusão</button></div><p id="feedbackPrivacidade" class="mensagem" aria-live="polite"></p></article>
     </section>

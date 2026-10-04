@@ -1,8 +1,9 @@
 import { getIdToken, reload } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
 import { capacidadeDoHorario, horarioDisponivelNoDia, indiceDiaDaData, normalizarFuncionamento } from "./operacao.mjs";
-import { dataLocalISO, idAgendamento, possuiAgendamentoAtivo, validarHorarioAgendamento } from "./validacoes.mjs";
+import { dataLocalISO, validarHorarioAgendamento } from "./validacoes.mjs";
 
 const form = document.getElementById("agendamentoForm");
 const mensagem = document.getElementById("mensagemAgendamento");
@@ -43,7 +44,7 @@ async function preencherDadosDaConta() {
 
   try {
     const perfil = await getDoc(doc(db, "usuarios", usuario.uid));
-    if (perfil.exists() && !campoNome.value) campoNome.value = perfil.data().nome || "";
+    if (perfil.exists()) { campoNome.value = perfil.data().nome || ""; campoNome.readOnly = true; }
   } catch (error) {
     console.warn("Não foi possível preencher o perfil.", error.code);
   }
@@ -151,41 +152,12 @@ if (form && data && hora) {
     botao.textContent = "Salvando...";
 
     try {
-      const existentes = await getDocs(query(collection(db, "agendamentos"), where("usuarioId", "==", usuario.uid)));
-      const agendamentos = existentes.docs.map((documento) => documento.data());
-
-      if (possuiAgendamentoAtivo(agendamentos, data.value, hora.value)) {
-        mostrarMensagem("Você já possui uma solicitação ativa nessa data e horário.");
-        return;
-      }
-
-      const identificador = idAgendamento(usuario.uid, data.value, hora.value);
-      const referencia = doc(db, "agendamentos", identificador);
-      const existenteDeterministico = existentes.docs.find((documento) => documento.id === identificador);
       const opcaoHorario = hora.selectedOptions[0];
-      const valores = {
-        nome: campoNome.value.trim(),
-        email: usuario.email,
-        plano: campoPlano?.value || "Não informado",
+      await chamarBackend("solicitarAgendamento", {
+        data: data.value,
         horarioId: opcaoHorario?.dataset.horarioId || "",
-        atividade: opcaoHorario?.dataset.atividade || "Aula experimental",
-        professorUid: opcaoHorario?.dataset.professorUid || "",
-        professorNome: opcaoHorario?.dataset.professorNome || "",
-        status: "pendente",
-        atualizadoEm: serverTimestamp()
-      };
-
-      if (existenteDeterministico) {
-        await updateDoc(referencia, valores);
-      } else {
-        await setDoc(referencia, {
-          usuarioId: usuario.uid,
-          data: data.value,
-          hora: hora.value,
-          criadoEm: serverTimestamp(),
-          ...valores
-        });
-      }
+        plano: campoPlano.value
+      });
 
       mostrarMensagem("Agendamento salvo! Acompanhe o status na Área do Aluno.", "sucesso");
       form.reset();
@@ -194,7 +166,7 @@ if (form && data && hora) {
       sessionStorage.removeItem("powerFitnessPlano");
       await preencherDadosDaConta();
     } catch (error) {
-      mostrarMensagem("Não foi possível salvar. Verifique sua conexão e tente novamente.");
+      mostrarMensagem(mensagemBackend(error, "Não foi possível salvar. Verifique sua conexão e tente novamente."));
       console.error("Falha no agendamento:", error.code);
     } finally {
       botao.disabled = false;

@@ -51,13 +51,38 @@ function avatarProfessor(dados) {
 }
 
 async function carregarPlanos() {
-  const snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
   const container = document.querySelector(".cards-planos");
+  container.replaceChildren(elemento("p", "Carregando planos da academia…"));
+  const simulador = document.getElementById("plano");
+  const interesse = document.getElementById("planoAgendamento");
+  const calcular = document.querySelector('#mensalidadeForm button[type="submit"]');
+  simulador.replaceChildren(new Option("Carregando planos…", ""));
+  simulador.disabled = true;
+  calcular.disabled = true;
+  interesse.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
+  let snapshot;
+  try { snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true))); }
+  catch {
+    container.replaceChildren(elemento("p", "Não foi possível carregar os planos. Atualize a página antes de consultar os valores."));
+    simulador.replaceChildren(new Option("Planos indisponíveis", ""));
+    return;
+  }
   container.replaceChildren();
+  simulador.replaceChildren();
+  if (snapshot.empty) {
+    container.append(elemento("p", "Os planos serão publicados pela academia em breve."));
+    simulador.append(new Option("Nenhum plano publicado", ""));
+    simulador.disabled = true;
+    document.querySelector('#mensalidadeForm button[type="submit"]').disabled = true;
+    return;
+  }
+  simulador.disabled = false;
+  calcular.disabled = false;
 
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
+    simulador.append(new Option(`${dados.nome} — ${Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`, String(dados.valor)));
+    interesse.append(new Option(dados.nome, dados.nome));
     const card = elemento("article", "", "plano");
     card.append(elemento("h3", dados.nome), elemento("p", Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês", "preco"));
     const lista = document.createElement("ul");
@@ -68,13 +93,15 @@ async function carregarPlanos() {
     card.append(lista, botao);
     container.appendChild(card);
   });
+  const salvo = sessionStorage.getItem("powerFitnessPlano");
+  if ([...interesse.options].some(opcao => opcao.value === salvo)) interesse.value = salvo;
 }
 
 async function carregarProfessores() {
   const snapshot = await getDocs(query(collection(db, "professores"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
   const container = document.querySelector(".cards-professores");
   container.replaceChildren();
+  if (snapshot.empty) container.append(elemento("p", "A equipe será publicada pela academia em breve."));
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
     const card = elemento("article", "", "professor");

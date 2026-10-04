@@ -16,3 +16,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Execução local e credenciais administrativas
+.firebase/
+tmp/
+upload/
+output/
+*service-account*.json
+*.pem
+

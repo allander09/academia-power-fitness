@@ -11,6 +11,8 @@ function abrirModal(plano, valor) {
   document.getElementById("tituloPlano").textContent = plano;
   document.getElementById("descricaoPlano").textContent = `Valor da mensalidade: ${valor}`;
   sessionStorage.setItem("powerFitnessPlano", plano);
+  const interesse = document.getElementById("planoAgendamento");
+  if (interesse && [...interesse.options].some(opcao => opcao.value === plano)) interesse.value = plano;
   modal.classList.add("aberto");
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-aberto");
@@ -62,4 +64,3 @@ document.addEventListener("keydown", (event) => {
 
 window.abrirModal = abrirModal;
 window.fecharModal = fecharModal;
-
