@@ -68,6 +68,8 @@ A primeira chamada apenas relata. O script preenche identificador aleatório da 
 
 ## Aceitação
 
+Antes da publicação, o responsável pode testar os três perfis com `npm run demo`, seguindo [TESTAR.md](TESTAR.md). O modo local não usa dados reais nem requer conta de faturamento. Isso permite revisar a entrega enquanto o acesso ao projeto de destino é configurado.
+
 Use REVISAO_2_5.md no domínio final. Registre data, versão/commit, responsável, dispositivo, navegador e resultado dos fluxos. Conferir Console, falhas de rede, regras reais, App Check e e-mail de verificação/recuperação é obrigatório. Os testes locais já realizados não substituem esse registro. O comprador deve receber acesso e reproduzir o login administrativo antes do aceite.
 
 ## Rotina de privacidade e recuperação

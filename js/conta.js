@@ -31,6 +31,8 @@ onAuthStateChanged(auth, async usuario => {
   fechar();
   document.getElementById("contaEntrar").hidden = Boolean(usuario);
   botao.hidden = !usuario;
+  botao.disabled = Boolean(usuario);
+  botao.setAttribute("aria-busy", String(Boolean(usuario)));
   if (!usuario) return;
   const ler = colecao => getDoc(doc(db, colecao, usuario.uid));
   const snapshots = await Promise.allSettled([ler("usuarios"), ler("admins"), usuario.emailVerified ? ler("professores_acesso") : Promise.resolve(null)]);
@@ -45,4 +47,6 @@ onAuthStateChanged(auth, async usuario => {
   document.getElementById("contaIniciais").textContent = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => parte[0]).join("").toUpperCase();
   document.getElementById("contaArea").href = destinoPorPerfil({ administradorAtivo, professorAtivo });
   botao.setAttribute("aria-label", `Abrir conta de ${nome}`);
+  botao.disabled = false;
+  botao.setAttribute("aria-busy", "false");
 });

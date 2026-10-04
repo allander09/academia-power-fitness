@@ -23,7 +23,7 @@
       "**/.*",
       "**/*.log"
     ],
-    "cleanUrls": true,
+    "cleanUrls": false,
     "redirects": [
       {
         "source": "/",
@@ -86,13 +86,23 @@
   ],
   "emulators": {
     "firestore": {
+      "host": "127.0.0.1",
       "port": 8080
     },
     "auth": {
+      "host": "127.0.0.1",
       "port": 9099
     },
     "ui": {
       "enabled": false
+    },
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5001
+    },
+    "hosting": {
+      "host": "127.0.0.1",
+      "port": 5000
     }
   }
 }

@@ -28,7 +28,9 @@ npm test
 npm run test:integration
 ```
 
-Para o site, abra a raiz no VS Code e use Live Server. `file://` não executa corretamente os módulos. Cadastre no App Check o token de desenvolvimento emitido apenas para localhost. Os testes usam exclusivamente o projeto `demo-power-fitness` nos emuladores.
+Para testar o site completo sem credenciais de produção, execute `npm run demo` e abra `http://127.0.0.1:5000/html/`. A carga inicial fornece contas fictícias dos três perfis e reservas para testar a fila. Veja [TESTAR.md](TESTAR.md) para as contas, o clone no VS Code e o roteiro. Os testes usam exclusivamente o projeto `demo-power-fitness` nos emuladores.
+
+Live Server em outra porta continua ligado ao projeto real e exige o token de desenvolvimento registrado no App Check. `file://` não executa corretamente os módulos. A demonstração local não substitui os testes no domínio publicado.
 
 ## Implantação
 
@@ -49,6 +51,7 @@ O primeiro administrador deve criar uma conta, verificar o e-mail e receber, no 
 - [SECURITY.md](SECURITY.md): controles técnicos e operação de segurança.
 - [REVISAO_2_5.md](REVISAO_2_5.md): evidências e roteiro de aceitação.
 - [ENTREGA.md](ENTREGA.md): implantação, transferência ao comprador e responsabilidades.
+- [TESTAR.md](TESTAR.md): demonstração completa local, contas fictícias e roteiro no VS Code.
 
 ## Escopo de venda
 

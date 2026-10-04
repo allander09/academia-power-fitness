@@ -4,7 +4,7 @@
 
 - Permissões de aluno, professor e administrador verificadas no servidor e/ou Firestore Rules.
 - Verificação de e-mail para operações críticas e conferência de conta ativa no Authentication.
-- Funções chamáveis com `enforceAppCheck: true` e tokens autenticados.
+- Funções chamáveis exigem App Check em produção e tokens autenticados. A dispensa de App Check exige simultaneamente o emulador de Functions, o projeto fictício `demo-power-fitness` e os dois emuladores em loopback nas portas previstas. Autenticação, papéis e regras continuam ativos no teste local.
 - Nenhuma escrita direta de agendamento, presença, turma ou atividade pelo navegador.
 - Confirmação transacional de capacidade e agendamentos duplicados bloqueados.
 - Professor recebe campos mínimos e identificador aleatório, sem UID/e-mail do aluno.
@@ -13,6 +13,7 @@
 - Renderização de dados com textContent e validação de URLs de foto.
 - Política versionada, ciência persistida e rotas privadas sem indexação.
 - HTTPS e cabeçalhos contra interpretação de conteúdo e enquadramento; cache de scripts revalidado.
+- Demonstração limitada à porta 5000 em loopback, com configuração de projeto fictício e sem credenciais de produção.
 - Código do servidor, testes, documentos e dependências excluídos do Hosting.
 
 ## Implantação e operação

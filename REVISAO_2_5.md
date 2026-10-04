@@ -16,18 +16,24 @@
 - Planos administrativos alimentam também os dois seletores; conteúdo totalmente desativado não ressuscita os cards antigos.
 - Código interno, documentos e dependências excluídos do Hosting.
 - Documentação de venda sem pacote obrigatório de suporte.
+- Demonstração local completa com contas fictícias dos três perfis, sem login no Firebase ou faturamento.
+- Corrigida a remoção de `index.html` pelo Hosting, que podia fazer os links relativos apontarem para a raiz errada. A configuração agora preserva as URLs HTML.
+- Menu da conta aguarda o carregamento do perfil antes de permitir abertura.
 
 ## Evidências locais
 
-- 28 testes de lógica e estrutura: aprovados.
-- 16 testes de integração no Firestore/Authentication Emulator Suite: aprovados, incluindo confirmações concorrentes, negação de acesso, presença, duplicidade e exclusão.
+- 30 testes de lógica e estrutura: aprovados, incluindo a separação entre ambiente local e produção.
+- 16 testes de integração no Firestore/Authentication Emulator Suite: aprovados, incluindo confirmações concorrentes, negação de acesso, presença, duplicidade e exclusão. Outros cinco testes verificam o protocolo HTTP das funções e a navegação no Hosting.
 - Interface executada em navegador headless com respostas Firebase simuladas: IMC, planos dinâmicos, simulador, seleção de plano, menu da conta, teclado, saída, painéis e estado sem planos aprovados.
+- Interface também executada com o SDK Firebase 12.17.1 real e os emuladores: login dos três perfis, primeiro acesso sem verificação, perfil persistido após recarga, reserva pelo navegador, capacidade pelo administrador e presença pelo professor aprovados. Os módulos oficiais foram mantidos em cache local no ensaio; as respostas de dados não foram simuladas.
 - Larguras 1440, 1024, 901, 900 e 390 px sem transbordamento horizontal; capturas de desktop, conta no celular, administração e professor inspecionadas.
 - Sintaxe do frontend, servidor e scripts: aprovada.
 - Auditoria das dependências de produção do servidor: zero vulnerabilidades conhecidas na execução da revisão (resultado pontual; reavaliar em futuras atualizações).
 - Imagens do repositório restauradas na cópia de trabalho e decodificadas sem erros. Não foi necessário alterar os arquivos remotos de imagem.
 
-Roteiro manual abaixo ainda precisa ser executado no projeto de destino. Não houve publicação no Firebase nesta revisão, pois a CLI não estava autenticada na conta do responsável.
+A execução local de Functions neste ambiente precisou de um ajuste temporário de transporte interno da CLI (TCP no lugar de socket Unix indisponível). Esse ajuste não faz parte do repositório; a validação no GitHub executa a CLI original com Node.js 22/Java 21. App Check real permanece uma etapa exclusiva da aceitação em produção.
+
+Para reproduzir a demonstração local, consulte [TESTAR.md](TESTAR.md). Roteiro manual abaixo ainda precisa ser executado no projeto de destino. Não houve publicação no Firebase nesta revisão: a CLI não estava autenticada e o acesso ao Console nesta sessão encontrou erro de conexão na página de login do Google.
 
 ## Roteiro no domínio publicado
 
