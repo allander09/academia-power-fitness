@@ -1,5 +1,9 @@
 # Power Fitness 2.5 — validação e aceitação
 
+Atualização de 06/10: foi preparada uma vitrine estática para apresentação no Spark, descrita em [APRESENTAR.md](APRESENTAR.md). Os 33 testes de lógica/estrutura passaram, assim como a verificação da vitrine em navegador: planos, equipe, sete dias, IMC válido/inválido, mensalidade, modal, três capturas, quatro larguras e menu no celular. Não houve requisições externas nem erros JavaScript nesse ensaio. Os 22 testes de integração do sistema completo passaram no GitHub Actions do PR #12; a nova execução também deve ser conferida no PR da apresentação. A publicação da vitrine e a aceitação comercial são etapas distintas.
+
+No modo público de demonstração, planos, equipe e funcionamento usam exemplos identificados quando o banco está vazio ou indisponível. Conteúdo real publicado substitui esses exemplos. No modo comercial (`data-demonstracao-publica="false"`), exemplos ficam ocultos. O roteiro de operação abaixo se refere ao sistema completo em modo comercial, não à vitrine estática.
+
 ## Mudanças concluídas no código
 
 - Conta no cabeçalho com iniciais, nome, e-mail, perfil, acesso ao painel e saída.
@@ -13,7 +17,7 @@
 - Exportação ampliada para contatos vinculados e pedidos de privacidade.
 - Exclusão administrativa executa a remoção da conta/dados, permite retomar falha intermediária e agenda descarte do bloqueio técnico por TTL após a conclusão.
 - Ciência da política persistida com versão e horário; identificação e prazos configuráveis.
-- Planos administrativos alimentam também os dois seletores; conteúdo totalmente desativado não ressuscita os cards antigos.
+- Planos administrativos alimentam também os dois seletores; em modo comercial, conteúdo totalmente desativado não ressuscita os cards antigos.
 - Código interno, documentos e dependências excluídos do Hosting.
 - Documentação de venda sem pacote obrigatório de suporte.
 - Demonstração local completa com contas fictícias dos três perfis, sem login no Firebase ou faturamento.
@@ -54,7 +58,7 @@ Em 05/10 o titular confirmou que o UID do e-mail administrativo corresponde ao d
 | IMC 75,5 / 1,75 | Resultado numérico e classificação informativa |
 | IMC inválido | Mensagem de erro clara |
 | Editar plano e preço | Card, simulador e seletor de interesse acompanham a publicação |
-| Desativar todos os planos | Mensagem sem planos; simulador desabilitado |
+| Desativar todos os planos no modo comercial | Mensagem sem planos; simulador desabilitado |
 | Dia fechado/data passada | Solicitação recusada |
 | Duplo clique/duas abas | Só uma solicitação ativa do aluno na mesma data/hora |
 | Confirmar em duas sessões | Capacidade permanece respeitada e excedente vai para fila |

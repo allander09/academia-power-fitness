@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "check": "node scripts/check.mjs",
+    "build:apresentacao": "node scripts/gerar-apresentacao.mjs",
     "test:integration": "firebase emulators:exec --only firestore,auth,functions,hosting --project demo-power-fitness \"node --test --test-concurrency=1 integration/*.test.mjs\"",
     "demo": "firebase emulators:exec --only firestore,auth,functions,hosting --project demo-power-fitness \"node scripts/demo.mjs\""
   },
