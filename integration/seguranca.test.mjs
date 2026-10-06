@@ -35,10 +35,21 @@ beforeEach(async () => {
     await db.collection("usuarios").doc(uid).set({ nome: `Nome ${uid}`, email: `${uid}@example.com`, telefone: "85999999999", papel: "aluno" });
   }
   await db.doc("admins/admin").set({ ativo: true });
+  await db.doc("planos/essencial").set({ nome: "Essencial", ativo: true, valor: 129.9 });
   for (const uid of ["professor", "outroprofessor"]) await db.collection("professores_acesso").doc(uid).set({ ativo: true, nome: `Nome ${uid}` });
   await db.doc("horarios/atividade").set({ hora: "10:00", atividade: "Funcional", diasSemana: [1], capacidade: 1, ativo: true, professorUid: "professor", professorNome: "Nome professor" });
 });
 after(async () => { if (ambiente) await ambiente.cleanup(); if (app) await deleteApp(app); });
+
+test("reservas recusam plano inventado ou desativado e aceitam interesse ainda não definido", async () => {
+  const dados = { data: "2026-10-05", horarioId: "atividade", plano: "Inventado" };
+  await rejeita(servico.solicitarAgendamento(request("aluno1", dados)), "failed-precondition");
+  await db.doc("planos/essencial").update({ ativo: false });
+  await rejeita(agendar("aluno1"), "failed-precondition");
+  const reserva = await servico.solicitarAgendamento(request("aluno1", { ...dados, plano: "Ainda não decidi" }));
+  assert.equal(reserva.status, "pendente");
+  assert.equal((await db.doc(`agendamentos/${reserva.id}`).get()).data().plano, "Ainda não decidi");
+});
 
 test("as regras isolam alunos e não entregam o documento completo ao professor", async () => {
   const { id } = await agendar("aluno1");

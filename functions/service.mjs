@@ -37,9 +37,11 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
     if (!idValido(horarioId) || !texto(plano, 3, 100)) falha("invalid-argument", "Selecione uma atividade e um plano válidos.");
     return db.runTransaction(async transacao => {
       await permissoes(conta, transacao);
-      const [perfil, horario, funcionamento] = await Promise.all([
-        transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento"))
+      const [perfil, horario, funcionamento, planos] = await Promise.all([
+        transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento")),
+        plano.trim() === "Ainda não decidi" ? null : transacao.get(db.collection("planos").where("nome", "==", plano.trim()))
       ]);
+      if (planos && !planos.docs.some(item => item.data().ativo === true)) falha("failed-precondition", "Este plano não está disponível. Atualize a página e escolha um plano publicado ou Ainda não decidi.");
       const atividade = horario.data();
       if (!perfil.exists || !texto(perfil.data().nome, 3, 100)) falha("failed-precondition", "Complete seu perfil antes de agendar.");
       if (!atividadeDisponivel(atividade, data, funcionamento.data()) || !dataHoraFutura(data, atividade?.hora, agora())) falha("failed-precondition", "Escolha uma atividade disponível em uma data futura.");

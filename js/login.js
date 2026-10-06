@@ -1,7 +1,7 @@
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
-import { alternarSenha, mensagemAuth } from "./auth-utils.js";
+import { alternarSenha, mensagemAuth, resultadoRecuperacao } from "./auth-utils.js";
 import { destinoPorPerfil } from "./perfis.mjs";
 
 const form = document.getElementById("loginForm");
@@ -62,18 +62,24 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-document.getElementById("recuperarSenha").addEventListener("click", async () => {
+document.getElementById("recuperarSenha").addEventListener("click", async (event) => {
   if (!email.value.trim()) {
     mostrarFeedback("Digite seu e-mail para receber a recuperação.", "erro");
     email.focus();
     return;
   }
 
+  const recuperar = event.currentTarget;
+  recuperar.disabled = true;
   try {
     await sendPasswordResetEmail(auth, email.value.trim().toLowerCase());
-    mostrarFeedback("Se esse e-mail estiver cadastrado, você receberá as instruções.");
+    const retorno = resultadoRecuperacao();
+    mostrarFeedback(retorno.mensagem, retorno.tipo);
   } catch (error) {
-    mostrarFeedback(mensagemAuth(error), "erro");
+    const retorno = resultadoRecuperacao(error);
+    mostrarFeedback(retorno.mensagem, retorno.tipo);
+  } finally {
+    recuperar.disabled = false;
   }
 });
 
