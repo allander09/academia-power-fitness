@@ -113,7 +113,7 @@ if (form && data && hora) {
   preencherDadosDaConta();
 
   const planoSalvo = sessionStorage.getItem("powerFitnessPlano");
-  if (planoSalvo && campoPlano) campoPlano.value = planoSalvo;
+  if (planoSalvo && campoPlano && [...campoPlano.options].some(opcao => opcao.value === planoSalvo)) campoPlano.value = planoSalvo;
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();

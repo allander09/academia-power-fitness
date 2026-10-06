@@ -46,3 +46,7 @@ input[readonly]{background:#f2f3f5;color:#444;cursor:not-allowed}
 @media(min-width:901px){#horarios{padding:56px 0}#horarios h2{margin-bottom:24px}}
 
 .aviso-demonstracao{padding:12px 16px;margin:12px 0;border:1px solid #ddb75b;border-radius:8px;background:#fff4cc;color:#574313;font-size:.85rem;line-height:1.5}
+
+.nota-demo{text-align:center;margin:22px auto 0;color:#666;font-size:.85rem;line-height:1.5}
+.nota-demo[hidden],.ajuda-campo[hidden]{display:none}
+body:not([data-demonstracao-publica="true"]) [data-exemplo]{display:none}
