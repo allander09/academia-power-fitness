@@ -10,6 +10,7 @@ export function calcularImcValor(peso, altura) {
   }
 
   const valor = pesoNumero / (alturaNumero ** 2);
+  if (!Number.isFinite(valor)) throw new RangeError("Peso ou altura inválidos.");
   let situacao;
   if (valor < 18.5) situacao = "Abaixo do peso";
   else if (valor < 25) situacao = "Peso adequado";

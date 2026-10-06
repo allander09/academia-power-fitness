@@ -2,6 +2,7 @@ import { getIdToken, reload } from "https://www.gstatic.com/firebasejs/12.17.1/f
 import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
+import { mensagemAuth } from "./auth-utils.js";
 import { capacidadeDoHorario, horarioDisponivelNoDia, indiceDiaDaData, normalizarFuncionamento } from "./operacao.mjs";
 import { dataLocalISO, validarHorarioAgendamento } from "./validacoes.mjs";
 
@@ -116,42 +117,38 @@ if (form && data && hora) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    await auth.authStateReady();
-    const usuario = auth.currentUser;
-
-    if (!usuario) {
-      pedirLogin();
-      return;
-    }
-
-    await reload(usuario);
-    if (!usuario.emailVerified) {
-      mostrarMensagem("Verifique seu e-mail antes de solicitar uma aula.");
-      return;
-    }
-    await getIdToken(usuario, true);
-
-    if (!operacaoCarregada) {
-      mostrarMensagem("Aguarde o carregamento dos horários antes de agendar.");
-      return;
-    }
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    const validacao = validarHorarioAgendamento(data.value, hora.value, new Date(), funcionamento);
-    if (!validacao.valido) {
-      mostrarMensagem(validacao.mensagem);
-      return;
-    }
-
     const botao = form.querySelector('button[type="submit"]');
+    if (botao.disabled) return;
     botao.disabled = true;
-    botao.textContent = "Salvando...";
+    botao.textContent = "Aguarde...";
 
     try {
+      await auth.authStateReady();
+      const usuario = auth.currentUser;
+      if (!usuario) {
+        pedirLogin();
+        return;
+      }
+      await reload(usuario);
+      if (!usuario.emailVerified) {
+        mostrarMensagem("Verifique seu e-mail antes de solicitar uma aula.");
+        return;
+      }
+      await getIdToken(usuario, true);
+      if (!operacaoCarregada) {
+        mostrarMensagem("Aguarde o carregamento dos horários antes de agendar.");
+        return;
+      }
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const validacao = validarHorarioAgendamento(data.value, hora.value, new Date(), funcionamento);
+      if (!validacao.valido) {
+        mostrarMensagem(validacao.mensagem);
+        return;
+      }
+      botao.textContent = "Salvando...";
       const opcaoHorario = hora.selectedOptions[0];
       await chamarBackend("solicitarAgendamento", {
         data: data.value,
@@ -166,7 +163,8 @@ if (form && data && hora) {
       sessionStorage.removeItem("powerFitnessPlano");
       await preencherDadosDaConta();
     } catch (error) {
-      mostrarMensagem(mensagemBackend(error, "Não foi possível salvar. Verifique sua conexão e tente novamente."));
+      const padrao = "Não foi possível salvar. Verifique sua conexão e tente novamente.";
+      mostrarMensagem(error.code?.startsWith("auth/") ? mensagemAuth(error, padrao) : mensagemBackend(error, padrao));
       console.error("Falha no agendamento:", error.code);
     } finally {
       botao.disabled = false;

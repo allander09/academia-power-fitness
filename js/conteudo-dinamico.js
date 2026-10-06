@@ -98,8 +98,14 @@ async function carregarPlanos() {
 }
 
 async function carregarProfessores() {
-  const snapshot = await getDocs(query(collection(db, "professores"), where("ativo", "==", true)));
   const container = document.querySelector(".cards-professores");
+  container.replaceChildren(elemento("p", "Carregando equipe da academia…"));
+  let snapshot;
+  try { snapshot = await getDocs(query(collection(db, "professores"), where("ativo", "==", true))); }
+  catch {
+    container.replaceChildren(elemento("p", "Não foi possível carregar a equipe. Atualize a página e tente novamente."));
+    return;
+  }
   container.replaceChildren();
   if (snapshot.empty) container.append(elemento("p", "A equipe será publicada pela academia em breve."));
   snapshot.docs.forEach((documento) => {
@@ -111,9 +117,23 @@ async function carregarProfessores() {
 }
 
 async function carregarFuncionamento() {
-  const snapshot = await getDoc(doc(db, "configuracoes", "funcionamento"));
-  const funcionamento = normalizarFuncionamento(snapshot.exists() ? snapshot.data() : {});
   const tbody = document.querySelector("#horarios tbody");
+  const destaque = document.getElementById("resumoFuncionamento");
+  const rodape = document.getElementById("funcionamentoRodape");
+  const aviso = texto => {
+    const td = elemento("td", texto); td.colSpan = 2;
+    const tr = document.createElement("tr"); tr.append(td); tbody.replaceChildren(tr);
+    if (rodape) rodape.replaceChildren(elemento("p", texto));
+  };
+  aviso("Carregando horários da academia…");
+  let snapshot;
+  try { snapshot = await getDoc(doc(db, "configuracoes", "funcionamento")); }
+  catch {
+    aviso("Não foi possível carregar o funcionamento. Atualize a página e tente novamente.");
+    if (destaque) destaque.textContent = "Consulte o funcionamento";
+    return;
+  }
+  const funcionamento = normalizarFuncionamento(snapshot.exists() ? snapshot.data() : {});
   tbody.replaceChildren();
   DIAS_SEMANA.forEach(({ id, rotulo }) => {
     const tr = document.createElement("tr");
@@ -122,9 +142,7 @@ async function carregarFuncionamento() {
   });
 
   const diasAbertos = DIAS_SEMANA.filter(({ id }) => funcionamento.dias[id].modo !== "fechado");
-  const destaque = document.getElementById("resumoFuncionamento");
   if (destaque) destaque.textContent = diasAbertos.length === 7 ? "Todos os dias" : "Horários flexíveis";
-  const rodape = document.getElementById("funcionamentoRodape");
   if (rodape) {
     rodape.replaceChildren(...DIAS_SEMANA.map(({ id, rotulo }) => elemento("p", `${rotulo}: ${formatarFuncionamento(funcionamento.dias[id])}`)));
   }

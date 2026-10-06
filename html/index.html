@@ -112,9 +112,7 @@
         </div>
         <h2>Nossos planos</h2>
         <div class="cards-planos">
-          <article class="plano"><h3>Básico</h3><p class="preco">R$ 89,90<small>/mês</small></p><ul><li>Musculação</li><li>Avaliação física</li></ul><button type="button" class="escolher-plano" data-plano="Plano Básico" data-valor="R$ 89,90/mês">Escolher</button></article>
-          <article class="plano destaque-plano"><span class="selo">Mais escolhido</span><h3>Premium</h3><p class="preco">R$ 149,90<small>/mês</small></p><ul><li>Musculação</li><li>Funcional</li><li>Cardio</li></ul><button type="button" class="escolher-plano" data-plano="Plano Premium" data-valor="R$ 149,90/mês">Escolher</button></article>
-          <article class="plano"><h3>VIP</h3><p class="preco">R$ 199,90<small>/mês</small></p><ul><li>Todos os serviços</li><li>Personal trainer</li></ul><button type="button" class="escolher-plano" data-plano="Plano VIP" data-valor="R$ 199,90/mês">Escolher</button></article>
+          <p>Carregando planos da academia…</p>
         </div>
       </div>
     </section>
@@ -123,9 +121,7 @@
       <h2>Nossa equipe</h2>
       <p class="subtitulo">Profissionais preparados para orientar cada etapa do seu treino.</p>
       <div class="cards-professores">
-        <article class="professor"><img class="foto-professor" src="../assets/images/professor-carlos.webp" alt="Retrato de Carlos Silva, professor de musculação" width="640" height="640" loading="lazy"><h3>Carlos Silva</h3><p>Musculação</p></article>
-        <article class="professor"><img class="foto-professor" src="../assets/images/professora-ana.webp" alt="Retrato de Ana Souza, professora de treinamento funcional" width="640" height="640" loading="lazy"><h3>Ana Souza</h3><p>Treinamento funcional</p></article>
-        <article class="professor"><img class="foto-professor" src="../assets/images/professor-lucas.webp" alt="Retrato de Lucas Martins, professor de condicionamento físico" width="640" height="640" loading="lazy"><h3>Lucas Martins</h3><p>Condicionamento físico</p></article>
+        <p>Carregando equipe da academia…</p>
       </div>
     </section>
 
@@ -142,7 +138,7 @@
     </section>
 
     <section id="horarios" class="secao-clara">
-      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td>Segunda a sexta</td><td>06:00 às 22:00</td></tr><tr><td>Sábado</td><td>08:00 às 14:00</td></tr><tr><td>Domingo</td><td>Fechado</td></tr></tbody></table></div></div>
+      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td colspan="2">Carregando horários da academia…</td></tr></tbody></table></div></div>
     </section>
 
     <section id="imc" class="container secao-formulario">
@@ -151,7 +147,7 @@
     </section>
 
     <section class="secao-clara secao-formulario">
-      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano"><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit">Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
+      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano" disabled><option value="">Carregando planos…</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit" disabled>Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
     </section>
 
     <section id="agendamento" class="container secao-formulario">
@@ -160,8 +156,8 @@
         <label for="nomeAgendamento">Nome</label><input type="text" id="nomeAgendamento" name="nome" autocomplete="name" minlength="3" required>
         <label for="emailAgendamento">E-mail</label><input type="email" id="emailAgendamento" name="email" autocomplete="email" required><small id="emailAgendamentoAjuda" class="ajuda-campo">Ao entrar, será usado o e-mail verificado da sua conta.</small>
         <label for="dataAgendamento">Data</label><input type="date" id="dataAgendamento" name="data" required>
-        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Plano Básico</option><option>Plano Premium</option><option>Plano VIP</option><option>Ainda não decidi</option></select>
-        <label for="horaAgendamento">Horário</label><select id="horaAgendamento" name="hora" aria-describedby="horarioAgendamentoAjuda" required><option value="">Escolha a data primeiro</option><option value="06:00">06:00</option><option value="08:00">08:00</option><option value="18:00">18:00</option><option value="20:00">20:00</option></select><small id="horarioAgendamentoAjuda" class="ajuda-campo">Os horários disponíveis dependem do dia escolhido.</small>
+        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Ainda não decidi</option></select>
+        <label for="horaAgendamento">Horário</label><select id="horaAgendamento" name="hora" aria-describedby="horarioAgendamentoAjuda" required disabled><option value="">Escolha a data primeiro</option></select><small id="horarioAgendamentoAjuda" class="ajuda-campo">Os horários disponíveis dependem do dia escolhido.</small>
         <button type="submit">Solicitar aula experimental</button><p id="mensagemAgendamento" class="mensagem" aria-live="polite"></p>
       </form>
     </section>
