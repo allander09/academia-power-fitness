@@ -1,5 +1,7 @@
 # Power Fitness 2.5
 
+Para a apresentação gratuita, siga [APRESENTAR.md](APRESENTAR.md). A vitrine pública usa arquivos estáticos e capturas fictícias dos três painéis; os perfis interativos completos podem ser demonstrados nos emuladores conforme [TESTAR.md](TESTAR.md).
+
 Sistema web para apresentação da academia, solicitação de aulas experimentais e operação de uma única academia. Desenvolvido com HTML, CSS, JavaScript e Firebase, com painéis separados para aluno, professor e administrador.
 
 ## Funcionalidades
