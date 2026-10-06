@@ -8,8 +8,8 @@ Se o projeto já estiver clonado, abra a pasta no VS Code e execute no terminal:
 
 ```bash
 git fetch origin
-git switch main
-git pull --ff-only origin main
+git switch review/power-fitness-2.3
+git pull --ff-only origin review/power-fitness-2.3
 npm ci
 npm ci --prefix functions
 npm run demo
@@ -17,7 +17,7 @@ npm run demo
 
 Na primeira cópia use **Ctrl+Shift+P → Git: Clone**, cole `https://github.com/allander09/academia-power-fitness.git` e abra a pasta clonada. Como o repositório é privado, entre na conta GitHub com acesso quando solicitado. `Repository not found` também pode significar que essa máquina não está autenticada na conta autorizada. Não use `git init` como correção desse erro.
 
-`No commits yet` significa que a branch local está sem histórico; isso não confirma que o projeto foi clonado. Preserve essa pasta e abra uma cópia clonada em outro local. A revisão final passa a estar na `main` após a integração da PR #10; a branch `review/power-fitness-2.3` conserva o histórico dessa preparação. Confira o estado da PR antes de usar uma cópia antiga.
+`No commits yet` significa que a branch local está sem histórico; isso não confirma que o projeto foi clonado. Preserve essa pasta e abra uma cópia clonada em outro local. A revisão final está na branch `review/power-fitness-2.3`, apesar do nome antigo; ela contém a versão 2.5. A `main` ainda não recebeu a PR #10. Use a branch indicada acima para testar as melhorias.
 
 Quando o terminal mostrar **teste local pronto**, abra **http://127.0.0.1:5000/html/**. Mantenha o terminal aberto. O endereço local só funciona no computador que iniciou os emuladores; não use esse endereço no QR da apresentação.
 
