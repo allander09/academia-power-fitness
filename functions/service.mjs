@@ -31,20 +31,85 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
     });
   }
 
+  function capacidadeDaAtividade(atividade, funcionamento) {
+    return atividade?.capacidade || funcionamento?.capacidadePadrao || 20;
+  }
+
+  async function listarDisponibilidadeAgendamento(request) {
+    const data = typeof request.data?.data === "string" ? request.data.data : "";
+    if (data && !/^\d{4}-\d{2}-\d{2}$/.test(data)) falha("invalid-argument", "Informe uma data válida.");
+    const [horarios, funcionamento, professores, agendamentos] = await Promise.all([
+      db.collection("horarios").where("ativo", "==", true).get(),
+      ref("configuracoes", "funcionamento").get(),
+      db.collection("professores_acesso").where("ativo", "==", true).get(),
+      data ? db.collection("agendamentos").where("data", "==", data).get() : Promise.resolve({ docs: [] })
+    ]);
+    const professoresAtivos = new Map(professores.docs.map(item => [item.id, item.data()]));
+    const confirmadosPorHorario = {};
+    agendamentos.docs.forEach(item => {
+      const dados = item.data();
+      if (dados.status === "confirmado") confirmadosPorHorario[dados.horarioId] = (confirmadosPorHorario[dados.horarioId] || 0) + 1;
+    });
+
+    const funcionamentoDados = funcionamento.data() || {};
+    return {
+      data,
+      horarios: horarios.docs
+        .map(documento => {
+          const dados = documento.data();
+          const professorUid = dados.professorUid || "";
+          const professor = professorUid ? professoresAtivos.get(professorUid) : null;
+          if (professorUid && !professor) return null;
+          const capacidade = capacidadeDaAtividade(dados, funcionamentoDados);
+          const confirmados = confirmadosPorHorario[documento.id] || 0;
+          const dentroDoFuncionamento = !data || atividadeDisponivel(dados, data, funcionamentoDados);
+          const futuro = !data || dataHoraFutura(data, dados.hora, agora());
+          const vagasDisponiveis = Math.max(0, capacidade - confirmados);
+          return {
+            id: documento.id,
+            atividade: dados.atividade,
+            hora: dados.hora,
+            diasSemana: dados.diasSemana || [1, 2, 3, 4, 5, 6],
+            capacidade,
+            vagasDisponiveis,
+            professorUid,
+            professorNome: professor?.nome || dados.professorNome || "",
+            professorEspecialidade: professor?.especialidade || "",
+            disponivel: Boolean(dentroDoFuncionamento && futuro && vagasDisponiveis > 0),
+            motivoIndisponivel: !dentroDoFuncionamento ? "fora_funcionamento" : !futuro ? "data_passada" : vagasDisponiveis <= 0 ? "sem_vagas" : ""
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => `${a.atividade} ${a.professorNome} ${a.hora}`.localeCompare(`${b.atividade} ${b.professorNome} ${b.hora}`))
+    };
+  }
+
   async function solicitarAgendamento(request) {
     const conta = await usuario(request);
     const { data, horarioId, plano } = request.data || {};
+    const professorEscolhido = typeof request.data?.professorUid === "string" ? request.data.professorUid.trim() : "";
     if (!idValido(horarioId) || !texto(plano, 3, 100)) falha("invalid-argument", "Selecione uma atividade e um plano válidos.");
     return db.runTransaction(async transacao => {
       await permissoes(conta, transacao);
-      const [perfil, horario, funcionamento, planos] = await Promise.all([
+      const [perfil, horario, funcionamento, planos, turmaSnapshot] = await Promise.all([
         transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento")),
-        plano.trim() === "Ainda não decidi" ? null : transacao.get(db.collection("planos").where("nome", "==", plano.trim()))
+        plano.trim() === "Ainda não decidi" ? null : transacao.get(db.collection("planos").where("nome", "==", plano.trim())),
+        transacao.get(db.collection("agendamentos").where("data", "==", data).where("horarioId", "==", horarioId))
       ]);
       if (planos && !planos.docs.some(item => item.data().ativo === true)) falha("failed-precondition", "Este plano não está disponível. Atualize a página e escolha um plano publicado ou Ainda não decidi.");
       const atividade = horario.data();
       if (!perfil.exists || !texto(perfil.data().nome, 3, 100)) falha("failed-precondition", "Complete seu perfil antes de agendar.");
       if (!atividadeDisponivel(atividade, data, funcionamento.data()) || !dataHoraFutura(data, atividade?.hora, agora())) falha("failed-precondition", "Escolha uma atividade disponível em uma data futura.");
+      const professorUid = atividade.professorUid || "";
+      if (professorUid) {
+        if (professorEscolhido !== professorUid) falha("failed-precondition", "Escolha o professor vinculado a esta atividade.");
+        const professor = await transacao.get(ref("professores_acesso", professorUid));
+        if (professor.data()?.ativo !== true) falha("failed-precondition", "Este professor não está disponível para agendamento.");
+      } else if (professorEscolhido) {
+        falha("failed-precondition", "Este horário não possui professor vinculado.");
+      }
+      const capacidade = capacidadeDaAtividade(atividade, funcionamento.data());
+      if (turmaSnapshot.docs.filter(item => item.data().status === "confirmado").length >= capacidade) falha("resource-exhausted", "Este horário está sem vagas disponíveis.");
       const identificador = `${conta.uid}_${data}_${atividade.hora}`;
       const referencia = ref("agendamentos", identificador);
       const [existente, historico] = await Promise.all([
@@ -54,7 +119,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       if (historico.docs.some(item => item.data().data === data && item.data().hora === atividade.hora && STATUS_ATIVOS.includes(item.data().status))) falha("already-exists", "Você já tem uma solicitação ativa nesta data e horário.");
       const dados = {
         usuarioId: conta.uid, nome: perfil.data().nome, email: conta.email, data, hora: atividade.hora,
-        horarioId, atividade: atividade.atividade, plano: plano.trim(), professorUid: atividade.professorUid || "",
+        horarioId, atividade: atividade.atividade, plano: plano.trim(), professorUid,
         professorNome: atividade.professorNome || "", status: "pendente", presenca: "nao_registrada",
         aulaId: randomUUID(), criadoEm: timestamp(), atualizadoEm: timestamp()
       };
@@ -243,5 +308,5 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
     return { protocolo, mensagem: "Conta e dados vinculados excluídos. Registre o protocolo e comunique a conclusão ao titular." };
   }
 
-  return { solicitarAgendamento, alterarAgendamento, listarAulasProfessor, salvarHorario, exportarDados, excluirConta };
+  return { listarDisponibilidadeAgendamento, solicitarAgendamento, alterarAgendamento, listarAulasProfessor, salvarHorario, exportarDados, excluirConta };
 }

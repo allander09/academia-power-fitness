@@ -352,10 +352,25 @@ function renderizarAgendamentos(documentos) {
 function renderizarContatos(documentos) {
   const tbody = document.getElementById("contatosAdmin");
   tbody.replaceChildren();
+  if (!documentos.length) {
+    const tr = document.createElement("tr");
+    const td = celula("Nenhuma solicitação recebida.");
+    td.colSpan = 7;
+    tr.append(td);
+    tbody.append(tr);
+    return;
+  }
   documentos.forEach((documento) => {
     const dados = documento.data();
     const tr = document.createElement("tr");
-    tr.append(celula(dados.nome), celula(dados.email), celula(dados.mensagem), celula(rotuloStatus(dados.status)));
+    tr.append(
+      celula(dados.nome),
+      celula(dados.email),
+      celula(dados.tipoSolicitacao || "Solicitação"),
+      celula(dados.assunto || "Sem assunto"),
+      celula(dados.mensagem),
+      celula(rotuloStatus(dados.status))
+    );
     const acoes = document.createElement("td");
     if (dados.status !== "respondido") {
       acoes.append(botaoAcao("Marcar respondido", async () => {

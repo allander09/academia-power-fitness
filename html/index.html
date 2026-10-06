@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Power Fitness: planos, horários, equipe, cadastro e aula experimental.">
+  <meta name="description" content="Power Fitness: planos, horários, equipe, cadastro e agendamento de aulas.">
   <meta name="theme-color" content="#111111">
   <meta property="og:title" content="Power Fitness">
   <meta property="og:description" content="Treine, evolua e supere seus limites.">
@@ -43,8 +43,8 @@
         <li><a href="#professores">Equipe</a></li>
         <li><a href="#horarios">Horários</a></li>
         <li><a href="#imc">IMC</a></li>
-        <li><a href="#agendamento">Agendamento</a></li>
-        <li><a href="#contato">Contato</a></li>
+        <li><a href="../html/agenda.html">Agendar</a></li>
+        <li><a href="../html/contato.html">Fale Conosco</a></li>
       </ul>
     </nav>
     <div class="controles-cabecalho">
@@ -67,12 +67,11 @@
         <div class="hero-content">
           <p class="destaque">TREINE. EVOLUA. SUPERE.</p>
           <h1>POWER FITNESS</h1>
-          <h2>Transforme seu corpo e sua rotina.</h2>
-          <p>Estrutura completa, professores preparados e treinos para diferentes objetivos.</p>
+          <h2>Agende sua aula de forma rápida e simples.</h2>
+          <p>Escolha atividade, professor, data e horário disponível em um fluxo claro e seguro.</p>
           <div class="hero-buttons">
-            <a href="#planos" class="btn-hero">Ver planos</a>
-            <a href="#agendamento" class="btn-hero2">Agendar aula</a>
-            <a href="../html/formularios.html" class="btn-cadastro">Cadastre-se</a>
+            <a href="../html/agenda.html" class="btn-hero">Agendar uma aula</a>
+            <a href="#planos" class="btn-hero2">Conhecer nossos planos</a>
           </div>
         </div>
       </div>
@@ -156,34 +155,27 @@
       <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano" data-exemplo disabled><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><small id="notaSimulador" class="ajuda-campo" data-exemplo>Simulação com valores ilustrativos da demonstração.</small><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit" disabled>Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
     </section>
 
-    <section id="agendamento" class="container secao-formulario">
-      <h2>Aula experimental</h2>
-      <form id="agendamentoForm" class="form-card">
-        <label for="nomeAgendamento">Nome</label><input type="text" id="nomeAgendamento" name="nome" autocomplete="name" minlength="3" required>
-        <label for="emailAgendamento">E-mail</label><input type="email" id="emailAgendamento" name="email" autocomplete="email" required><small id="emailAgendamentoAjuda" class="ajuda-campo">Ao entrar, será usado o e-mail verificado da sua conta.</small>
-        <label for="dataAgendamento">Data</label><input type="date" id="dataAgendamento" name="data" required>
-        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Ainda não decidi</option></select>
-        <label for="horaAgendamento">Horário</label><select id="horaAgendamento" name="hora" aria-describedby="horarioAgendamentoAjuda" required disabled><option value="">Escolha a data primeiro</option></select><small id="horarioAgendamentoAjuda" class="ajuda-campo">Os horários disponíveis dependem do dia escolhido.</small>
-        <button type="submit">Solicitar aula experimental</button><p id="mensagemAgendamento" class="mensagem" aria-live="polite"></p>
-      </form>
-    </section>
-
-    <section id="contato" class="secao-clara secao-formulario">
-      <div class="container"><h2>Contato</h2><form id="formContato" class="form-card"><label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" minlength="3" maxlength="100" required><label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" maxlength="254" required><label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel" maxlength="20"><label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea><label class="consentimento"><input type="checkbox" required> Li as informações sobre o uso dos dados para resposta na <a href="../html/privacidade.html">Política de Privacidade</a>.</label><button type="submit">Enviar mensagem</button><p id="mensagemContato" class="mensagem" aria-live="polite"></p></form></div>
+    <section class="secao-clara chamada-final">
+      <div class="container">
+        <h2>Pronto para treinar?</h2>
+        <p class="subtitulo">Agende uma aula, escolha um professor disponível e acompanhe a situação pela sua área.</p>
+        <div class="hero-buttons centralizadas">
+          <a href="../html/agenda.html" class="btn-hero">Agendar uma aula</a>
+          <a href="../html/contato.html" class="btn-hero2">Fale Conosco</a>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Contato</h3><p><a href="#contato">Envie uma mensagem pelo formulário</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Atendimento</h3><div id="funcionamentoRodape" data-exemplo><p>Segunda a sexta: 06:00 às 22:00</p><p>Sábado: 08:00 às 14:00</p><p>Domingo: Fechado</p></div><p><a href="../html/privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
+  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Atendimento</h3><p><a href="../html/contato.html">Fale Conosco</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Horários</h3><div id="funcionamentoRodape" data-exemplo><p>Segunda a sexta: 06:00 às 22:00</p><p>Sábado: 08:00 às 14:00</p><p>Domingo: Fechado</p></div><p><a href="../html/privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
 
-  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="tituloPlano"><div class="modal-content"><button type="button" class="fechar" id="fecharModal" aria-label="Fechar modal">&times;</button><h2 id="tituloPlano"></h2><p id="descricaoPlano"></p><a class="btn" id="irAgendamento" href="#agendamento">Solicitar aula</a></div></div>
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="tituloPlano"><div class="modal-content"><button type="button" class="fechar" id="fecharModal" aria-label="Fechar modal">&times;</button><h2 id="tituloPlano"></h2><p id="descricaoPlano"></p><a class="btn" id="irAgendamento" href="../html/agenda.html">Agendar aula</a></div></div>
 
   <script src="../js/script.js"></script>
   <script src="../js/modal.js"></script>
   <script type="module" src="../js/imc.js"></script>
   <script type="module" src="../js/mensalidade.js"></script>
   <script type="module" src="../js/conta.js"></script>
-  <script type="module" src="../js/agendamento.js"></script>
-  <script type="module" src="../js/contato.js"></script>
   <script type="module" src="../js/conteudo-dinamico.js"></script>
   <script type="module" src="../js/ambiente.js"></script>
 </body>

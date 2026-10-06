@@ -10,6 +10,7 @@ test("redireciona cada perfil para a área correta", () => {
 
 test("preserva o retorno ao agendamento após o login", () => {
   assert.equal(destinoPorPerfil({ retorno: "index.html#agendamento", professorAtivo: true }), "index.html#agendamento");
+  assert.equal(destinoPorPerfil({ retorno: "agenda.html", professorAtivo: true }), "agenda.html");
 });
 
 test("normaliza o vínculo de professor da atividade", () => {

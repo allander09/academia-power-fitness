@@ -3,7 +3,7 @@ import { db } from "./firebase-services.js";
 import { DIAS_SEMANA, formatarFuncionamento, normalizarFuncionamento } from "./operacao.mjs";
 
 const demonstracaoPublica = document.body.dataset.demonstracaoPublica === "true";
-const preservarExemplo = container => demonstracaoPublica && Boolean(container.matches("[data-exemplo]") || container.querySelector("[data-exemplo]"));
+const preservarExemplo = container => demonstracaoPublica && Boolean(container?.matches("[data-exemplo]") || container?.querySelector("[data-exemplo]"));
 function ocultarNota(id) {
   const nota = document.getElementById(id);
   if (nota) nota.hidden = true;
@@ -59,6 +59,7 @@ function avatarProfessor(dados) {
 
 async function carregarPlanos() {
   const container = document.querySelector(".cards-planos");
+  if (!container) return;
   const exemplo = preservarExemplo(container);
   if (!exemplo) {
     container.replaceChildren(elemento("p", "Carregando planos da academia…"));
@@ -67,43 +68,47 @@ async function carregarPlanos() {
   const simulador = document.getElementById("plano");
   const interesse = document.getElementById("planoAgendamento");
   const calcular = document.querySelector('#mensalidadeForm button[type="submit"]');
-  if (!exemplo) {
+  if (!exemplo && simulador && calcular) {
     simulador.removeAttribute("data-exemplo");
     simulador.replaceChildren(new Option("Carregando planos…", ""));
     simulador.disabled = true;
     calcular.disabled = true;
     ocultarNota("notaSimulador");
   }
-  interesse.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
+  if (interesse) interesse.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
   let snapshot;
   try { snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true))); }
   catch {
     if (exemplo) return;
     container.replaceChildren(elemento("p", "Não foi possível carregar os planos. Atualize a página antes de consultar os valores."));
-    simulador.replaceChildren(new Option("Planos indisponíveis", ""));
+    if (simulador) simulador.replaceChildren(new Option("Planos indisponíveis", ""));
     return;
   }
   if (snapshot.empty) {
     if (exemplo) return;
     container.replaceChildren(elemento("p", "Os planos serão publicados pela academia em breve."));
-    simulador.replaceChildren();
-    simulador.append(new Option("Nenhum plano publicado", ""));
-    simulador.disabled = true;
-    document.querySelector('#mensalidadeForm button[type="submit"]').disabled = true;
+    if (simulador) {
+      simulador.replaceChildren();
+      simulador.append(new Option("Nenhum plano publicado", ""));
+      simulador.disabled = true;
+    }
+    if (calcular) calcular.disabled = true;
     return;
   }
   container.replaceChildren();
-  simulador.replaceChildren();
-  simulador.removeAttribute("data-exemplo");
+  if (simulador) {
+    simulador.replaceChildren();
+    simulador.removeAttribute("data-exemplo");
+  }
   ocultarNota("notaPlanos");
   ocultarNota("notaSimulador");
-  simulador.disabled = false;
-  calcular.disabled = false;
+  if (simulador) simulador.disabled = false;
+  if (calcular) calcular.disabled = false;
 
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
-    simulador.append(new Option(`${dados.nome} — ${Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`, String(dados.valor)));
-    interesse.append(new Option(dados.nome, dados.nome));
+    if (simulador) simulador.append(new Option(`${dados.nome} — ${Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`, String(dados.valor)));
+    if (interesse) interesse.append(new Option(dados.nome, dados.nome));
     const card = elemento("article", "", "plano");
     card.append(elemento("h3", dados.nome), elemento("p", Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês", "preco"));
     const lista = document.createElement("ul");
@@ -115,11 +120,12 @@ async function carregarPlanos() {
     container.appendChild(card);
   });
   const salvo = sessionStorage.getItem("powerFitnessPlano");
-  if ([...interesse.options].some(opcao => opcao.value === salvo)) interesse.value = salvo;
+  if (interesse && [...interesse.options].some(opcao => opcao.value === salvo)) interesse.value = salvo;
 }
 
 async function carregarProfessores() {
   const container = document.querySelector(".cards-professores");
+  if (!container) return;
   const exemplo = preservarExemplo(container);
   if (!exemplo) {
     container.replaceChildren(elemento("p", "Carregando equipe da academia…"));
@@ -146,6 +152,7 @@ async function carregarProfessores() {
 
 async function carregarFuncionamento() {
   const tbody = document.querySelector("#horarios tbody");
+  if (!tbody) return;
   const destaque = document.getElementById("resumoFuncionamento");
   const rodape = document.getElementById("funcionamentoRodape");
   const exemplo = preservarExemplo(tbody);

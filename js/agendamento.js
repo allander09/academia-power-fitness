@@ -3,172 +3,299 @@ import { collection, doc, getDoc, getDocs, query, where } from "https://www.gsta
 import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
 import { mensagemAuth } from "./auth-utils.js";
-import { capacidadeDoHorario, horarioDisponivelNoDia, indiceDiaDaData, normalizarFuncionamento } from "./operacao.mjs";
-import { dataLocalISO, validarHorarioAgendamento } from "./validacoes.mjs";
+import { dataLocalISO, formatarDataISO } from "./validacoes.mjs";
 
 const form = document.getElementById("agendamentoForm");
 const mensagem = document.getElementById("mensagemAgendamento");
-const data = form?.querySelector('input[type="date"]');
-const hora = form?.querySelector('[name="hora"]');
-const campoNome = form?.querySelector('[name="nome"]');
-const campoEmail = form?.querySelector('[name="email"]');
-const campoPlano = form?.querySelector('[name="plano"]');
-const ajudaHorario = document.getElementById("horarioAgendamentoAjuda");
-let horariosAtivos = [];
-let funcionamento = normalizarFuncionamento();
-let operacaoCarregada = false;
+const data = document.getElementById("dataAgendamento");
+const plano = document.getElementById("planoAgendamento");
+const etapas = [...document.querySelectorAll(".agenda-etapa")];
+const botaoVoltar = document.getElementById("voltarEtapa");
+const botaoAvancar = document.getElementById("avancarEtapa");
+const botaoConfirmar = document.getElementById("confirmarAgendamento");
+const confirmacao = document.getElementById("confirmacaoAgendamento");
+const detalhesConfirmacao = document.getElementById("detalhesConfirmacao");
+
+let etapaAtual = 1;
+let disponibilidade = [];
+let disponibilidadeData = [];
+const escolha = { atividade: "", professorUid: "", professorNome: "", horarioId: "", hora: "", data: "", plano: "Ainda não decidi" };
+
+const rotulosIndisponivel = {
+  fora_funcionamento: "Fora do funcionamento",
+  data_passada: "Data ou horário passado",
+  sem_vagas: "Sem vagas"
+};
 
 function mostrarMensagem(texto, tipo = "erro") {
-  mensagem.replaceChildren();
+  if (!mensagem) return;
   mensagem.textContent = texto;
   mensagem.className = `mensagem ${tipo}`;
 }
 
-function pedirLogin() {
-  sessionStorage.setItem("powerFitnessRetornoLogin", "index.html#agendamento");
-  mensagem.replaceChildren(document.createTextNode("Entre na sua conta antes de agendar. "));
-  const link = document.createElement("a");
-  link.href = "../html/login.html";
-  link.textContent = "Fazer login";
-  mensagem.appendChild(link);
-  mensagem.className = "mensagem erro";
+function limparMensagem() {
+  if (!mensagem) return;
+  mensagem.textContent = "";
+  mensagem.className = "mensagem";
 }
 
-async function preencherDadosDaConta() {
-  await auth.authStateReady();
-  const usuario = auth.currentUser;
-  if (!usuario || !form) return;
+function resumo(id, texto) {
+  const alvo = document.getElementById(id);
+  if (alvo) alvo.textContent = texto;
+}
 
-  campoEmail.value = usuario.email || "";
-  campoEmail.readOnly = true;
-  campoEmail.setAttribute("aria-describedby", "emailAgendamentoAjuda");
-
-  try {
-    const perfil = await getDoc(doc(db, "usuarios", usuario.uid));
-    if (perfil.exists()) { campoNome.value = perfil.data().nome || ""; campoNome.readOnly = true; }
-  } catch (error) {
-    console.warn("Não foi possível preencher o perfil.", error.code);
+function atualizarResumo() {
+  resumo("resumoAtividade", escolha.atividade || "Escolha uma atividade");
+  resumo("resumoProfessor", escolha.professorNome || "Defina o professor");
+  resumo("resumoData", escolha.data ? formatarDataISO(escolha.data) : "Escolha a data");
+  resumo("resumoHorario", escolha.hora || "Escolha o horário");
+  resumo("resumoPlano", escolha.plano || "Ainda não definido");
+  const revisao = document.getElementById("textoRevisao");
+  if (revisao) {
+    revisao.textContent = escolha.horarioId
+      ? `${escolha.atividade} com ${escolha.professorNome || "professor a definir"}, em ${formatarDataISO(escolha.data)} às ${escolha.hora}.`
+      : "Confira as informações antes de confirmar.";
   }
 }
 
-function atualizarOpcoesHorario() {
-  if (!hora) return;
-  const dataSelecionada = data?.value;
-  hora.replaceChildren(new Option(dataSelecionada ? "Selecione um horário" : "Escolha a data primeiro", ""));
-  hora.disabled = !dataSelecionada;
-  if (!dataSelecionada) {
-    if (ajudaHorario) ajudaHorario.textContent = "Os horários disponíveis dependem do dia escolhido.";
+function irParaEtapa(numero) {
+  etapaAtual = Math.max(1, Math.min(4, numero));
+  etapas.forEach(etapa => {
+    const ativa = Number(etapa.dataset.etapa) === etapaAtual;
+    etapa.hidden = !ativa;
+    etapa.classList.toggle("ativa", ativa);
+  });
+  document.getElementById("progressoAgendamento").textContent = `Etapa ${etapaAtual} de 4`;
+  botaoVoltar.disabled = etapaAtual === 1;
+  botaoAvancar.hidden = etapaAtual === 4;
+  botaoConfirmar.hidden = etapaAtual !== 4;
+  limparMensagem();
+  atualizarResumo();
+}
+
+function criarOpcao({ titulo, detalhe, selecionada, desabilitada = false, onClick }) {
+  const botao = document.createElement("button");
+  botao.type = "button";
+  botao.className = `opcao-agendamento${selecionada ? " selecionada" : ""}`;
+  botao.disabled = desabilitada;
+  botao.append(Object.assign(document.createElement("strong"), { textContent: titulo }));
+  if (detalhe) botao.append(Object.assign(document.createElement("span"), { textContent: detalhe }));
+  botao.addEventListener("click", onClick);
+  return botao;
+}
+
+function atividadesUnicas() {
+  return [...new Set(disponibilidade.map(item => item.atividade).filter(Boolean))].sort();
+}
+
+function professoresDaAtividade() {
+  const mapa = new Map();
+  disponibilidade
+    .filter(item => item.atividade === escolha.atividade && item.professorUid)
+    .forEach(item => mapa.set(item.professorUid, { uid: item.professorUid, nome: item.professorNome, especialidade: item.professorEspecialidade }));
+  return [...mapa.values()].sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
+function horariosDaEscolha() {
+  return disponibilidadeData.filter(item => item.atividade === escolha.atividade && item.professorUid === escolha.professorUid);
+}
+
+function renderizarAtividades() {
+  const alvo = document.getElementById("opcoesAtividade");
+  alvo.replaceChildren();
+  const atividades = atividadesUnicas();
+  if (!atividades.length) {
+    alvo.textContent = "Nenhuma atividade disponível no momento.";
     return;
   }
-
-  const indiceDia = indiceDiaDaData(dataSelecionada);
-  const disponiveis = horariosAtivos.filter(({ dados }) => horarioDisponivelNoDia(dados, indiceDia, funcionamento));
-  disponiveis.forEach(({ id, dados }) => {
-    const capacidade = capacidadeDoHorario(dados, funcionamento);
-    const option = new Option(`${dados.hora} — ${dados.atividade} (${capacidade} vagas)`, dados.hora);
-    option.dataset.horarioId = id;
-    option.dataset.atividade = dados.atividade;
-    option.dataset.professorUid = dados.professorUid || "";
-    option.dataset.professorNome = dados.professorNome || "";
-    hora.appendChild(option);
-  });
-
-  if (ajudaHorario) {
-    ajudaHorario.textContent = disponiveis.length
-      ? "A vaga é confirmada pela academia. Se a turma lotar, sua solicitação poderá entrar na lista de espera."
-      : "Não há atividades disponíveis para esse dia.";
-  }
-}
-
-async function carregarOperacao() {
-  try {
-    const [horariosSnapshot, funcionamentoSnapshot] = await Promise.all([
-      getDocs(query(collection(db, "horarios"), where("ativo", "==", true))),
-      getDoc(doc(db, "configuracoes", "funcionamento"))
-    ]);
-    horariosAtivos = horariosSnapshot.docs
-      .map((documento) => ({ id: documento.id, dados: documento.data() }))
-      .sort((a, b) => a.dados.hora.localeCompare(b.dados.hora));
-    if (funcionamentoSnapshot.exists()) funcionamento = normalizarFuncionamento(funcionamentoSnapshot.data());
-    operacaoCarregada = true;
-    atualizarOpcoesHorario();
-  } catch (error) {
-    operacaoCarregada = false;
-    horariosAtivos = [];
-    console.warn("Não foi possível carregar os horários da academia.", error.code);
-    atualizarOpcoesHorario();
-    if (ajudaHorario) ajudaHorario.textContent = "Não foi possível carregar os horários. Atualize a página e tente novamente.";
-  }
-}
-
-if (form && data && hora) {
-  data.min = dataLocalISO();
-  const opcoesIniciais = [...hora.options]
-    .filter((option) => option.value)
-    .map((option) => ({ id: `padrao-${option.value}`, dados: { hora: option.value, atividade: option.textContent, diasSemana: [1, 2, 3, 4, 5, 6] } }));
-  horariosAtivos = opcoesIniciais;
-  data.addEventListener("change", atualizarOpcoesHorario);
-  atualizarOpcoesHorario();
-  carregarOperacao();
-  preencherDadosDaConta();
-
-  const planoSalvo = sessionStorage.getItem("powerFitnessPlano");
-  if (planoSalvo && campoPlano && [...campoPlano.options].some(opcao => opcao.value === planoSalvo)) campoPlano.value = planoSalvo;
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const botao = form.querySelector('button[type="submit"]');
-    if (botao.disabled) return;
-    botao.disabled = true;
-    botao.textContent = "Aguarde...";
-
-    try {
-      await auth.authStateReady();
-      const usuario = auth.currentUser;
-      if (!usuario) {
-        pedirLogin();
-        return;
-      }
-      await reload(usuario);
-      if (!usuario.emailVerified) {
-        mostrarMensagem("Verifique seu e-mail antes de solicitar uma aula.");
-        return;
-      }
-      await getIdToken(usuario, true);
-      if (!operacaoCarregada) {
-        mostrarMensagem("Aguarde o carregamento dos horários antes de agendar.");
-        return;
-      }
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      const validacao = validarHorarioAgendamento(data.value, hora.value, new Date(), funcionamento);
-      if (!validacao.valido) {
-        mostrarMensagem(validacao.mensagem);
-        return;
-      }
-      botao.textContent = "Salvando...";
-      const opcaoHorario = hora.selectedOptions[0];
-      await chamarBackend("solicitarAgendamento", {
-        data: data.value,
-        horarioId: opcaoHorario?.dataset.horarioId || "",
-        plano: campoPlano.value
-      });
-
-      mostrarMensagem("Agendamento salvo! Acompanhe o status na Área do Aluno.", "sucesso");
-      form.reset();
-      data.min = dataLocalISO();
-      atualizarOpcoesHorario();
-      sessionStorage.removeItem("powerFitnessPlano");
-      await preencherDadosDaConta();
-    } catch (error) {
-      const padrao = "Não foi possível salvar. Verifique sua conexão e tente novamente.";
-      mostrarMensagem(error.code?.startsWith("auth/") ? mensagemAuth(error, padrao) : mensagemBackend(error, padrao));
-      console.error("Falha no agendamento:", error.code);
-    } finally {
-      botao.disabled = false;
-      botao.textContent = "Solicitar aula experimental";
+  atividades.forEach(atividade => alvo.append(criarOpcao({
+    titulo: atividade,
+    detalhe: `${disponibilidade.filter(item => item.atividade === atividade).length} horário(s) cadastrado(s)`,
+    selecionada: escolha.atividade === atividade,
+    onClick: () => {
+      escolha.atividade = atividade;
+      escolha.professorUid = ""; escolha.professorNome = ""; escolha.horarioId = ""; escolha.hora = "";
+      renderizarAtividades(); renderizarProfessores(); atualizarResumo();
     }
-  });
+  })));
 }
+
+function renderizarProfessores() {
+  const alvo = document.getElementById("opcoesProfessor");
+  alvo.replaceChildren();
+  if (!escolha.atividade) {
+    alvo.textContent = "Escolha uma atividade primeiro.";
+    return;
+  }
+  const professores = professoresDaAtividade();
+  if (!professores.length) {
+    alvo.textContent = "Esta atividade ainda não possui professor ativo vinculado.";
+    return;
+  }
+  professores.forEach(professor => alvo.append(criarOpcao({
+    titulo: professor.nome,
+    detalhe: professor.especialidade || "Professor ativo",
+    selecionada: escolha.professorUid === professor.uid,
+    onClick: () => {
+      escolha.professorUid = professor.uid; escolha.professorNome = professor.nome; escolha.horarioId = ""; escolha.hora = "";
+      renderizarProfessores(); renderizarHorarios(); atualizarResumo();
+    }
+  })));
+}
+
+function renderizarHorarios() {
+  const alvo = document.getElementById("opcoesHorario");
+  alvo.replaceChildren();
+  if (!escolha.data) {
+    alvo.textContent = "Escolha uma data para carregar os horários.";
+    return;
+  }
+  const horarios = horariosDaEscolha().sort((a, b) => a.hora.localeCompare(b.hora));
+  if (!horarios.length) {
+    alvo.textContent = "Não há horários para este professor nesta data.";
+    return;
+  }
+  horarios.forEach(horario => alvo.append(criarOpcao({
+    titulo: horario.hora,
+    detalhe: horario.disponivel ? `${horario.vagasDisponiveis} vaga(s) disponível(is)` : rotulosIndisponivel[horario.motivoIndisponivel] || "Indisponível",
+    selecionada: escolha.horarioId === horario.id,
+    desabilitada: !horario.disponivel,
+    onClick: () => {
+      escolha.horarioId = horario.id; escolha.hora = horario.hora;
+      renderizarHorarios(); atualizarResumo();
+    }
+  })));
+}
+
+async function carregarPlanos() {
+  if (!plano) return;
+  try {
+    const snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true)));
+    plano.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
+    snapshot.docs
+      .map(item => item.data())
+      .sort((a, b) => (a.ordem || 99) - (b.ordem || 99) || a.nome.localeCompare(b.nome))
+      .forEach(item => plano.append(new Option(item.nome, item.nome)));
+    const salvo = sessionStorage.getItem("powerFitnessPlano");
+    if ([...plano.options].some(opcao => opcao.value === salvo)) plano.value = salvo;
+    escolha.plano = plano.value;
+  } catch {
+    plano.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
+  }
+}
+
+async function carregarDisponibilidade(dataEscolhida = "") {
+  const retorno = await chamarBackend("listarDisponibilidadeAgendamento", dataEscolhida ? { data: dataEscolhida } : {});
+  return retorno.horarios || [];
+}
+
+async function carregarInicial() {
+  if (!form) return;
+  data.min = dataLocalISO();
+  await auth.authStateReady();
+  const usuario = auth.currentUser;
+  if (usuario) {
+    const email = document.getElementById("emailAgendamento");
+    const nome = document.getElementById("nomeAgendamento");
+    if (email) email.value = usuario.email || "";
+    try {
+      const perfil = await getDoc(doc(db, "usuarios", usuario.uid));
+      if (perfil.exists() && nome) nome.value = perfil.data().nome || "";
+    } catch {
+      // O perfil é complementar ao agendamento; a Function valida antes de gravar.
+    }
+  }
+  try {
+    [disponibilidade] = await Promise.all([carregarDisponibilidade(), carregarPlanos()]);
+    renderizarAtividades();
+  } catch (error) {
+    mostrarMensagem(mensagemBackend(error, "Não foi possível carregar as atividades. Atualize a página e tente novamente."));
+  }
+  irParaEtapa(1);
+}
+
+function validarEtapa() {
+  if (etapaAtual === 1 && !escolha.atividade) return "Escolha uma atividade para continuar.";
+  if (etapaAtual === 2 && !escolha.professorUid) return "Escolha um professor para continuar.";
+  if (etapaAtual === 3) {
+    if (!escolha.data) return "Escolha uma data para continuar.";
+    if (!escolha.horarioId) return "Escolha um horário disponível.";
+  }
+  return "";
+}
+
+botaoAvancar?.addEventListener("click", async () => {
+  const erro = validarEtapa();
+  if (erro) { mostrarMensagem(erro); return; }
+  irParaEtapa(etapaAtual + 1);
+});
+
+botaoVoltar?.addEventListener("click", () => irParaEtapa(etapaAtual - 1));
+
+data?.addEventListener("change", async () => {
+  escolha.data = data.value;
+  escolha.horarioId = ""; escolha.hora = "";
+  renderizarHorarios(); atualizarResumo();
+  if (!data.value) return;
+  document.getElementById("horarioAgendamentoAjuda").textContent = "Carregando horários disponíveis...";
+  try {
+    disponibilidadeData = await carregarDisponibilidade(data.value);
+    document.getElementById("horarioAgendamentoAjuda").textContent = "Escolha um horário com vaga disponível.";
+    renderizarHorarios();
+  } catch (error) {
+    document.getElementById("horarioAgendamentoAjuda").textContent = "Não foi possível carregar os horários desta data.";
+    mostrarMensagem(mensagemBackend(error, "Não foi possível carregar os horários."));
+  }
+});
+
+plano?.addEventListener("change", () => {
+  escolha.plano = plano.value;
+  atualizarResumo();
+});
+
+form?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const erro = validarEtapa();
+  if (erro) { mostrarMensagem(erro); return; }
+  botaoConfirmar.disabled = true;
+  botaoConfirmar.textContent = "Confirmando...";
+
+  try {
+    await auth.authStateReady();
+    const usuario = auth.currentUser;
+    if (!usuario) {
+      sessionStorage.setItem("powerFitnessRetornoLogin", "agenda.html");
+      mostrarMensagem("Entre na sua conta antes de agendar. Use o botão Entrar no topo da página.");
+      return;
+    }
+    await reload(usuario);
+    if (!usuario.emailVerified) {
+      mostrarMensagem("Verifique seu e-mail antes de agendar uma aula.");
+      return;
+    }
+    await getIdToken(usuario, true);
+    const retorno = await chamarBackend("solicitarAgendamento", {
+      data: escolha.data,
+      horarioId: escolha.horarioId,
+      professorUid: escolha.professorUid,
+      plano: plano?.value || "Ainda não decidi"
+    });
+    detalhesConfirmacao.className = "detalhes-confirmacao";
+    detalhesConfirmacao.innerHTML = `<div><span>Atividade</span><strong>${escolha.atividade}</strong></div>
+      <div><span>Professor</span><strong>${escolha.professorNome}</strong></div>
+      <div><span>Data</span><strong>${formatarDataISO(escolha.data)}</strong></div>
+      <div><span>Horário</span><strong>${escolha.hora}</strong></div>`;
+    confirmacao.hidden = false;
+    etapas.forEach(etapa => { etapa.hidden = true; etapa.classList.remove("ativa"); });
+    document.querySelector(".agenda-acoes").hidden = true;
+    mostrarMensagem(retorno.status === "pendente" ? "Seu agendamento foi enviado para confirmação." : "Agendamento salvo.", "sucesso");
+    sessionStorage.removeItem("powerFitnessPlano");
+  } catch (error) {
+    mostrarMensagem(error.code?.startsWith("auth/") ? mensagemAuth(error) : mensagemBackend(error, "Não foi possível confirmar este agendamento."));
+  } finally {
+    botaoConfirmar.disabled = false;
+    botaoConfirmar.textContent = "Confirmar agendamento";
+  }
+});
+
+carregarInicial();

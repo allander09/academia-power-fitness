@@ -11,7 +11,7 @@ function ler(caminho) {
 }
 
 test("não existem IDs duplicados nas páginas principais", () => {
-  for (const pagina of ["html/index.html", "html/admin.html", "html/painel.html", "html/professor.html", "html/login.html", "html/formularios.html"]) {
+  for (const pagina of ["html/index.html", "html/agenda.html", "html/contato.html", "html/admin.html", "html/painel.html", "html/professor.html", "html/login.html", "html/formularios.html"]) {
     const ids = [...ler(pagina).matchAll(/\sid="([^"]+)"/g)].map((resultado) => resultado[1]);
     assert.deepEqual(ids.filter((id, indice) => ids.indexOf(id) !== indice), [], `IDs duplicados em ${pagina}`);
   }
@@ -36,8 +36,17 @@ test("os controles usados pelos módulos existem no HTML", () => {
       "totalAlunosProfessor", "feedbackProfessor", "linkAdminProfessor"
     ],
     "html/index.html": [
-      "agendamentoForm", "mensagemAgendamento", "dataAgendamento", "horaAgendamento",
-      "horarioAgendamentoAjuda", "mensalidadeForm", "resultadoMensalidade", "resumoFuncionamento", "funcionamentoRodape"
+      "mensalidadeForm", "resultadoMensalidade", "resumoFuncionamento", "funcionamentoRodape"
+    ],
+    "html/agenda.html": [
+      "agendamentoForm", "mensagemAgendamento", "opcoesAtividade", "opcoesProfessor",
+      "dataAgendamento", "horarioAgendamentoAjuda", "opcoesHorario", "planoAgendamento",
+      "confirmacaoAgendamento", "detalhesConfirmacao", "voltarEtapa", "avancarEtapa",
+      "confirmarAgendamento"
+    ],
+    "html/contato.html": [
+      "formContato", "mensagemContato", "contatoNome", "contatoEmail", "contatoTelefone",
+      "contatoTipo", "contatoAssunto", "contatoMensagem"
     ]
   };
 
@@ -48,7 +57,7 @@ test("os controles usados pelos módulos existem no HTML", () => {
 });
 
 test("scripts e folhas de estilo locais referenciados existem", () => {
-  for (const pagina of ["html/index.html", "html/admin.html", "html/painel.html", "html/professor.html"]) {
+  for (const pagina of ["html/index.html", "html/agenda.html", "html/contato.html", "html/admin.html", "html/painel.html", "html/professor.html"]) {
     const html = ler(pagina);
     const referencias = [...html.matchAll(/(?:src|href)="(\.\.\/[^"?#]+)"/g)].map((resultado) => resultado[1]);
     referencias.forEach((referencia) => {

@@ -3,11 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=index.html#contato">
-  <link rel="canonical" href="index.html#contato">
-  <title>Contato | Power Fitness</title>
+  <meta name="description" content="Fale com a equipe da Power Fitness.">
+  <meta name="theme-color" content="#111111">
+  <title>Fale Conosco | Power Fitness</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/header.css">
+  <link rel="stylesheet" href="../css/contato.css">
+  <link rel="stylesheet" href="../css/footer.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <p>Abrindo <a href="index.html#contato">Contato na página da Power Fitness</a>…</p>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo principal</a>
+  <header>
+    <a class="logo" href="index.html" aria-label="Power Fitness - início"><span>POWER</span> FITNESS</a>
+    <nav aria-label="Navegação principal">
+      <ul id="menuPrincipal">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="agenda.html">Agendar</a></li>
+        <li><a href="index.html#planos">Planos</a></li>
+        <li><a href="index.html#professores">Professores</a></li>
+        <li><a href="painel.html">Minha Área</a></li>
+      </ul>
+    </nav>
+    <div class="controles-cabecalho">
+      <a class="conta-entrar" href="login.html">Entrar</a>
+      <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="fale-hero">
+      <div class="container">
+        <p class="destaque">FALE CONOSCO</p>
+        <h1>Precisa de ajuda ou quer solicitar alguma coisa?</h1>
+        <p>Envie sua solicitação e nossa equipe entrará em contato pelo e-mail informado.</p>
+      </div>
+    </section>
+
+    <section class="container contato-layout">
+      <form id="formContato" class="contato-card">
+        <label for="contatoNome">Nome</label>
+        <input type="text" id="contatoNome" name="nome" autocomplete="name" minlength="3" maxlength="100" required>
+        <label for="contatoEmail">E-mail</label>
+        <input type="email" id="contatoEmail" name="email" autocomplete="email" maxlength="254" required>
+        <label for="contatoTelefone">Telefone</label>
+        <input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel" maxlength="20">
+        <label for="contatoTipo">Tipo de solicitação</label>
+        <select id="contatoTipo" name="tipoSolicitacao" required>
+          <option value="">Selecione</option>
+          <option>Dúvida</option>
+          <option>Agendamento</option>
+          <option>Cancelamento</option>
+          <option>Informações sobre planos</option>
+          <option>Problema no acesso</option>
+          <option>Sugestão</option>
+          <option>Outro</option>
+        </select>
+        <label for="contatoAssunto">Assunto</label>
+        <input type="text" id="contatoAssunto" name="assunto" minlength="3" maxlength="120" required>
+        <label for="contatoMensagem">Mensagem</label>
+        <textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea>
+        <label class="consentimento"><input type="checkbox" required> Li as informações sobre o uso dos dados para resposta na <a href="privacidade.html">Política de Privacidade</a>.</label>
+        <button type="submit">Enviar solicitação</button>
+        <p id="mensagemContato" class="mensagem" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Atendimento</h3><p><a href="agenda.html">Agendar aula</a></p><p><a href="painel.html">Minha Área</a></p></div><div><h3>Privacidade</h3><p><a href="privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness - Todos os direitos reservados.</p></footer>
+
+  <script src="../js/script.js"></script>
+  <script type="module" src="../js/contato.js"></script>
+  <script type="module" src="../js/ambiente.js"></script>
 </body>
 </html>

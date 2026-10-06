@@ -6,6 +6,7 @@
 - Verificação de e-mail para operações críticas e conferência de conta ativa no Authentication.
 - Funções chamáveis exigem App Check em produção e tokens autenticados. A dispensa de App Check exige simultaneamente o emulador de Functions, o projeto fictício `demo-power-fitness` e os dois emuladores em loopback nas portas previstas. Autenticação, papéis e regras continuam ativos no teste local.
 - Nenhuma escrita direta de agendamento, presença, turma ou atividade pelo navegador.
+- A escolha de professor no agendamento é validada nas Cloud Functions contra `horarios` e `professores_acesso`; o valor enviado pelo navegador não é confiável.
 - Confirmação transacional de capacidade e agendamentos duplicados bloqueados.
 - Professor recebe campos mínimos e identificador aleatório, sem UID/e-mail do aluno.
 - Cadastro não permite elevação de privilégio; `admins` só pode ser alterado no Console/SDK administrativo.

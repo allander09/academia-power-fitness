@@ -55,10 +55,16 @@ test("HTTP mantém a capacidade, libera presença e promove a fila", async () =>
 });
 
 test("HTTP cria reserva e exporta somente os dados da própria conta", async () => {
-  const reserva = await chamar("solicitarAgendamento", { data, horarioId: "musculacao", plano: "Essencial" }, "aluno");
+  const disponibilidade = await chamar("listarDisponibilidadeAgendamento", { data }, "aluno");
+  assert.equal(disponibilidade.status, 200);
+  const musculacao = disponibilidade.result.horarios.find(item => item.id === "musculacao");
+  assert.equal(musculacao.professorUid, "demo-professor");
+  assert.equal(musculacao.disponivel, true);
+  const reserva = await chamar("solicitarAgendamento", { data, horarioId: "musculacao", professorUid: "demo-professor", plano: "Essencial" }, "aluno");
   assert.equal(reserva.status, 200);
   assert.equal(reserva.result.status, "pendente");
-  assert.equal((await chamar("solicitarAgendamento", { data, horarioId: "musculacao", plano: "Essencial" }, "aluno")).error.status, "ALREADY_EXISTS");
+  assert.equal((await chamar("solicitarAgendamento", { data, horarioId: "musculacao", professorUid: "demo-professor", plano: "Essencial" }, "aluno")).error.status, "ALREADY_EXISTS");
+  assert.equal((await chamar("solicitarAgendamento", { data, horarioId: "musculacao", professorUid: "professor-inventado", plano: "Essencial" }, "aluno2")).error.status, "FAILED_PRECONDITION");
   const exportacao = (await chamar("exportarDados", {}, "aluno")).result;
   assert.equal(exportacao.agendamentos.length, 2);
   assert.ok(!JSON.stringify(exportacao).includes("aluno2@example.com"));

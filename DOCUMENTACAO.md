@@ -4,15 +4,17 @@
 
 | Perfil | Tela | Operações |
 |---|---|---|
-| Público | `html/index.html` | Informações, planos, equipe, horários, IMC, simulação, contato |
+| Público | `html/index.html` | Informações, planos, equipe, horários, IMC, simulação e chamadas para agendamento/Fale Conosco |
+| Agendamento | `html/agenda.html` | Escolha de atividade, professor, data, horário, plano e confirmação |
+| Fale Conosco | `html/contato.html` | Solicitações para a academia com tipo, assunto e mensagem |
 | Conta | `html/login.html`, `html/formularios.html` | Cadastro, login, recuperação, verificação de e-mail |
 | Aluno | `html/painel.html` | Perfil, próprios agendamentos, cancelamento, exportação e pedido de exclusão |
 | Professor | `html/professor.html` | Atividades atribuídas, alunos vinculados e presença |
 | Administrador | `html/admin.html` | Conteúdo, alunos, professores, agenda, fila, privacidade e auditoria |
 
-O cabeçalho público mostra Entrar ou as iniciais da conta. O menu da conta oferece o painel do perfil, perfil e privacidade e saída. A prioridade do login é administrador, professor e aluno. Um login iniciado pelo agendamento retorna ao formulário.
+O cabeçalho público mostra Entrar ou as iniciais da conta. O menu da conta oferece o painel do perfil, perfil e privacidade e saída. A prioridade do login é administrador, professor e aluno. Um login iniciado pelo agendamento retorna para `agenda.html`.
 
-Os endereços antigos `agenda.html`, `contato.html`, `horarios.html`, `imc.html`, `planos.html` e `professores.html` encaminham para a seção correspondente da página principal, onde estão os formulários e o conteúdo atuais.
+Os endereços `agenda.html` e `contato.html` são telas próprias. Os endereços antigos `horarios.html`, `imc.html`, `planos.html` e `professores.html` encaminham para a seção correspondente da página principal.
 
 ## Autorização
 
@@ -20,16 +22,18 @@ Uma conta de aluno não pode escolher papéis privilegiados. O primeiro administ
 
 ## Agendamento
 
-1. A página carrega as atividades ativas e o funcionamento real.
-2. O aluno seleciona data, atividade e plano de interesse.
-3. `solicitarAgendamento` valida identidade, perfil, data futura no fuso brasileiro, atividade ativa, dia, horário e plano. O plano deve estar publicado e ativo; a opção `Ainda não decidi` também é aceita. Nome e e-mail vêm da conta.
-4. O ID usa `UID_data_hora`; uma transação também verifica solicitações antigas do aluno para impedir duplicidade.
-5. O pedido começa como `pendente` e não ocupa uma vaga confirmada.
-6. `alterarAgendamento` confirma somente pedidos pendentes ou na fila, conferindo a capacidade da atividade no servidor.
-7. A turma usa um documento de coordenação por data e atividade; confirmações simultâneas não podem consumir a mesma última vaga.
-8. Quando não há vaga, o pedido vira `lista_espera`.
-9. Cancelar uma reserva confirmada promove o primeiro pedido da fila para `pendente`. A academia confirma a nova vaga.
-10. Presença só pode ser registrada em reserva confirmada pelo professor vinculado ou administrador.
+1. `agenda.html` usa um fluxo em quatro etapas: atividade, professor, data/horário e confirmação.
+2. `listarDisponibilidadeAgendamento` carrega atividades ativas, funcionamento real, professores ativos em `professores_acesso` e reservas confirmadas da data escolhida.
+3. A interface mostra somente professores vinculados à atividade cadastrada em `horarios/{id}` por `professorUid`/`professorNome`. Horários sem professor ativo não aparecem como opção para o aluno.
+4. Ao escolher uma data, a disponibilidade é recalculada e horários fora do funcionamento, passados ou sem vaga confirmada aparecem indisponíveis.
+5. `solicitarAgendamento` valida identidade, perfil, data futura no fuso brasileiro, atividade ativa, professor escolhido, professor ativo, dia, horário e plano. O plano deve estar publicado e ativo; a opção `Ainda não decidi` também é aceita. Nome e e-mail vêm da conta.
+6. O ID usa `UID_data_hora`; uma transação também verifica solicitações antigas do aluno para impedir duplicidade.
+7. O pedido começa como `pendente` e não ocupa uma vaga confirmada.
+8. `alterarAgendamento` confirma somente pedidos pendentes ou na fila, conferindo a capacidade da atividade no servidor.
+9. A turma usa um documento de coordenação por data e atividade; confirmações simultâneas não podem consumir a mesma última vaga.
+10. Quando não há vaga na confirmação, o pedido vira `lista_espera`.
+11. Cancelar uma reserva confirmada promove o primeiro pedido da fila para `pendente`. A academia confirma a nova vaga.
+12. Presença só pode ser registrada em reserva confirmada pelo professor vinculado ou administrador.
 
 Capacidade pertence a cada atividade, inclusive quando duas atividades têm a mesma hora. Uma pessoa não pode ter duas solicitações ativas no mesmo horário. Não existe garantia de vaga na solicitação. Não existe controle de duração/sobreposição entre horários diferentes.
 
@@ -39,7 +43,7 @@ Capacidade pertence a cada atividade, inclusive quando duas atividades têm a me
 
 Planos publicados alimentam os cards, a simulação de mensalidade e o formulário de interesse. Quando não existe conteúdo ativo, a página informa isso. Uma falha de carregamento não deve ser interpretada como atualização de preços confirmada; confirme o conteúdo no projeto de destino.
 
-A página inicia com estados de carregamento, sem preços e equipe fictícios como fallback. Falhas ao carregar planos, equipe e funcionamento são informadas. Falhas de autenticação/rede no agendamento restauram o botão e não são exibidas como sucesso. Recuperação de senha não revela pela mensagem se o e-mail está cadastrado, inclusive quando o provedor retorna conta inexistente.
+A página inicia com estados de carregamento, sem preços e equipe fictícios como fallback. Falhas ao carregar planos, equipe, funcionamento e disponibilidade são informadas. Falhas de autenticação/rede no agendamento restauram o botão e não são exibidas como sucesso. Recuperação de senha não revela pela mensagem se o e-mail está cadastrado, inclusive quando o provedor retorna conta inexistente.
 
 ## Dados
 
@@ -50,7 +54,7 @@ A página inicia com estados de carregamento, sem preços e equipe fictícios co
 | `professores_acesso/{UID}` | Permissão de professor; manutenção por administrador |
 | `agendamentos` | Reservas; aluno proprietário e administrador leem documentos; servidor altera |
 | `turmas` | Coordenação transacional; só servidor |
-| `contatos` | Mensagens e ciência de privacidade; leitura administrativa |
+| `contatos` | Solicitações do Fale Conosco, tipo, assunto, mensagem e ciência de privacidade; leitura administrativa |
 | `planos`, `professores`, `horarios` | Conteúdo ativo público; atividades alteradas pelo servidor |
 | `configuracoes/funcionamento` | Funcionamento semanal e capacidade padrão |
 | `configuracoes/privacidade` | Controlador, canal e prazos de revisão configuráveis |

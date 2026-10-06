@@ -45,7 +45,7 @@ O índice declarado de data/atividade deve estar pronto antes de testar confirma
 
 ## Contas e carga inicial
 
-A página inicial usa `data-demonstracao-publica="true"` no elemento `body` para a apresentação acadêmica. Nesse modo, planos, equipe e funcionamento ilustrativos continuam visíveis quando o banco está vazio ou indisponível; as notas de exemplo aparecem nas próprias seções e a simulação identifica valores ilustrativos. Os cadastros publicados no Firestore substituem esses exemplos quando carregados. O seletor de agendamento recebe somente planos e atividades do banco, e os exemplos visuais não criam reservas nem contas.
+A página inicial usa `data-demonstracao-publica="true"` no elemento `body` para a apresentação acadêmica. Nesse modo, planos, equipe e funcionamento ilustrativos continuam visíveis quando o banco está vazio ou indisponível; as notas de exemplo aparecem nas próprias seções e a simulação identifica valores ilustrativos. Os cadastros publicados no Firestore substituem esses exemplos quando carregados. O agendamento em `agenda.html` recebe somente planos, atividades, professores ativos e horários vindos do banco/Functions, e os exemplos visuais da home não criam reservas nem contas.
 
 Antes do uso comercial, altere para `data-demonstracao-publica="false"` em `html/index.html` e publique após cadastrar e conferir o conteúdo real. Nesse modo, os exemplos ficam ocultos desde o HTML/CSS e uma falha de leitura informa indisponibilidade. A orientação de privacidade acompanha os formulários de cadastro, contato e agendamento, sem ocupar o destaque inicial nem a tela de login.
 

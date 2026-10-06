@@ -40,8 +40,8 @@ function renderizarAgendamentos(documentos) {
   if (!documentos.length) {
     const vazio = criar("div", "", "lista-vazia");
     vazio.append(criar("p", "Você ainda não possui agendamentos."));
-    const novo = criar("a", "Solicitar aula experimental");
-    novo.href = "index.html#agendamento";
+    const novo = criar("a", "Agendar uma aula");
+    novo.href = "agenda.html";
     novo.className = "link-acao";
     vazio.append(novo);
     lista.appendChild(vazio);
@@ -51,10 +51,10 @@ function renderizarAgendamentos(documentos) {
   documentos.forEach((item) => {
     const dados = item.data();
     const card = criar("article", "", "item-lista");
-    const status = criar("span", `Status: ${rotulosStatus[dados.status] || dados.status || "Não informado"}`, `status-agendamento status-${dados.status || "desconhecido"}`);
+    const status = criar("span", `Situação: ${rotulosStatus[dados.status] || dados.status || "Não informado"}`, `status-agendamento status-${dados.status || "desconhecido"}`);
     card.append(
       criar("strong", dados.hora ? `${formatarDataISO(dados.data)} às ${dados.hora}` : formatarDataISO(dados.data)),
-      criar("span", `Atividade: ${dados.atividade || "Aula experimental"}`),
+      criar("span", `Atividade: ${dados.atividade || "Aula"}`),
       criar("span", `Professor: ${dados.professorNome || "A definir"}`),
       criar("span", `Plano: ${dados.plano || "Não informado"}`),
       status,
