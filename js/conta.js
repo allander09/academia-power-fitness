@@ -45,7 +45,7 @@ onAuthStateChanged(auth, async usuario => {
   document.getElementById("contaEmail").textContent = usuario.email || "";
   document.getElementById("contaPerfil").textContent = administradorAtivo ? "Administrador" : professorAtivo ? "Professor" : "Aluno";
   document.getElementById("contaIniciais").textContent = nome.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => parte[0]).join("").toUpperCase();
-  document.getElementById("contaArea").href = destinoPorPerfil({ administradorAtivo, professorAtivo });
+  document.getElementById("contaArea").href = `../html/${destinoPorPerfil({ administradorAtivo, professorAtivo })}`;
   botao.setAttribute("aria-label", `Abrir conta de ${nome}`);
   botao.disabled = false;
   botao.setAttribute("aria-busy", "false");
