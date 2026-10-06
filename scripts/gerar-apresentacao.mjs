@@ -14,15 +14,17 @@ export async function gerarApresentacao(destino = join(raiz, "dist-apresentacao"
   let html = await readFile(join(raiz, "html/index.html"), "utf8");
   html = substituir(html, /<div class="conta-cabecalho">[\s\S]*?<\/div>\s*<\/div>/,
     '<a class="conta-entrar" href="#perfis">Conhecer perfis</a>', "menu de conta");
-  for (const id of ["agendamento", "contato"]) {
-    html = substituir(html, new RegExp(`<section id="${id}"[\\s\\S]*?<\\/section>`), "", `formulário ${id}`);
-  }
-  html = substituir(html, /<a href="\.\.\/html\/formularios\.html" class="btn-cadastro">Cadastre-se<\/a>/, "", "cadastro");
+  html = html.replace(/<a href="\.\.\/html\/formularios\.html" class="btn-cadastro">Cadastre-se<\/a>/, "");
   html = html.replaceAll('href="#agendamento"', 'href="#perfis"')
     .replaceAll('href="#contato"', 'href="#projeto"')
+    .replaceAll('href="../html/agenda.html"', 'href="#perfis"')
+    .replaceAll('href="../html/contato.html"', 'href="#projeto"')
     .replaceAll(">Agendamento</a>", ">Perfis</a>")
+    .replaceAll(">Agendar</a>", ">Perfis</a>")
+    .replaceAll(">Fale Conosco</a>", ">Projeto</a>")
     .replaceAll(">Contato</a>", ">Projeto</a>")
     .replaceAll(">Agendar aula</a>", ">Conhecer perfis</a>")
+    .replaceAll(">Agendar uma aula</a>", ">Conhecer perfis</a>")
     .replaceAll(">Solicitar aula</a>", ">Conhecer perfis</a>");
   html = html.replace(/\s*<script[^>]*src="\.\.\/js\/([^\"]+)"[^>]*><\/script>/g,
     (tag, nome) => scriptsPublicos.includes(nome) ? tag : "");
@@ -30,7 +32,7 @@ export async function gerarApresentacao(destino = join(raiz, "dist-apresentacao"
   html = html.replace(/^\s*<link[^>]*(?:https:\/\/|rel="manifest")[^>]*>\s*$/gm, "")
     .replace(/^\s*<meta property="og:(?:url|image(?:\:[^\"]+)?)"[^>]*>\s*$/gm, "")
     .replace(/<i class="fa-solid [^\"]+" aria-hidden="true"><\/i>/g, "")
-    .replace('content="Power Fitness: planos, horários, equipe, cadastro e aula experimental."',
+    .replace('content="Power Fitness: planos, horários, equipe, cadastro e agendamento de aulas."',
       'content="Apresentação acadêmica Power Fitness: visual do site, calculadoras e três perfis ilustrativos."')
     .replace("<title>Power Fitness</title>", "<title>Power Fitness | Apresentação</title>")
     .replace("Funcionamento configurado pela academia", "Horários ilustrativos da apresentação")

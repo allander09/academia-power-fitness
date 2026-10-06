@@ -16,7 +16,7 @@ class Erro extends Error { constructor(code, message) { super(message); this.cod
 const request = (uid, data = {}, verificado = true) => ({ auth: { uid, token: { email: `${uid}@example.com`, email_verified: verificado } }, data });
 const cliente = (uid, verificado = true) => ambiente.authenticatedContext(uid, { email: `${uid}@example.com`, email_verified: verificado }).firestore();
 const rejeita = (promise, code) => assert.rejects(promise, error => error.code === code);
-const agendar = uid => servico.solicitarAgendamento(request(uid, { data: "2026-10-05", horarioId: "atividade", plano: "Essencial" }));
+const agendar = uid => servico.solicitarAgendamento(request(uid, { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", plano: "Essencial" }));
 const confirmar = id => servico.alterarAgendamento(request("admin", { id, status: "confirmado" }));
 
 before(async () => {
@@ -42,7 +42,7 @@ beforeEach(async () => {
 after(async () => { if (ambiente) await ambiente.cleanup(); if (app) await deleteApp(app); });
 
 test("reservas recusam plano inventado ou desativado e aceitam interesse ainda não definido", async () => {
-  const dados = { data: "2026-10-05", horarioId: "atividade", plano: "Inventado" };
+  const dados = { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", plano: "Inventado" };
   await rejeita(servico.solicitarAgendamento(request("aluno1", dados)), "failed-precondition");
   await db.doc("planos/essencial").update({ ativo: false });
   await rejeita(agendar("aluno1"), "failed-precondition");
@@ -81,9 +81,26 @@ test("cadastro exige a versão e o horário de ciência, inclusive antes de veri
 });
 
 test("funções recusam conta não verificada e confirmação por aluno", async () => {
-  await rejeita(servico.solicitarAgendamento(request("naoverificado", { data: "2026-10-05", horarioId: "atividade", plano: "Essencial" }, false)), "failed-precondition");
+  await rejeita(servico.solicitarAgendamento(request("naoverificado", { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", plano: "Essencial" }, false)), "failed-precondition");
   const { id } = await agendar("aluno1");
   await rejeita(servico.alterarAgendamento(request("aluno1", { id, status: "confirmado" })), "permission-denied");
+});
+
+test("disponibilidade mostra somente professor ativo e bloqueia professor forjado", async () => {
+  const disponibilidade = await servico.listarDisponibilidadeAgendamento(request("aluno1", { data: "2026-10-05" }));
+  assert.equal(disponibilidade.horarios.length, 1);
+  assert.equal(disponibilidade.horarios[0].professorUid, "professor");
+  assert.equal(disponibilidade.horarios[0].disponivel, true);
+  await rejeita(servico.solicitarAgendamento(request("aluno1", { data: "2026-10-05", horarioId: "atividade", professorUid: "outroprofessor", plano: "Essencial" })), "failed-precondition");
+  await db.doc("professores_acesso/professor").update({ ativo: false });
+  assert.equal((await servico.listarDisponibilidadeAgendamento(request("aluno1", { data: "2026-10-05" }))).horarios.length, 0);
+  await rejeita(agendar("aluno1"), "failed-precondition");
+});
+
+test("criação de agendamento respeita capacidade sem depender do navegador", async () => {
+  const { id } = await agendar("aluno1");
+  await confirmar(id);
+  await rejeita(agendar("aluno2"), "resource-exhausted");
 });
 
 test("duas solicitações simultâneas do mesmo aluno geram só um registro", async () => {
@@ -93,7 +110,24 @@ test("duas solicitações simultâneas do mesmo aluno geram só um registro", as
 });
 
 test("confirmações concorrentes respeitam capacidade e cancelamento promove a fila", async () => {
-  const agendamentos = await Promise.all(["aluno1", "aluno2", "aluno3"].map(agendar));
+  const agendamentos = ["aluno1", "aluno2", "aluno3"].map((uid) => ({ id: `${uid}_2026-10-05_10:00`, usuarioId: uid }));
+  await Promise.all(agendamentos.map(({ id, usuarioId }) => db.doc(`agendamentos/${id}`).set({
+    usuarioId,
+    nome: `Nome ${usuarioId}`,
+    email: `${usuarioId}@example.com`,
+    data: "2026-10-05",
+    hora: "10:00",
+    horarioId: "atividade",
+    atividade: "Funcional",
+    plano: "Essencial",
+    professorUid: "professor",
+    professorNome: "Nome professor",
+    status: "pendente",
+    presenca: "nao_registrada",
+    aulaId: id,
+    criadoEm: Timestamp.now(),
+    atualizadoEm: Timestamp.now()
+  })));
   await Promise.all(agendamentos.map(item => confirmar(item.id)));
   let documentos = (await db.collection("agendamentos").get()).docs;
   assert.equal(documentos.filter(item => item.data().status === "confirmado").length, 1);

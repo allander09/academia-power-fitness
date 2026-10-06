@@ -1,5 +1,5 @@
 export function destinoPorPerfil({ retorno = "", administradorAtivo = false, professorAtivo = false } = {}) {
-  if (retorno === "index.html#agendamento") return retorno;
+  if (["index.html#agendamento", "agenda.html"].includes(retorno)) return retorno;
   if (administradorAtivo) return "admin.html";
   if (professorAtivo) return "professor.html";
   return "painel.html";

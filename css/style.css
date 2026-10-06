@@ -50,3 +50,5 @@ input[readonly]{background:#f2f3f5;color:#444;cursor:not-allowed}
 .nota-demo{text-align:center;margin:22px auto 0;color:#666;font-size:.85rem;line-height:1.5}
 .nota-demo[hidden],.ajuda-campo[hidden]{display:none}
 body:not([data-demonstracao-publica="true"]) [data-exemplo]{display:none}
+.chamada-final{text-align:center}
+.centralizadas{justify-content:center}

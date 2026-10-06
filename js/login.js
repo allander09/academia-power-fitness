@@ -13,7 +13,7 @@ let redirecionando = false;
 
 async function destinoAposLogin(usuario) {
   const retorno = sessionStorage.getItem("powerFitnessRetornoLogin");
-  if (retorno === "index.html#agendamento") return retorno;
+  if (["index.html#agendamento", "agenda.html"].includes(retorno)) return retorno;
   if (!usuario.emailVerified) return "painel.html";
 
   try {

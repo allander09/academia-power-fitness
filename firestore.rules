@@ -60,10 +60,11 @@ service cloud.firestore {
     }
     match /contatos/{contatoId} {
       allow create: if (!autenticado() || contaAtiva())
-        && request.resource.data.keys().hasOnly(['usuarioId', 'nome', 'email', 'telefone', 'mensagem', 'status', 'criadoEm', 'privacidadeVersao', 'privacidadeCienteEm'])
+        && request.resource.data.keys().hasOnly(['usuarioId', 'nome', 'email', 'telefone', 'tipoSolicitacao', 'assunto', 'mensagem', 'status', 'criadoEm', 'privacidadeVersao', 'privacidadeCienteEm'])
         && (request.resource.data.usuarioId == null || (contaAtiva() && request.resource.data.usuarioId == request.auth.uid && emailDaConta(request.resource.data.email)))
         && texto(request.resource.data.nome, 3, 100) && texto(request.resource.data.email, 5, 254)
-        && texto(request.resource.data.telefone, 0, 20) && texto(request.resource.data.mensagem, 10, 2000)
+        && texto(request.resource.data.telefone, 0, 20) && texto(request.resource.data.tipoSolicitacao, 3, 40)
+        && texto(request.resource.data.assunto, 3, 120) && texto(request.resource.data.mensagem, 10, 2000)
         && request.resource.data.status == 'novo' && request.resource.data.criadoEm == request.time && cienciaValida(request.resource.data);
       allow read: if administrador();
       allow update: if administrador() && request.resource.data.status in ['novo', 'respondido']

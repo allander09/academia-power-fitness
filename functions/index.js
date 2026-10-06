@@ -11,6 +11,7 @@ setGlobalOptions({ region: "southamerica-east1", maxInstances: 3, timeoutSeconds
 const servico = criarServico({ db: getFirestore(), auth: getAuth(), FieldValue, Timestamp, Erro: HttpsError });
 // App Check é obrigatório em produção. O projeto fictício local não possui reCAPTCHA.
 const callable = nome => onCall({ enforceAppCheck: !ambienteDemo() }, request => servico[nome](request));
+export const listarDisponibilidadeAgendamento = callable("listarDisponibilidadeAgendamento");
 export const solicitarAgendamento = callable("solicitarAgendamento");
 export const alterarAgendamento = callable("alterarAgendamento");
 export const listarAulasProfessor = callable("listarAulasProfessor");

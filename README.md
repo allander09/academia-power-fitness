@@ -2,15 +2,16 @@
 
 Para a apresentação gratuita, siga [APRESENTAR.md](APRESENTAR.md). A vitrine pública usa arquivos estáticos e capturas fictícias dos três painéis; os perfis interativos completos podem ser demonstrados nos emuladores conforme [TESTAR.md](TESTAR.md).
 
-Sistema web para apresentação da academia, solicitação de aulas experimentais e operação de uma única academia. Desenvolvido com HTML, CSS, JavaScript e Firebase, com painéis separados para aluno, professor e administrador.
+Sistema web para apresentação da academia, agendamento de aulas e operação de uma única academia. Desenvolvido com HTML, CSS, JavaScript e Firebase, com painéis separados para aluno, professor e administrador.
 
 ## Funcionalidades
 
-- Site público com serviços, planos, equipe, galeria, horários e contato.
+- Site público com serviços, planos, equipe, galeria, horários e Fale Conosco.
 - IMC com vírgula ou ponto decimal e simulador ligado aos planos publicados.
 - Conta no cabeçalho, painel por perfil e saída da sessão.
 - Cadastro, verificação de e-mail, recuperação de senha e atualização do perfil.
-- Agendamento validado no servidor, plano publicado ou interesse ainda não definido, proteção contra duplicidade e confirmação transacional de vagas.
+- Agendamento de aula em etapas, com atividade, professor cadastrado, data, horário, plano publicado ou interesse ainda não definido.
+- Disponibilidade consultada nas Cloud Functions e validada novamente no servidor, com proteção contra professor inativo, duplicidade e confirmação transacional de vagas.
 - Lista de espera; cancelamento pelo aluno ou administrador devolve a primeira pessoa da fila para análise.
 - Professor com atividades próprias e presença, recebendo apenas os campos necessários e identificador aleatório da aula.
 - Administração de planos, equipe, atividades, capacidade, funcionamento e permissões dos professores.

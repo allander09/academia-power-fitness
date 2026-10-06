@@ -3,11 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="0; url=index.html#agendamento">
-  <link rel="canonical" href="index.html#agendamento">
-  <title>Agendamento | Power Fitness</title>
+  <meta name="description" content="Agende uma aula na Power Fitness escolhendo atividade, professor, data e horário.">
+  <meta name="theme-color" content="#111111">
+  <title>Agendar aula | Power Fitness</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/header.css">
+  <link rel="stylesheet" href="../css/agendamento.css">
+  <link rel="stylesheet" href="../css/footer.css">
+  <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body>
-  <p>Abrindo <a href="index.html#agendamento">Agendamento na página da Power Fitness</a>…</p>
+  <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo principal</a>
+  <header>
+    <a class="logo" href="index.html" aria-label="Power Fitness - início"><span>POWER</span> FITNESS</a>
+    <nav aria-label="Navegação principal">
+      <ul id="menuPrincipal">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="index.html#planos">Planos</a></li>
+        <li><a href="index.html#professores">Professores</a></li>
+        <li><a href="painel.html">Meus agendamentos</a></li>
+        <li><a href="contato.html">Fale Conosco</a></li>
+      </ul>
+    </nav>
+    <div class="controles-cabecalho">
+      <a class="conta-entrar" href="login.html">Entrar</a>
+      <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="agenda-hero">
+      <div class="container">
+        <p class="destaque">AGENDAMENTO DE AULA</p>
+        <h1>Escolha sua aula em poucos passos</h1>
+        <p>Selecione atividade, professor, data e horário disponível. A equipe confirma a situação do agendamento pelo sistema.</p>
+      </div>
+    </section>
+
+    <section class="container agenda-layout" aria-labelledby="tituloAgendamento">
+      <aside class="agenda-resumo" aria-live="polite">
+        <span id="progressoAgendamento">Etapa 1 de 4</span>
+        <h2 id="tituloAgendamento">Agendar aula</h2>
+        <dl>
+          <div><dt>Atividade</dt><dd id="resumoAtividade">Escolha uma atividade</dd></div>
+          <div><dt>Professor</dt><dd id="resumoProfessor">Defina o professor</dd></div>
+          <div><dt>Data</dt><dd id="resumoData">Escolha a data</dd></div>
+          <div><dt>Horário</dt><dd id="resumoHorario">Escolha o horário</dd></div>
+          <div><dt>Plano</dt><dd id="resumoPlano">Ainda não definido</dd></div>
+        </dl>
+      </aside>
+
+      <form id="agendamentoForm" class="agenda-card">
+        <p id="mensagemAgendamento" class="mensagem" aria-live="polite"></p>
+
+        <fieldset class="agenda-etapa ativa" data-etapa="1">
+          <legend>Atividade</legend>
+          <p>Escolha o tipo de aula que deseja agendar.</p>
+          <div id="opcoesAtividade" class="grade-opcoes" aria-live="polite">Carregando atividades...</div>
+        </fieldset>
+
+        <fieldset class="agenda-etapa" data-etapa="2" hidden>
+          <legend>Professor</legend>
+          <p>Mostramos somente professores vinculados à atividade escolhida.</p>
+          <div id="opcoesProfessor" class="grade-opcoes" aria-live="polite"></div>
+        </fieldset>
+
+        <fieldset class="agenda-etapa" data-etapa="3" hidden>
+          <legend>Data e horário</legend>
+          <label for="dataAgendamento">Data</label>
+          <input type="date" id="dataAgendamento" name="data" required>
+          <p id="horarioAgendamentoAjuda" class="ajuda-campo">Depois de escolher a data, os horários disponíveis serão carregados.</p>
+          <div id="opcoesHorario" class="grade-opcoes horarios-opcoes" aria-live="polite"></div>
+        </fieldset>
+
+        <fieldset class="agenda-etapa" data-etapa="4" hidden>
+          <legend>Confirmação</legend>
+          <label for="planoAgendamento">Modalidade ou plano</label>
+          <select id="planoAgendamento" name="plano"><option>Ainda não decidi</option></select>
+          <div class="revisao-agendamento">
+            <h3>Revise seu agendamento</h3>
+            <p id="textoRevisao">Confira as informações antes de confirmar.</p>
+          </div>
+        </fieldset>
+
+        <section id="confirmacaoAgendamento" class="confirmacao-agendamento" hidden>
+          <h2>Agendamento realizado!</h2>
+          <div id="detalhesConfirmacao"></div>
+          <p>Situação: <strong>Aguardando confirmação</strong></p>
+          <a class="btn" href="painel.html">Ver meus agendamentos</a>
+        </section>
+
+        <div class="agenda-acoes">
+          <button id="voltarEtapa" type="button" class="botao-secundario" disabled>Voltar</button>
+          <button id="avancarEtapa" type="button">Avançar</button>
+          <button id="confirmarAgendamento" type="submit" hidden>Confirmar agendamento</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Atendimento</h3><p><a href="contato.html">Fale Conosco</a></p><p><a href="painel.html">Meus agendamentos</a></p></div><div><h3>Privacidade</h3><p><a href="privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness - Todos os direitos reservados.</p></footer>
+
+  <script src="../js/script.js"></script>
+  <script type="module" src="../js/agendamento.js"></script>
+  <script type="module" src="../js/ambiente.js"></script>
 </body>
 </html>

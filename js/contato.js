@@ -25,6 +25,8 @@ if (form) {
         nome: form.querySelector('[name="nome"]').value.trim(),
         email: form.querySelector('[name="email"]').value.trim().toLowerCase(),
         telefone: form.querySelector('[name="telefone"]')?.value.trim() || "",
+        tipoSolicitacao: form.querySelector('[name="tipoSolicitacao"]').value.trim(),
+        assunto: form.querySelector('[name="assunto"]').value.trim(),
         mensagem: form.querySelector('[name="mensagem"]').value.trim(),
         status: "novo",
         privacidadeVersao: VERSAO_PRIVACIDADE,
@@ -32,7 +34,7 @@ if (form) {
         criadoEm: serverTimestamp()
       });
 
-      retorno.textContent = "Mensagem enviada. Entraremos em contato.";
+      retorno.textContent = "Solicitação enviada. Nossa equipe entrará em contato.";
       retorno.className = "mensagem sucesso";
       form.reset();
     } catch (error) {
@@ -41,7 +43,7 @@ if (form) {
       console.error("Falha no contato:", error.code);
     } finally {
       botao.disabled = false;
-      botao.textContent = "Enviar mensagem";
+      botao.textContent = "Enviar solicitação";
     }
   });
 }

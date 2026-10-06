@@ -1,89 +1,25 @@
-body{
-
-font-family:Poppins,sans-serif;
-
-background:#f4f4f4;
-
-}
-
-header{
-
-background:#111;
-
-color:white;
-
-padding:20px;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-header a{
-
-color:white;
-
-text-decoration:none;
-
-}
-
-.agendamento{
-
-width:400px;
-
-max-width:90%;
-
-margin:60px auto;
-
-background:white;
-
-padding:30px;
-
-border-radius:12px;
-
-box-shadow:0 0 15px rgba(0,0,0,.15);
-
-text-align:center;
-
-}
-
-.agendamento input{
-
-width:100%;
-
-padding:14px;
-
-margin:12px 0;
-
-}
-
-.agendamento button{
-
-width:100%;
-
-padding:15px;
-
-background:#d62828;
-
-color:white;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-}
-
-#msg{
-
-margin-top:20px;
-
-font-size:18px;
-
-font-weight:bold;
-
-}
+.agenda-hero{padding:120px 0 56px;background:linear-gradient(135deg,rgba(0,0,0,.86),rgba(80,8,8,.82)),url("../assets/images/hero-academia.webp") center/cover;color:#fff}
+.agenda-hero h1{max-width:760px;text-align:left;font-size:clamp(2.2rem,5vw,4rem);line-height:1.05;margin:10px 0 16px}
+.agenda-hero p{max-width:680px;color:#f3eeee;font-size:1.08rem}
+.agenda-layout{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:28px;align-items:start;padding:48px 0 80px}
+.agenda-resumo,.agenda-card{background:#fff;border-radius:16px;box-shadow:0 18px 45px rgba(0,0,0,.1)}
+.agenda-resumo{position:sticky;top:96px;padding:24px;border:1px solid #eee}
+.agenda-resumo>span{display:inline-block;margin-bottom:14px;padding:6px 12px;border-radius:999px;background:#ffe7e7;color:#9d1111;font-weight:700;font-size:.85rem}
+.agenda-resumo h2{text-align:left;font-size:1.35rem;margin:0 0 18px}
+.agenda-resumo dl{display:grid;gap:14px}.agenda-resumo div{padding-bottom:12px;border-bottom:1px solid #eee}.agenda-resumo div:last-child{border-bottom:0;padding-bottom:0}
+.agenda-resumo dt{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:#777;font-weight:700}.agenda-resumo dd{margin-top:4px;color:#222;font-weight:600}
+.agenda-card{padding:28px;border:1px solid #eee}
+.agenda-etapa{border:0;margin:0;padding:0}.agenda-etapa legend{font-size:1.65rem;font-weight:700;color:#111;margin-bottom:8px}.agenda-etapa>p{color:#666;margin-bottom:22px}
+.grade-opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.opcao-agendamento{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;min-height:94px;padding:16px;border:2px solid #eee;border-radius:14px;background:#fff;color:#222;text-align:left;box-shadow:none}
+.opcao-agendamento:hover{border-color:#d62828;background:#fff8f8;transform:none}
+.opcao-agendamento.selecionada{border-color:#d62828;background:#ffecec}
+.opcao-agendamento:disabled{cursor:not-allowed;opacity:.58;background:#f6f6f6;border-color:#e4e4e4}
+.opcao-agendamento strong{font-size:1.02rem}.opcao-agendamento span{font-size:.9rem;color:#666}
+.horarios-opcoes .opcao-agendamento{min-height:82px}
+.agenda-acoes{display:flex;justify-content:space-between;gap:12px;margin-top:28px;border-top:1px solid #eee;padding-top:22px}
+.agenda-acoes button{width:auto;min-width:150px}.botao-secundario{background:#f0f0f0;color:#222;border:1px solid #d5d5d5}.botao-secundario:hover{background:#e7e7e7;color:#111}
+.revisao-agendamento{margin-top:18px;padding:18px;border-radius:14px;background:#f7f7f7;border:1px solid #eee}.revisao-agendamento h3{margin-bottom:8px}
+.confirmacao-agendamento{padding:22px;border-radius:16px;background:#f0fff5;border:1px solid #b9efc9}.confirmacao-agendamento h2{text-align:left;margin-bottom:14px;color:#126b32}.confirmacao-agendamento p{text-align:left}.confirmacao-agendamento .btn{display:inline-block;margin-top:14px}
+.detalhes-confirmacao{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.detalhes-confirmacao div{padding:12px;border-radius:10px;background:#fff}.detalhes-confirmacao span{display:block;color:#666;font-size:.82rem}.detalhes-confirmacao strong{display:block;margin-top:3px}
+@media(max-width:860px){.agenda-hero{padding-top:96px}.agenda-layout{grid-template-columns:1fr;padding-top:28px}.agenda-resumo{position:static}.grade-opcoes{grid-template-columns:1fr}.agenda-acoes{position:sticky;bottom:0;margin-inline:-28px;margin-bottom:-28px;padding:16px 28px;background:#fff;box-shadow:0 -10px 30px rgba(0,0,0,.08)}.agenda-acoes button{flex:1;min-width:0;padding-inline:12px}.detalhes-confirmacao{grid-template-columns:1fr}}
