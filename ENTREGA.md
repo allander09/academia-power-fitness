@@ -21,8 +21,8 @@ No computador autorizado do responsável, a partir da raiz do repositório:
 
 ```bash
 git fetch origin
-git switch review/power-fitness-2.3
-git pull --ff-only origin review/power-fitness-2.3
+git switch main
+git pull --ff-only origin main
 npm ci
 npm ci --prefix functions
 npm run check
