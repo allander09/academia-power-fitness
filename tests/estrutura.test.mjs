@@ -79,3 +79,17 @@ test("a área do professor consulta somente vínculos do próprio UID", () => {
 test("a página principal não usa manipuladores JavaScript inline", () => {
   assert.doesNotMatch(ler("html/index.html"), /\son[a-z]+=/i);
 });
+
+test("links da página inicial preservam a pasta das telas em endereços antigos e subpastas", () => {
+  const links = [...ler("html/index.html").matchAll(/href="([^"?#]+\.html)"/g)].map(resultado => resultado[1]);
+  assert.ok(links.length > 0);
+  for (const [entrada, pasta] of [
+    ["/html", "/html/"], ["/html/", "/html/"], ["/html/index.html", "/html/"],
+    ["/curso/academia/html/", "/curso/academia/html/"], ["/curso/academia/html/index.html", "/curso/academia/html/"]
+  ]) {
+    for (const link of links) {
+      const destino = new URL(link, `https://exemplo.invalid${entrada}`);
+      assert.equal(destino.pathname, pasta + link.split("/").at(-1), `Link incorreto em ${entrada}: ${link}`);
+    }
+  }
+});

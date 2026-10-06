@@ -28,7 +28,7 @@ function pedirLogin() {
   sessionStorage.setItem("powerFitnessRetornoLogin", "index.html#agendamento");
   mensagem.replaceChildren(document.createTextNode("Entre na sua conta antes de agendar. "));
   const link = document.createElement("a");
-  link.href = "login.html";
+  link.href = "../html/login.html";
   link.textContent = "Fazer login";
   mensagem.appendChild(link);
   mensagem.className = "mensagem erro";
