@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="../css/modal.css">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
-<body>
+<body data-demonstracao-publica="true">
   <a class="pular-conteudo" href="#inicio">Pular para o conteúdo principal</a>
   <header>
     <a class="logo" href="#inicio" aria-label="Power Fitness — início"><span>POWER</span> FITNESS</a>
@@ -112,8 +112,11 @@
         </div>
         <h2>Nossos planos</h2>
         <div class="cards-planos">
-          <p>Carregando planos da academia…</p>
+          <article class="plano" data-exemplo><h3>Básico</h3><p class="preco">R$ 89,90<small> /mês</small></p><ul><li>Musculação</li><li>Avaliação física</li></ul><button type="button" data-plano="Básico" data-valor="R$ 89,90/mês — valor ilustrativo">Conhecer plano</button></article>
+          <article class="plano destaque-plano" data-exemplo><span class="selo">Mais escolhido na demonstração</span><h3>Premium</h3><p class="preco">R$ 149,90<small> /mês</small></p><ul><li>Musculação</li><li>Funcional</li><li>Cardio</li></ul><button type="button" data-plano="Premium" data-valor="R$ 149,90/mês — valor ilustrativo">Conhecer plano</button></article>
+          <article class="plano" data-exemplo><h3>VIP</h3><p class="preco">R$ 199,90<small> /mês</small></p><ul><li>Todos os serviços</li><li>Personal trainer</li></ul><button type="button" data-plano="VIP" data-valor="R$ 199,90/mês — valor ilustrativo">Conhecer plano</button></article>
         </div>
+        <p id="notaPlanos" class="nota-demo" data-exemplo>Planos e valores ilustrativos da demonstração.</p>
       </div>
     </section>
 
@@ -121,8 +124,11 @@
       <h2>Nossa equipe</h2>
       <p class="subtitulo">Profissionais preparados para orientar cada etapa do seu treino.</p>
       <div class="cards-professores">
-        <p>Carregando equipe da academia…</p>
+        <article class="professor" data-exemplo><img class="foto-professor" src="../assets/images/professor-carlos.webp" alt="Carlos Silva, personagem da demonstração de musculação" width="640" height="640" loading="lazy"><h3>Carlos Silva</h3><p>Musculação</p></article>
+        <article class="professor" data-exemplo><img class="foto-professor" src="../assets/images/professora-ana.webp" alt="Ana Souza, personagem da demonstração de treinamento funcional" width="640" height="640" loading="lazy"><h3>Ana Souza</h3><p>Treinamento funcional</p></article>
+        <article class="professor" data-exemplo><img class="foto-professor" src="../assets/images/professor-lucas.webp" alt="Lucas Martins, personagem da demonstração de condicionamento físico" width="640" height="640" loading="lazy"><h3>Lucas Martins</h3><p>Condicionamento físico</p></article>
       </div>
+      <p id="notaEquipe" class="nota-demo" data-exemplo>Equipe ilustrativa da demonstração.</p>
     </section>
 
     <section id="galeria" class="secao-galeria">
@@ -138,7 +144,7 @@
     </section>
 
     <section id="horarios" class="secao-clara">
-      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td colspan="2">Carregando horários da academia…</td></tr></tbody></table></div></div>
+      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody data-exemplo><tr><td>Segunda-feira</td><td>06:00 às 22:00</td></tr><tr><td>Terça-feira</td><td>06:00 às 22:00</td></tr><tr><td>Quarta-feira</td><td>06:00 às 22:00</td></tr><tr><td>Quinta-feira</td><td>06:00 às 22:00</td></tr><tr><td>Sexta-feira</td><td>06:00 às 22:00</td></tr><tr><td>Sábado</td><td>08:00 às 14:00</td></tr><tr><td>Domingo</td><td>Fechado</td></tr></tbody></table></div><p id="notaFuncionamento" class="nota-demo" data-exemplo>Funcionamento ilustrativo da demonstração.</p></div>
     </section>
 
     <section id="imc" class="container secao-formulario">
@@ -147,7 +153,7 @@
     </section>
 
     <section class="secao-clara secao-formulario">
-      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano" disabled><option value="">Carregando planos…</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit" disabled>Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
+      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano" data-exemplo disabled><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><small id="notaSimulador" class="ajuda-campo" data-exemplo>Simulação com valores ilustrativos da demonstração.</small><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit" disabled>Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
     </section>
 
     <section id="agendamento" class="container secao-formulario">
@@ -167,7 +173,7 @@
     </section>
   </main>
 
-  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Contato</h3><p><a href="#contato">Envie uma mensagem pelo formulário</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Atendimento</h3><div id="funcionamentoRodape"><p>Segunda a sexta: 06:00 às 22:00</p><p>Sábado: 08:00 às 14:00</p><p>Domingo: Fechado</p></div><p><a href="../html/privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
+  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Contato</h3><p><a href="#contato">Envie uma mensagem pelo formulário</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Atendimento</h3><div id="funcionamentoRodape" data-exemplo><p>Segunda a sexta: 06:00 às 22:00</p><p>Sábado: 08:00 às 14:00</p><p>Domingo: Fechado</p></div><p><a href="../html/privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
 
   <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="tituloPlano"><div class="modal-content"><button type="button" class="fechar" id="fecharModal" aria-label="Fechar modal">&times;</button><h2 id="tituloPlano"></h2><p id="descricaoPlano"></p><a class="btn" id="irAgendamento" href="#agendamento">Solicitar aula</a></div></div>
 
