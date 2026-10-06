@@ -8,7 +8,7 @@ Sistema web para apresentação da academia, solicitação de aulas experimentai
 - IMC com vírgula ou ponto decimal e simulador ligado aos planos publicados.
 - Conta no cabeçalho, painel por perfil e saída da sessão.
 - Cadastro, verificação de e-mail, recuperação de senha e atualização do perfil.
-- Agendamento validado no servidor, proteção contra duplicidade e confirmação transacional de vagas.
+- Agendamento validado no servidor, plano publicado ou interesse ainda não definido, proteção contra duplicidade e confirmação transacional de vagas.
 - Lista de espera; cancelamento pelo aluno ou administrador devolve a primeira pessoa da fila para análise.
 - Professor com atividades próprias e presença, recebendo apenas os campos necessários e identificador aleatório da aula.
 - Administração de planos, equipe, atividades, capacidade, funcionamento e permissões dos professores.
@@ -34,11 +34,13 @@ Live Server em outra porta continua ligado ao projeto real e exige o token de de
 
 ## Implantação
 
-Leia [ENTREGA.md](ENTREGA.md) antes de publicar. Esta versão inclui **Cloud Functions** e precisa do plano **Blaze** para a implantação das funções. Custos de infraestrutura pertencem ao titular da conta Firebase, conforme uso; alertas de orçamento não são um bloqueio automático de gastos.
+Leia [ENTREGA.md](ENTREGA.md) antes de publicar e faça backup/migração quando houver dados antigos. Esta versão inclui **Cloud Functions** e precisa do plano **Blaze** para a implantação das funções. Custos de infraestrutura pertencem ao titular da conta Firebase, conforme uso; alertas de orçamento não são um bloqueio automático de gastos. Publique nesta ordem e execute a aceitação após a atualização completa.
 
 ```bash
 npx firebase login
-npx firebase deploy --project powerfitness-2a4a4 --only functions,firestore,hosting
+npx firebase deploy --project powerfitness-2a4a4 --only functions
+npx firebase deploy --project powerfitness-2a4a4 --only firestore
+npx firebase deploy --project powerfitness-2a4a4 --only hosting
 ```
 
 Em uma instalação vendida, utilize o projeto Firebase do comprador e substitua o ID, a configuração web e a chave pública do App Check. Nunca coloque chave privada de conta de serviço no repositório.
@@ -52,6 +54,7 @@ O primeiro administrador deve criar uma conta, verificar o e-mail e receber, no 
 - [REVISAO_2_5.md](REVISAO_2_5.md): evidências e roteiro de aceitação.
 - [ENTREGA.md](ENTREGA.md): implantação, transferência ao comprador e responsabilidades.
 - [TESTAR.md](TESTAR.md): demonstração completa local, contas fictícias e roteiro no VS Code.
+- [TESTE_COLEGAS.md](TESTE_COLEGAS.md): como liberar o link e registrar a avaliação no domínio publicado.
 
 ## Escopo de venda
 

@@ -8,14 +8,16 @@ Se o projeto já estiver clonado, abra a pasta no VS Code e execute no terminal:
 
 ```bash
 git fetch origin
-git switch review/power-fitness-2.3
-git pull --ff-only origin review/power-fitness-2.3
+git switch main
+git pull --ff-only origin main
 npm ci
 npm ci --prefix functions
 npm run demo
 ```
 
 Na primeira cópia use **Ctrl+Shift+P → Git: Clone**, cole `https://github.com/allander09/academia-power-fitness.git` e abra a pasta clonada. Como o repositório é privado, entre na conta GitHub com acesso quando solicitado. `Repository not found` também pode significar que essa máquina não está autenticada na conta autorizada. Não use `git init` como correção desse erro.
+
+`No commits yet` significa que a branch local está sem histórico; isso não confirma que o projeto foi clonado. Preserve essa pasta e abra uma cópia clonada em outro local. A revisão final passa a estar na `main` após a integração da PR #10; a branch `review/power-fitness-2.3` conserva o histórico dessa preparação. Confira o estado da PR antes de usar uma cópia antiga.
 
 Quando o terminal mostrar **teste local pronto**, abra **http://127.0.0.1:5000/html/**. Mantenha o terminal aberto. O endereço local só funciona no computador que iniciou os emuladores; não use esse endereço no QR da apresentação.
 
@@ -45,6 +47,7 @@ Saia de uma conta antes de entrar na próxima. Duas abas do mesmo navegador comp
 8. **Permissões:** abra `admin.html` e `professor.html` como aluno. O acesso deve ser negado/redirecionado. Conceda/revogue acesso de professor com o administrador e confira a mudança após sair e entrar.
 9. **Privacidade:** como aluno, solicite exclusão. No administrador, use **Excluir conta e dados**, confirme com `EXCLUIR` e confira o protocolo. A conta fictícia excluída não deve voltar a entrar. Reiniciar os emuladores recria as contas iniciais.
 10. **Cadastro e recuperação:** use uma conta fictícia nova. Links de verificação e recuperação aparecem no terminal dos emuladores, em vez de serem enviados por e-mail. Abra o link correspondente para completar o fluxo e entre novamente.
+11. **Links antigos e falhas:** abra `imc.html`, `planos.html` e `agenda.html`; eles encaminham para a seção funcional do site. Desative a rede durante o agendamento: a operação deve informar a falha e permitir nova tentativa. A recuperação de uma conta inexistente usa a mesma mensagem genérica de uma conta existente.
 
 O terminal informa a data das aulas iniciais: o próximo dia aberto. As reservas precisam estar no futuro para serem confirmadas. Para começar uma demonstração nova, encerre com **Ctrl+C** e execute `npm run demo` novamente.
 

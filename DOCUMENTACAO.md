@@ -12,6 +12,8 @@
 
 O cabeçalho público mostra Entrar ou as iniciais da conta. O menu da conta oferece o painel do perfil, perfil e privacidade e saída. A prioridade do login é administrador, professor e aluno. Um login iniciado pelo agendamento retorna ao formulário.
 
+Os endereços antigos `agenda.html`, `contato.html`, `horarios.html`, `imc.html`, `planos.html` e `professores.html` encaminham para a seção correspondente da página principal, onde estão os formulários e o conteúdo atuais.
+
 ## Autorização
 
 Uma conta de aluno não pode escolher papéis privilegiados. O primeiro administrador é autorizado no Console Firestore por `admins/{UID}` com `ativo: true`. Professores são autorizados por administrador em `professores_acesso/{UID}`; precisam verificar o e-mail. Dados próprios podem ser lidos antes da verificação, para permitir o primeiro acesso e reenvio do link. As operações críticas exigem verificação.
@@ -20,7 +22,7 @@ Uma conta de aluno não pode escolher papéis privilegiados. O primeiro administ
 
 1. A página carrega as atividades ativas e o funcionamento real.
 2. O aluno seleciona data, atividade e plano de interesse.
-3. `solicitarAgendamento` valida identidade, perfil, data futura no fuso brasileiro, atividade ativa, dia e horário. Nome e e-mail vêm da conta.
+3. `solicitarAgendamento` valida identidade, perfil, data futura no fuso brasileiro, atividade ativa, dia, horário e plano. O plano deve estar publicado e ativo; a opção `Ainda não decidi` também é aceita. Nome e e-mail vêm da conta.
 4. O ID usa `UID_data_hora`; uma transação também verifica solicitações antigas do aluno para impedir duplicidade.
 5. O pedido começa como `pendente` e não ocupa uma vaga confirmada.
 6. `alterarAgendamento` confirma somente pedidos pendentes ou na fila, conferindo a capacidade da atividade no servidor.
@@ -36,6 +38,8 @@ Capacidade pertence a cada atividade, inclusive quando duas atividades têm a me
 `salvarHorario` valida os campos e o responsável, grava a atividade e sincroniza o professor e o nome da atividade dos agendamentos futuros ativos na mesma transação. Uma hora com reservas futuras não pode ser alterada antes do cancelamento dessas reservas. A capacidade não pode ficar abaixo das reservas confirmadas. Mudanças com mais de 350 reservas futuras exigem migração assistida para respeitar limites da transação. Desativar uma atividade bloqueia novas solicitações; a equipe deve tratar as reservas existentes.
 
 Planos publicados alimentam os cards, a simulação de mensalidade e o formulário de interesse. Quando não existe conteúdo ativo, a página informa isso. Uma falha de carregamento não deve ser interpretada como atualização de preços confirmada; confirme o conteúdo no projeto de destino.
+
+A página inicia com estados de carregamento, sem preços e equipe fictícios como fallback. Falhas ao carregar planos, equipe e funcionamento são informadas. Falhas de autenticação/rede no agendamento restauram o botão e não são exibidas como sucesso. Recuperação de senha não revela pela mensagem se o e-mail está cadastrado, inclusive quando o provedor retorna conta inexistente.
 
 ## Dados
 

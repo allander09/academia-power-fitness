@@ -21,8 +21,8 @@ No computador autorizado do responsável, a partir da raiz do repositório:
 
 ```bash
 git fetch origin
-git switch review/power-fitness-2.3
-git pull --ff-only origin review/power-fitness-2.3
+git switch main
+git pull --ff-only origin main
 npm ci
 npm ci --prefix functions
 npm run check
@@ -71,6 +71,8 @@ A primeira chamada apenas relata. O script preenche identificador aleatório da 
 Antes da publicação, o responsável pode testar os três perfis com `npm run demo`, seguindo [TESTAR.md](TESTAR.md). O modo local não usa dados reais nem requer conta de faturamento. Isso permite revisar a entrega enquanto o acesso ao projeto de destino é configurado.
 
 Use REVISAO_2_5.md no domínio final. Registre data, versão/commit, responsável, dispositivo, navegador e resultado dos fluxos. Conferir Console, falhas de rede, regras reais, App Check e e-mail de verificação/recuperação é obrigatório. Os testes locais já realizados não substituem esse registro. O comprador deve receber acesso e reproduzir o login administrativo antes do aceite.
+
+Para uma avaliação pública antes da venda, siga [TESTE_COLEGAS.md](TESTE_COLEGAS.md). O link de Hosting já existente não comprova que esta atualização foi publicada.
 
 ## Rotina de privacidade e recuperação
 

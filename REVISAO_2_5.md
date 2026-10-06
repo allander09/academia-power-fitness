@@ -19,21 +19,28 @@
 - Demonstração local completa com contas fictícias dos três perfis, sem login no Firebase ou faturamento.
 - Corrigida a remoção de `index.html` pelo Hosting, que podia fazer os links relativos apontarem para a raiz errada. A configuração agora preserva as URLs HTML.
 - Menu da conta aguarda o carregamento do perfil antes de permitir abertura.
+- Revisão final de 05/10/2026: os seis endereços públicos antigos encaminham para as seções funcionais, eliminando formulários com IDs incompatíveis.
+- Agendamento trata falhas de Auth/rede e restaura o botão em todos os retornos; planos inventados/desativados são recusados no servidor.
+- Recuperação de senha mantém mensagem genérica para conta inexistente; cálculos de IMC não exibem resultados infinitos.
+- Carregamento e indisponibilidade de equipe/funcionamento explícitos; preços e profissionais estáticos removidos dos estados iniciais.
 
 ## Evidências locais
 
-- 30 testes de lógica e estrutura: aprovados, incluindo a separação entre ambiente local e produção.
-- 16 testes de integração no Firestore/Authentication Emulator Suite: aprovados, incluindo confirmações concorrentes, negação de acesso, presença, duplicidade e exclusão. Outros cinco testes verificam o protocolo HTTP das funções e a navegação no Hosting.
+- 31 testes de lógica e estrutura: aprovados, incluindo a separação entre ambiente local e produção e a resposta de recuperação.
+- 17 testes de integração no Firestore/Authentication Emulator Suite: aprovados, incluindo confirmações concorrentes, negação de acesso, presença, duplicidade, exclusão e validação do plano. Outros cinco testes verificam o protocolo HTTP das funções e a navegação no Hosting na integração contínua. A suíte completa reúne 53 testes; consulte a execução do commit no GitHub Actions.
 - Interface executada em navegador headless com respostas Firebase simuladas: IMC, planos dinâmicos, simulador, seleção de plano, menu da conta, teclado, saída, painéis e estado sem planos aprovados.
+- Na revisão de 05/10, a interface foi revalidada nas cinco larguras, com as seis rotas antigas, indisponibilidade de conteúdo, falha de rede no agendamento e recuperação de conta inexistente. Dez grupos de cenários aprovados; nenhum erro JavaScript não tratado nesses cenários.
 - Interface também executada com o SDK Firebase 12.17.1 real e os emuladores: login dos três perfis, primeiro acesso sem verificação, perfil persistido após recarga, reserva pelo navegador, capacidade pelo administrador e presença pelo professor aprovados. Os módulos oficiais foram mantidos em cache local no ensaio; as respostas de dados não foram simuladas.
 - Larguras 1440, 1024, 901, 900 e 390 px sem transbordamento horizontal; capturas de desktop, conta no celular, administração e professor inspecionadas.
 - Sintaxe do frontend, servidor e scripts: aprovada.
 - Auditoria das dependências de produção do servidor: zero vulnerabilidades conhecidas na execução da revisão (resultado pontual; reavaliar em futuras atualizações).
 - Imagens do repositório restauradas na cópia de trabalho e decodificadas sem erros. Não foi necessário alterar os arquivos remotos de imagem.
 
-A execução local de Functions neste ambiente precisou de um ajuste temporário de transporte interno da CLI (TCP no lugar de socket Unix indisponível). Esse ajuste não faz parte do repositório; a validação no GitHub executa a CLI original com Node.js 22/Java 21. App Check real permanece uma etapa exclusiva da aceitação em produção.
+A primeira execução local de Functions neste ambiente precisou de um ajuste temporário de transporte interno da CLI (TCP no lugar de socket Unix indisponível). Esse ajuste não faz parte do repositório. Na revisão de 05/10, a CLI original voltou a encontrar o bloqueio de socket do ambiente: os 17 testes de negócio foram executados diretamente com Firestore/Auth emulados, e a suíte completa de HTTP/Functions fica na validação do GitHub, com CLI original, Node.js 22/Java 21. App Check real permanece uma etapa exclusiva da aceitação em produção.
 
 Para reproduzir a demonstração local, consulte [TESTAR.md](TESTAR.md). Roteiro manual abaixo ainda precisa ser executado no projeto de destino. Não houve publicação no Firebase nesta revisão: a CLI não estava autenticada e o acesso ao Console nesta sessão encontrou erro de conexão na página de login do Google.
+
+Em 05/10 o titular confirmou que o UID do e-mail administrativo corresponde ao documento `admins/{UID}` com `ativo: true`. Isso confirma o cadastro da permissão; verificação de e-mail e login administrativo na versão publicada ainda dependem do teste real. A nova consulta de plano usa somente o índice simples de `planos.nome`; não exige índice composto adicional.
 
 ## Roteiro no domínio publicado
 
