@@ -2,29 +2,33 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Política de Privacidade da Power Fitness.">
-  <meta name="robots" content="noindex">
+  <meta name="description" content="Política de Privacidade da Power Fitness."><meta name="robots" content="noindex">
   <title>Política de Privacidade | Power Fitness</title>
-  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
   <header class="cabecalho-interno"><h1>Política de Privacidade</h1><a href="index.html">← Voltar</a></header>
   <main class="container pagina-texto">
-    <p><strong>Última atualização:</strong> 26 de agosto de 2026.</p>
-    <h2>Dados tratados</h2>
-    <p>A Power Fitness trata nome, e-mail e telefone para criar a conta, responder contatos e gerenciar solicitações de aula experimental. Senhas são processadas pelo Firebase Authentication e não são armazenadas pela aplicação no Cloud Firestore.</p>
-    <h2>Finalidades</h2>
-    <ul><li>identificar e autenticar o usuário;</li><li>permitir acesso à área do aluno;</li><li>gerenciar solicitações e cancelamentos;</li><li>responder mensagens enviadas pelo site;</li><li>proteger o sistema contra abuso e fraude.</li></ul>
-    <h2>Armazenamento e segurança</h2>
-    <p>Os dados ficam no Firebase Authentication e no Cloud Firestore. O acesso é controlado por autenticação, verificação de e-mail, regras de segurança e App Check. Não informe dados de saúde, documentos ou outras informações sensíveis nos formulários.</p>
-    <h2>Conservação</h2>
-    <p>Os dados devem ser mantidos somente pelo período necessário para as finalidades informadas e para o cumprimento de obrigações aplicáveis. Solicitações encerradas e mensagens antigas devem ser revisadas e excluídas conforme a política da academia.</p>
-    <h2>Direitos do titular</h2>
-    <p>O titular pode solicitar confirmação do tratamento, acesso, correção ou exclusão dos próprios dados pelo formulário de contato do site. A identidade poderá ser confirmada antes do atendimento.</p>
+    <p><strong>Versão:</strong> 2026-10-04.</p>
+    <p id="avisoDemonstracao" role="status"><strong>Ambiente de demonstração.</strong> A identificação da academia ainda precisa ser configurada. Use dados fictícios e não forneça informações pessoais reais neste ambiente.</p>
     <h2>Responsável pelo tratamento</h2>
-    <p>Antes de utilizar o sistema com clientes reais, a academia responsável deve informar nesta seção sua razão social ou nome, CNPJ/CPF, endereço e canal de privacidade, além de submeter esta política à revisão jurídica adequada.</p>
+    <p><strong id="controladorNome">Academia ainda não configurada</strong><br><span id="controladorDocumento"></span><br><span id="controladorEndereco"></span></p>
+    <p>Canal de privacidade: <a id="canalPrivacidade">aguardando configuração.</a></p>
+    <h2>Dados e finalidades</h2>
+    <p>Nome, e-mail e telefone permitem criar a conta, autenticar o usuário, manter o perfil e organizar solicitações de aulas experimentais. Agendamentos incluem atividade, plano de interesse, data, hora, responsável, status e presença. Mensagens de contato são usadas para responder à solicitação. A senha é processada pelo Firebase Authentication e não fica no banco de dados da aplicação.</p>
+    <p>A conta e os agendamentos atendem à solicitação do usuário e aos procedimentos relacionados ao serviço. Registros de segurança e auditoria protegem as contas e permitem investigar falhas e abuso. O responsável deve avaliar e documentar a base legal apropriada a cada finalidade na sua operação. A ciência desta política não autoriza marketing; o sistema não realiza campanhas de marketing.</p>
+    <p>O IMC e a simulação de mensalidade são calculados no navegador. Peso e altura não são salvos. Não envie dados de saúde, documentos ou outras informações sensíveis nos formulários. O IMC é informativo e não substitui avaliação profissional.</p>
+    <h2>Acesso e fornecedores</h2>
+    <p>Alunos acessam os próprios dados. Professores autorizados recebem somente nome, atividade, data, hora, status, presença e um identificador aleatório da aula, nas atividades vinculadas a eles. Administradores autorizados gerenciam a operação da academia.</p>
+    <p>A infraestrutura utiliza Google Firebase (Authentication, Firestore, Functions e Hosting), reCAPTCHA Enterprise para proteção contra abuso, Google Fonts e um CDN de ícones. Esses fornecedores podem tratar informações técnicas como IP e dados de acesso, inclusive em outros países, conforme seus serviços e termos. A academia deve verificar as regiões, os contratos e os mecanismos aplicáveis de transferência internacional.</p>
+    <h2>Conservação e descarte</h2>
+    <p>O perfil permanece enquanto a conta for necessária ao serviço ou houver obrigação aplicável de conservação. Agendamentos encerrados são revisados após <span id="agendamentosDias">180</span> dias; contatos respondidos, após <span id="contatosDias">90</span> dias; histórico de segurança, após <span id="auditoriaDias">365</span> dias. Estes são critérios operacionais configuráveis, e não prazos legais universais. A academia realiza a revisão e elimina dados sem necessidade de conservação, registrando a decisão.</p>
+    <p>Pedidos de exclusão são analisados antes da execução. Quando aprovados, o sistema bloqueia a conta, remove os dados vinculados no banco ativo e exclui a conta de autenticação. Mantém um protocolo de conclusão sem nome ou e-mail e um bloqueio técnico temporário para impedir reutilização da sessão. Backups, logs dos fornecedores e eventuais registros sujeitos a obrigação de conservação precisam de tratamento pelo responsável conforme seus prazos próprios.</p>
+    <h2>Direitos e atendimento</h2>
+    <p>No seu painel é possível corrigir nome e telefone, exportar os dados vinculados à conta e solicitar exclusão. Para acesso a outros registros, correção de e-mail, mensagens enviadas sem login, informações sobre compartilhamento ou demais direitos, procure o canal de privacidade. A academia verifica a identidade quando necessário e informa o resultado da solicitação.</p>
+    <h2>Segurança</h2>
+    <p>O projeto utiliza autenticação, verificação de e-mail, regras de acesso e validação das operações críticas no servidor. A academia deve manter acessos individuais, revogar contas que deixaram a equipe, configurar a proteção App Check e executar sua rotina de segurança e atendimento a incidentes. A política e a operação devem ser revisadas antes da implantação comercial.</p>
   </main>
+  <script type="module" src="../js/privacidade.js"></script>
 </body>
 </html>
-

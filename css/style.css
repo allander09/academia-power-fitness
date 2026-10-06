@@ -21,12 +21,15 @@ section{padding:80px 0}section h2{text-align:center;font-size:clamp(2rem,4vw,2.5
 .estatisticas{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;padding:42px 8%;background:var(--preto);color:#fff;text-align:center}
 .estatisticas .item{display:flex;flex-direction:column}.estatisticas strong{font-size:2rem;color:#ff4545}.estatisticas span{color:#ddd}
 .plano{text-align:center;position:relative}.plano h3{font-size:1.5rem}.plano ul{margin:22px 0}.plano li{margin:8px}.plano li::before{content:"✓ ";color:var(--vermelho);font-weight:700}
+.marca-planos{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 12px;color:var(--preto);font-size:1.05rem;font-weight:700;letter-spacing:.5px}.marca-planos img{width:48px;height:48px}.marca-planos strong{color:var(--vermelho)}
+.planos .marca-planos+h2{margin-bottom:36px}
 .preco{font-size:2rem;color:var(--vermelho);font-weight:700;margin:16px 0}.preco small{font-size:.9rem;color:#666}
 .destaque-plano{border:2px solid var(--vermelho);transform:scale(1.03)}.selo{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--vermelho);color:#fff;border-radius:99px;padding:5px 14px;font-size:.8rem;white-space:nowrap}
 .professor{text-align:center}.foto-professor,.avatar{display:grid;place-items:center;width:150px;height:150px;border-radius:50%;margin:0 auto 18px;border:5px solid #fff;box-shadow:0 0 0 3px #f1c8c8;object-fit:cover}.avatar{background:linear-gradient(135deg,var(--vermelho),#4d0505);color:#fff;font-size:2rem;font-weight:700}
 .secao-galeria{background:#111;color:#fff}.secao-galeria .subtitulo{color:#cfcfcf}.galeria-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.galeria-grid figure{position:relative;overflow:hidden;border-radius:16px;background:#222;min-height:280px}.galeria-grid img{width:100%;height:100%;min-height:280px;object-fit:cover;transition:transform .35s ease}.galeria-grid figure:hover img{transform:scale(1.04)}.galeria-grid figcaption{position:absolute;inset:auto 0 0;padding:46px 22px 18px;background:linear-gradient(transparent,rgba(0,0,0,.88));font-weight:600;font-size:1.05rem}
 .tabela-responsiva{overflow-x:auto;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
 table{width:100%;border-collapse:collapse;background:#fff}th{background:var(--vermelho);color:#fff}th,td{padding:16px;text-align:left;border-bottom:1px solid #eee}
+.quadro-horarios{width:min(720px,100%);margin-inline:auto}.quadro-horarios th,.quadro-horarios td{padding:10px 16px}.quadro-horarios th:first-child,.quadro-horarios td:first-child{width:52%}
 .secao-formulario .aviso{text-align:center;margin:-20px auto 30px;color:#666}.form-card{max-width:640px;margin:auto}
 label{display:block;font-weight:600;margin:12px 0 6px}
 input,select,textarea{width:100%;padding:13px;border:1px solid #bbb;border-radius:8px;background:#fff}
@@ -40,3 +43,6 @@ textarea{resize:vertical}.form-card button{width:100%;margin-top:12px}
 input[readonly]{background:#f2f3f5;color:#444;cursor:not-allowed}
 .mensagem a{text-decoration:underline}
 
+@media(min-width:901px){#horarios{padding:56px 0}#horarios h2{margin-bottom:24px}}
+
+.aviso-demonstracao{padding:12px 16px;margin:12px 0;border:1px solid #ddb75b;border-radius:8px;background:#fff4cc;color:#574313;font-size:.85rem;line-height:1.5}

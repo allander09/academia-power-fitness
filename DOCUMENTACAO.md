@@ -1,155 +1,80 @@
-# Documentação — Power Fitness
+# Power Fitness — documentação funcional 2.5
 
-## 1. Objetivo
+## Telas e perfis
 
-O Power Fitness é um site institucional com cadastro de alunos, solicitação de aula experimental e painel administrativo para uma única academia.
+| Perfil | Tela | Operações |
+|---|---|---|
+| Público | `html/index.html` | Informações, planos, equipe, horários, IMC, simulação, contato |
+| Conta | `html/login.html`, `html/formularios.html` | Cadastro, login, recuperação, verificação de e-mail |
+| Aluno | `html/painel.html` | Perfil, próprios agendamentos, cancelamento, exportação e pedido de exclusão |
+| Professor | `html/professor.html` | Atividades atribuídas, alunos vinculados e presença |
+| Administrador | `html/admin.html` | Conteúdo, alunos, professores, agenda, fila, privacidade e auditoria |
 
-## 2. Tecnologias
+O cabeçalho público mostra Entrar ou as iniciais da conta. O menu da conta oferece o painel do perfil, perfil e privacidade e saída. A prioridade do login é administrador, professor e aluno. Um login iniciado pelo agendamento retorna ao formulário.
 
-- HTML5 e CSS3;
-- JavaScript com módulos;
-- Firebase Authentication;
-- Cloud Firestore;
-- Firebase App Check com reCAPTCHA Enterprise;
-- Firebase Hosting;
-- GitHub Actions e testes com Node.js.
+Os endereços antigos `agenda.html`, `contato.html`, `horarios.html`, `imc.html`, `planos.html` e `professores.html` encaminham para a seção correspondente da página principal, onde estão os formulários e o conteúdo atuais.
 
-## 3. Perfis de acesso
+## Autorização
 
-### Visitante
+Uma conta de aluno não pode escolher papéis privilegiados. O primeiro administrador é autorizado no Console Firestore por `admins/{UID}` com `ativo: true`. Professores são autorizados por administrador em `professores_acesso/{UID}`; precisam verificar o e-mail. Dados próprios podem ser lidos antes da verificação, para permitir o primeiro acesso e reenvio do link. As operações críticas exigem verificação.
 
-Visualiza serviços, planos, professores e horários. Também pode calcular o IMC, simular mensalidade e enviar uma mensagem.
+## Agendamento
 
-### Aluno
+1. A página carrega as atividades ativas e o funcionamento real.
+2. O aluno seleciona data, atividade e plano de interesse.
+3. `solicitarAgendamento` valida identidade, perfil, data futura no fuso brasileiro, atividade ativa, dia, horário e plano. O plano deve estar publicado e ativo; a opção `Ainda não decidi` também é aceita. Nome e e-mail vêm da conta.
+4. O ID usa `UID_data_hora`; uma transação também verifica solicitações antigas do aluno para impedir duplicidade.
+5. O pedido começa como `pendente` e não ocupa uma vaga confirmada.
+6. `alterarAgendamento` confirma somente pedidos pendentes ou na fila, conferindo a capacidade da atividade no servidor.
+7. A turma usa um documento de coordenação por data e atividade; confirmações simultâneas não podem consumir a mesma última vaga.
+8. Quando não há vaga, o pedido vira `lista_espera`.
+9. Cancelar uma reserva confirmada promove o primeiro pedido da fila para `pendente`. A academia confirma a nova vaga.
+10. Presença só pode ser registrada em reserva confirmada pelo professor vinculado ou administrador.
 
-Cria uma conta, verifica o e-mail, atualiza nome e telefone, solicita aula experimental e acompanha ou cancela os próprios agendamentos. Quando o login é iniciado pelo formulário de agendamento, o sistema retorna ao mesmo ponto após autenticar.
+Capacidade pertence a cada atividade, inclusive quando duas atividades têm a mesma hora. Uma pessoa não pode ter duas solicitações ativas no mesmo horário. Não existe garantia de vaga na solicitação. Não existe controle de duração/sobreposição entre horários diferentes.
 
-### Administrador
+## Alterações da atividade
 
-Usa a mesma tela de login. O acesso é liberado quando existe `admins/{UID}` no Firestore. Pode consultar alunos, contatos e agendamentos, alterar status e administrar planos, professores e horários.
+`salvarHorario` valida os campos e o responsável, grava a atividade e sincroniza o professor e o nome da atividade dos agendamentos futuros ativos na mesma transação. Uma hora com reservas futuras não pode ser alterada antes do cancelamento dessas reservas. A capacidade não pode ficar abaixo das reservas confirmadas. Mudanças com mais de 350 reservas futuras exigem migração assistida para respeitar limites da transação. Desativar uma atividade bloqueia novas solicitações; a equipe deve tratar as reservas existentes.
 
-## 4. Coleções do Firestore
+Planos publicados alimentam os cards, a simulação de mensalidade e o formulário de interesse. Quando não existe conteúdo ativo, a página informa isso. Uma falha de carregamento não deve ser interpretada como atualização de preços confirmada; confirme o conteúdo no projeto de destino.
 
-| Coleção | Finalidade |
+A página inicia com estados de carregamento, sem preços e equipe fictícios como fallback. Falhas ao carregar planos, equipe e funcionamento são informadas. Falhas de autenticação/rede no agendamento restauram o botão e não são exibidas como sucesso. Recuperação de senha não revela pela mensagem se o e-mail está cadastrado, inclusive quando o provedor retorna conta inexistente.
+
+## Dados
+
+| Coleção/documento | Uso e acesso |
 |---|---|
-| `usuarios` | Perfil do aluno |
-| `admins` | Permissão administrativa pelo UID |
-| `agendamentos` | Solicitações de aula experimental; o ID usa `UID_data_hora` para impedir duplicidade |
-| `contatos` | Mensagens enviadas pelo site |
-| `planos` | Planos exibidos publicamente |
-| `professores` | Equipe exibida publicamente |
-| `horarios` | Horários e atividades |
+| `usuarios/{UID}` | Perfil, registro de ciência e timestamps; titular e administrador |
+| `admins/{UID}` | Permissão administrativa; bootstrap/revogação no Console |
+| `professores_acesso/{UID}` | Permissão de professor; manutenção por administrador |
+| `agendamentos` | Reservas; aluno proprietário e administrador leem documentos; servidor altera |
+| `turmas` | Coordenação transacional; só servidor |
+| `contatos` | Mensagens e ciência de privacidade; leitura administrativa |
+| `planos`, `professores`, `horarios` | Conteúdo ativo público; atividades alteradas pelo servidor |
+| `configuracoes/funcionamento` | Funcionamento semanal e capacidade padrão |
+| `configuracoes/privacidade` | Controlador, canal e prazos de revisão configuráveis |
+| `solicitacoes_privacidade/{UID}` | Pedido pendente ou em processamento |
+| `exclusoes/{UID}` | Bloqueio técnico da conta durante e após a exclusão |
+| `comprovantes_privacidade` | Protocolo sem nome ou e-mail da conta excluída |
+| `auditoria` | Histórico protegido de alterações |
 
-## 5. Segurança
+O professor recebe pela função apenas `aulaId`, nome, atividade, data, hora, status e presença. `aulaId` é aleatório, sem UID do aluno; documentos antigos recebem esse identificador no servidor. O professor não lê o documento de agendamento, e-mail, telefone, plano, perfil completo nem auditoria.
 
-- Cada aluno lê e altera apenas o próprio perfil e os próprios agendamentos.
-- Somente administradores consultam todos os alunos, contatos e agendamentos.
-- Agendamentos e administração exigem e-mail verificado.
-- O e-mail salvo no agendamento deve ser o mesmo da conta autenticada.
-- Timestamps de criação e atualização são validados pelas regras do Firestore.
-- Visitantes leem somente planos, professores e horários marcados como ativos.
-- Ninguém consegue criar administradores pelo site.
-- O App Check reduz solicitações feitas fora do site legítimo.
-- Senhas permanecem no Firebase Authentication e nunca são salvas no Firestore.
+## Privacidade e exclusão
 
-## 6. Executar no VS Code
+Cadastro e contato registram versão da política e timestamp de ciência. Esse registro não constitui autorização de marketing. A identificação real da academia é configurada no painel. Até a configuração revisada, o site exibe aviso de demonstração.
 
-1. Clone o repositório.
-2. Abra a pasta `academia-power-fitness` no VS Code.
-3. Use o Live Server para abrir `html/index.html`.
-4. Para atualizar uma cópia existente, execute `git pull origin main`.
+A exportação reúne conta, perfil, reservas, contatos vinculados ao UID, pedido de privacidade e eventual acesso de professor. Contatos enviados sem login, registros complementares e documentos externos são tratados pelo canal de privacidade após conferência de identidade.
 
-## 7. Testes
+O administrador analisa o pedido e eventuais obrigações de conservação antes de usar Excluir conta e dados. A operação bloqueia e desativa a conta, cancela/remove as reservas, trata a fila, remove contatos vinculados ao UID/e-mail e os registros de auditoria associados, limpa permissões e vínculos de professor, remove o perfil e exclui a conta Authentication. O comprovante contém protocolo, tipo, data e administrador executor. Não existe apenas uma troca para “atendida”.
 
-No terminal:
+Uma falha intermediária deixa o pedido como `processando` e a conta bloqueada. O administrador pode retomar. A exclusão entre Auth e Firestore é retomável, não uma transação única entre os dois serviços. Backups, logs de fornecedor e imagens/perfil público do profissional exigem os procedimentos de entrega. A aplicação não elimina dados externos nem determina sozinha obrigações legais.
 
-```bash
-npm test
-npm run check
-```
+O bloqueio de sessão antiga permanece por segurança; seu prazo mínimo é 24 horas. O TTL declarado no Firestore elimina bloqueios concluídos após a expiração (a execução do fornecedor é assíncrona). Pedidos interrompidos não recebem expiração antes da conclusão. A revisão dos demais prazos de conservação segue a rotina descrita em ENTREGA.md. Peso e altura do IMC não são persistidos.
 
-Antes de entregar, testar:
+## Arquitetura e validação
 
-- cadastro e verificação de e-mail;
-- login e recuperação de senha;
-- atualização do perfil;
-- criação e cancelamento de agendamento;
-- bloqueio de solicitação duplicada, inclusive em cliques rápidos;
-- rejeição de data passada, domingo e horário fora do atendimento;
-- acesso administrativo e negação para aluno comum;
-- edição e desativação de conteúdo;
-- envio e tratamento de contatos;
-- visualização em celular e computador.
+Frontend estático com SDK Firebase modular 12.17.1; Functions em Node.js 22, região `southamerica-east1`, App Check obrigatório e autenticação verificada nas operações críticas. A região das funções não altera automaticamente a região de Auth ou do banco existente. Firestore Rules impedem escrita direta nas reservas e atividades.
 
-## 8. Publicação
-
-Com o Firebase CLI instalado e a conta autorizada:
-
-```bash
-firebase login
-firebase deploy
-```
-
-O comando publica o Hosting e as regras do Firestore configuradas no projeto `powerfitness-2a4a4`.
-
-Endereço principal: **https://powerfitness-2a4a4.web.app/**. O Firebase Hosting redireciona a raiz para `/html/`.
-
-## 9. Configuração do primeiro administrador
-
-1. Cadastre a conta pelo site.
-2. Verifique o e-mail.
-3. Copie o UID em **Firebase Console → Authentication → Usuários**.
-4. Crie `admins/{UID}` no Firestore com `ativo: true`.
-5. Saia e entre novamente.
-
-Não existe senha administrativa separada. A conta usa o e-mail e a senha cadastrados no Firebase Authentication.
-
-## 10. Personalização antes da venda
-
-Para cada academia, substituir:
-
-- nome, logotipo, cores e domínio;
-- telefone, e-mail e endereço;
-- planos, preços, professores e horários;
-- fotos da estrutura e retratos da equipe;
-- identificação do controlador e canal de privacidade;
-- regras comerciais de cancelamento e capacidade das aulas.
-
-## 11. Imagens do site
-
-As imagens em `assets/images/` são demonstrações geradas para apresentar o layout de forma realista. Antes da entrega a um cliente:
-
-1. obtenha autorização escrita das pessoas fotografadas;
-2. substitua os retratos fictícios pelas fotos da equipe real;
-3. substitua as imagens de ambiente por fotos da academia real;
-4. mantenha os arquivos em WebP, com dimensões semelhantes e sem inserir textos dentro da imagem;
-5. atualize o texto alternativo (`alt`) para descrever a foto nova.
-
-No painel administrativo, o cadastro de professor aceita uma URL de foto opcional. Use HTTPS ou um caminho local do próprio projeto. Se a imagem não carregar, o site exibe as iniciais do professor.
-
-## 12. Fluxo do agendamento
-
-1. O visitante escolhe plano, data e horário.
-2. Se não estiver autenticado, o retorno ao formulário fica salvo na sessão.
-3. O e-mail verificado da conta é usado no registro.
-4. Datas passadas, domingos e horários fora do atendimento são rejeitados.
-5. O documento recebe o ID `UID_data_hora`, impedindo uma segunda solicitação ativa igual.
-6. Solicitações canceladas ou recusadas podem ser reenviadas pelo mesmo aluno.
-7. O administrador confirma ou cancela a solicitação.
-
-## 13. Alterações da versão 2.2.0
-
-- reforço das regras do Firestore;
-- agendamento idempotente e validação de horário;
-- retorno ao formulário depois do login;
-- datas e status em português;
-- feedback de erro ao cancelar ou atualizar perfil;
-- modal com retenção de foco e restauração do elemento anterior;
-- link para pular ao conteúdo;
-- remoção de estatísticas e contatos fictícios;
-- acesso pela URL principal do Hosting.
-
-## 14. Limites do MVP
-
-O projeto não inclui controle de capacidade automática por turma, pagamento online, controle financeiro, catraca, frequência, prescrição de treino ou suporte a várias academias no mesmo banco. Esses módulos devem ser contratados e desenvolvidos separadamente.
-
+`npm run check` verifica a sintaxe de site/servidor/scripts. `npm test` verifica cálculo, datas, regras de decisão e estrutura. `npm run test:integration` executa cenários com Firestore e Authentication emulados, incluindo isolamento, falsificação, duplicidade, concorrência, presença e exclusão. Consulte REVISAO_2_5.md para aceitação e limites.

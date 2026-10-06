@@ -1,5 +1,6 @@
-import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { collection, doc, getDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { db } from "./firebase-services.js";
+import { DIAS_SEMANA, formatarFuncionamento, normalizarFuncionamento } from "./operacao.mjs";
 
 const fotosPadrao = {
   "carlos silva": "../assets/images/professor-carlos.webp",
@@ -50,13 +51,38 @@ function avatarProfessor(dados) {
 }
 
 async function carregarPlanos() {
-  const snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
   const container = document.querySelector(".cards-planos");
+  container.replaceChildren(elemento("p", "Carregando planos da academia…"));
+  const simulador = document.getElementById("plano");
+  const interesse = document.getElementById("planoAgendamento");
+  const calcular = document.querySelector('#mensalidadeForm button[type="submit"]');
+  simulador.replaceChildren(new Option("Carregando planos…", ""));
+  simulador.disabled = true;
+  calcular.disabled = true;
+  interesse.replaceChildren(new Option("Ainda não decidi", "Ainda não decidi"));
+  let snapshot;
+  try { snapshot = await getDocs(query(collection(db, "planos"), where("ativo", "==", true))); }
+  catch {
+    container.replaceChildren(elemento("p", "Não foi possível carregar os planos. Atualize a página antes de consultar os valores."));
+    simulador.replaceChildren(new Option("Planos indisponíveis", ""));
+    return;
+  }
   container.replaceChildren();
+  simulador.replaceChildren();
+  if (snapshot.empty) {
+    container.append(elemento("p", "Os planos serão publicados pela academia em breve."));
+    simulador.append(new Option("Nenhum plano publicado", ""));
+    simulador.disabled = true;
+    document.querySelector('#mensalidadeForm button[type="submit"]').disabled = true;
+    return;
+  }
+  simulador.disabled = false;
+  calcular.disabled = false;
 
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
+    simulador.append(new Option(`${dados.nome} — ${Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`, String(dados.valor)));
+    interesse.append(new Option(dados.nome, dados.nome));
     const card = elemento("article", "", "plano");
     card.append(elemento("h3", dados.nome), elemento("p", Number(dados.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) + "/mês", "preco"));
     const lista = document.createElement("ul");
@@ -67,13 +93,21 @@ async function carregarPlanos() {
     card.append(lista, botao);
     container.appendChild(card);
   });
+  const salvo = sessionStorage.getItem("powerFitnessPlano");
+  if ([...interesse.options].some(opcao => opcao.value === salvo)) interesse.value = salvo;
 }
 
 async function carregarProfessores() {
-  const snapshot = await getDocs(query(collection(db, "professores"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
   const container = document.querySelector(".cards-professores");
+  container.replaceChildren(elemento("p", "Carregando equipe da academia…"));
+  let snapshot;
+  try { snapshot = await getDocs(query(collection(db, "professores"), where("ativo", "==", true))); }
+  catch {
+    container.replaceChildren(elemento("p", "Não foi possível carregar a equipe. Atualize a página e tente novamente."));
+    return;
+  }
   container.replaceChildren();
+  if (snapshot.empty) container.append(elemento("p", "A equipe será publicada pela academia em breve."));
   snapshot.docs.forEach((documento) => {
     const dados = documento.data();
     const card = elemento("article", "", "professor");
@@ -82,18 +116,36 @@ async function carregarProfessores() {
   });
 }
 
-async function carregarHorarios() {
-  const snapshot = await getDocs(query(collection(db, "horarios"), where("ativo", "==", true)));
-  if (snapshot.empty) return;
+async function carregarFuncionamento() {
   const tbody = document.querySelector("#horarios tbody");
+  const destaque = document.getElementById("resumoFuncionamento");
+  const rodape = document.getElementById("funcionamentoRodape");
+  const aviso = texto => {
+    const td = elemento("td", texto); td.colSpan = 2;
+    const tr = document.createElement("tr"); tr.append(td); tbody.replaceChildren(tr);
+    if (rodape) rodape.replaceChildren(elemento("p", texto));
+  };
+  aviso("Carregando horários da academia…");
+  let snapshot;
+  try { snapshot = await getDoc(doc(db, "configuracoes", "funcionamento")); }
+  catch {
+    aviso("Não foi possível carregar o funcionamento. Atualize a página e tente novamente.");
+    if (destaque) destaque.textContent = "Consulte o funcionamento";
+    return;
+  }
+  const funcionamento = normalizarFuncionamento(snapshot.exists() ? snapshot.data() : {});
   tbody.replaceChildren();
-  const ordenados = [...snapshot.docs].sort((a, b) => a.data().hora.localeCompare(b.data().hora));
-  ordenados.forEach((documento) => {
-    const dados = documento.data();
+  DIAS_SEMANA.forEach(({ id, rotulo }) => {
     const tr = document.createElement("tr");
-    tr.append(elemento("td", dados.hora), elemento("td", dados.atividade));
+    tr.append(elemento("td", rotulo), elemento("td", formatarFuncionamento(funcionamento.dias[id])));
     tbody.appendChild(tr);
   });
+
+  const diasAbertos = DIAS_SEMANA.filter(({ id }) => funcionamento.dias[id].modo !== "fechado");
+  if (destaque) destaque.textContent = diasAbertos.length === 7 ? "Todos os dias" : "Horários flexíveis";
+  if (rodape) {
+    rodape.replaceChildren(...DIAS_SEMANA.map(({ id, rotulo }) => elemento("p", `${rotulo}: ${formatarFuncionamento(funcionamento.dias[id])}`)));
+  }
 }
 
-Promise.allSettled([carregarPlanos(), carregarProfessores(), carregarHorarios()]);
+Promise.allSettled([carregarPlanos(), carregarProfessores(), carregarFuncionamento()]);

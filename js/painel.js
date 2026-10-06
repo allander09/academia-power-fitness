@@ -1,5 +1,6 @@
-import { onAuthStateChanged, reload, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { collection, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getIdToken, onAuthStateChanged, reload, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
 import { formatarDataISO } from "./validacoes.mjs";
 
@@ -12,7 +13,13 @@ const rotulosStatus = {
   pendente: "Aguardando confirmação",
   confirmado: "Confirmado",
   cancelado: "Cancelado",
-  recusado: "Não aprovado"
+  recusado: "Não aprovado",
+  lista_espera: "Lista de espera"
+};
+
+const rotulosPresenca = {
+  presente: "Presente",
+  ausente: "Ausente"
 };
 
 function criar(tag, texto, classe) {
@@ -47,12 +54,15 @@ function renderizarAgendamentos(documentos) {
     const status = criar("span", `Status: ${rotulosStatus[dados.status] || dados.status || "Não informado"}`, `status-agendamento status-${dados.status || "desconhecido"}`);
     card.append(
       criar("strong", dados.hora ? `${formatarDataISO(dados.data)} às ${dados.hora}` : formatarDataISO(dados.data)),
+      criar("span", `Atividade: ${dados.atividade || "Aula experimental"}`),
+      criar("span", `Professor: ${dados.professorNome || "A definir"}`),
       criar("span", `Plano: ${dados.plano || "Não informado"}`),
       status,
+      criar("small", `Presença: ${rotulosPresenca[dados.presenca] || "Não registrada"}`),
       criar("small", `Solicitado em ${formatarTimestamp(dados.criadoEm)}`)
     );
 
-    if (dados.status === "pendente" || dados.status === "confirmado") {
+    if (["pendente", "confirmado", "lista_espera"].includes(dados.status)) {
       const cancelar = criar("button", "Cancelar agendamento");
       cancelar.type = "button";
       cancelar.addEventListener("click", async () => {
@@ -60,7 +70,7 @@ function renderizarAgendamentos(documentos) {
         cancelar.disabled = true;
         cancelar.textContent = "Cancelando...";
         try {
-          await updateDoc(doc(db, "agendamentos", item.id), { status: "cancelado", atualizadoEm: serverTimestamp() });
+          await chamarBackend("alterarAgendamento", { id: item.id, status: "cancelado" });
           await carregarPainel(usuarioAtual);
         } catch (error) {
           cancelar.disabled = false;
@@ -79,9 +89,12 @@ function renderizarAgendamentos(documentos) {
 async function carregarPainel(usuario) {
   usuarioAtual = usuario;
   await reload(usuario);
-  const [perfilSnap, adminSnap] = await Promise.all([
+  await getIdToken(usuario, true);
+  const [perfilSnap, adminSnap, professorSnap, privacidadeSnap] = await Promise.all([
     getDoc(doc(db, "usuarios", usuario.uid)),
-    getDoc(doc(db, "admins", usuario.uid))
+    getDoc(doc(db, "admins", usuario.uid)),
+    usuario.emailVerified ? getDoc(doc(db, "professores_acesso", usuario.uid)) : Promise.resolve({ exists: () => false }),
+    getDoc(doc(db, "solicitacoes_privacidade", usuario.uid))
   ]);
 
   if (perfilSnap.exists()) {
@@ -92,11 +105,16 @@ async function carregarPainel(usuario) {
   }
   document.getElementById("perfilEmail").value = usuario.email || "";
   document.getElementById("linkAdmin").hidden = !adminSnap.exists() || adminSnap.data().ativo !== true || !usuario.emailVerified;
+  document.getElementById("linkProfessor").hidden = !professorSnap.exists() || professorSnap.data().ativo !== true || !usuario.emailVerified;
 
   const status = document.getElementById("emailVerificado");
   status.textContent = usuario.emailVerified ? "E-mail verificado" : "E-mail ainda não verificado";
   status.className = `status ${usuario.emailVerified ? "verificado" : "pendente"}`;
   document.getElementById("reenviarVerificacao").hidden = usuario.emailVerified;
+  const solicitarExclusao = document.getElementById("solicitarExclusao");
+  const solicitacaoPendente = privacidadeSnap.exists() && ["pendente", "processando"].includes(privacidadeSnap.data().status);
+  solicitarExclusao.disabled = solicitacaoPendente;
+  solicitarExclusao.textContent = solicitacaoPendente ? "Exclusão já solicitada" : "Solicitar exclusão";
 
   const consulta = query(collection(db, "agendamentos"), where("usuarioId", "==", usuario.uid));
   const agendamentos = await getDocs(consulta);
@@ -167,8 +185,52 @@ document.getElementById("reenviarVerificacao").addEventListener("click", async (
   }
 });
 
+document.getElementById("exportarDados").addEventListener("click", async (event) => {
+  const botao = event.currentTarget;
+  const retorno = document.getElementById("feedbackPrivacidade");
+  botao.disabled = true;
+  try {
+    const dados = await chamarBackend("exportarDados");
+    const url = URL.createObjectURL(new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `power-fitness-meus-dados-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    retorno.textContent = "Dados da conta, perfil, agendamentos, contatos vinculados e solicitações exportados. Para mensagens enviadas sem login e outros registros, use o canal de privacidade da academia.";
+    retorno.className = "mensagem sucesso";
+  } catch (error) {
+    retorno.textContent = mensagemBackend(error);
+    retorno.className = "mensagem erro";
+  } finally { botao.disabled = false; }
+});
+
+document.getElementById("solicitarExclusao").addEventListener("click", async (event) => {
+  if (!confirm("Deseja enviar uma solicitação de exclusão dos seus dados? A academia precisará analisar antes de concluir.")) return;
+  const botao = event.currentTarget;
+  const retorno = document.getElementById("feedbackPrivacidade");
+  botao.disabled = true;
+  try {
+    await setDoc(doc(db, "solicitacoes_privacidade", usuarioAtual.uid), {
+      usuarioId: usuarioAtual.uid,
+      email: usuarioAtual.email,
+      tipo: "exclusao",
+      status: "pendente",
+      criadoEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp()
+    });
+    botao.textContent = "Exclusão já solicitada";
+    retorno.textContent = "Solicitação enviada. A academia deverá confirmar a conclusão pelo canal cadastrado.";
+    retorno.className = "mensagem sucesso";
+  } catch (error) {
+    botao.disabled = false;
+    retorno.textContent = "Não foi possível enviar a solicitação agora.";
+    retorno.className = "mensagem erro";
+    console.error("Falha ao solicitar exclusão:", error.code);
+  }
+});
+
 document.getElementById("sair").addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "login.html";
 });
-

@@ -10,6 +10,14 @@ test("calcula IMC e classificação", () => {
 
 test("rejeita altura inválida", () => {
   assert.throws(() => calcularImcValor(70, 0), RangeError);
+  assert.throws(() => calcularImcValor("70", "1e-300"), RangeError);
+  assert.throws(() => calcularImcValor("1e308", "0,5"), RangeError);
+});
+
+test("calcula IMC com decimais no formato brasileiro", () => {
+  const resultado = calcularImcValor("70,5", "1,75");
+  assert.equal(resultado.valor.toFixed(2), "23.02");
+  assert.equal(resultado.situacao, "Peso adequado");
 });
 
 test("calcula plano com extras por vários meses", () => {

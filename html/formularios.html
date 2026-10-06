@@ -12,18 +12,19 @@
     <h1>Crie sua conta</h1>
     <p class="subtitulo-form">Comece sua jornada na Power Fitness.</p>
     <form id="cadastroForm">
-      <label for="nome">Nome completo</label><input type="text" id="nome" autocomplete="name" minlength="3" required>
+      <label for="nome">Nome completo</label><input type="text" id="nome" autocomplete="name" maxlength="100" minlength="3" required>
       <label for="email">E-mail</label><input type="email" id="email" autocomplete="email" required>
       <label for="telefone">Telefone</label><input type="tel" id="telefone" autocomplete="tel" inputmode="tel" maxlength="16" required>
       <label for="senha">Senha</label><input type="password" id="senha" autocomplete="new-password" minlength="8" aria-describedby="senhaAjuda" required><small id="senhaAjuda">Use pelo menos 8 caracteres.</small>
       <label for="confirmarSenha">Confirme a senha</label><input type="password" id="confirmarSenha" autocomplete="new-password" minlength="8" required>
       <button class="botao-secundario" id="alternarSenha" type="button" aria-pressed="false">Mostrar senha</button>
-      <label class="consentimento"><input type="checkbox" id="consentimento" required> Concordo com o tratamento dos dados para criação da conta, conforme a <a href="privacidade.html">Política de Privacidade</a>.</label>
+      <label class="consentimento"><input type="checkbox" id="consentimento" required> Li as informações sobre o uso dos dados para a conta e os agendamentos na <a href="privacidade.html">Política de Privacidade</a>.</label>
       <button type="submit">Cadastrar</button>
       <p id="feedbackCadastro" class="feedback" aria-live="polite" hidden></p>
     </form>
     <p class="alternativa">Já possui uma conta? <a href="login.html">Entrar</a></p>
   </main>
   <script type="module" src="../js/formularios.js"></script>
+  <script type="module" src="../js/ambiente.js"></script>
 </body>
 </html>

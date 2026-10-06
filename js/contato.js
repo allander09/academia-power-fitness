@@ -1,5 +1,6 @@
 import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { auth, db } from "./firebase-services.js";
+import { VERSAO_PRIVACIDADE } from "./privacidade-config.mjs";
 
 const form = document.getElementById("formContato");
 const retorno = document.getElementById("retorno") || document.getElementById("mensagemContato");
@@ -20,12 +21,14 @@ if (form) {
     try {
       await auth.authStateReady();
       await addDoc(collection(db, "contatos"), {
-        usuarioId: auth.currentUser?.uid || null,
+        usuarioId: auth.currentUser?.email?.toLowerCase() === form.querySelector('[name="email"]').value.trim().toLowerCase() ? auth.currentUser.uid : null,
         nome: form.querySelector('[name="nome"]').value.trim(),
         email: form.querySelector('[name="email"]').value.trim().toLowerCase(),
         telefone: form.querySelector('[name="telefone"]')?.value.trim() || "",
         mensagem: form.querySelector('[name="mensagem"]').value.trim(),
         status: "novo",
+        privacidadeVersao: VERSAO_PRIVACIDADE,
+        privacidadeCienteEm: serverTimestamp(),
         criadoEm: serverTimestamp()
       });
 

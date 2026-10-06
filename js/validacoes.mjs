@@ -1,3 +1,5 @@
+import { FUNCIONAMENTO_PADRAO, verificarFuncionamento } from "./operacao.mjs";
+
 export function dataLocalISO(data = new Date()) {
   if (!(data instanceof Date) || Number.isNaN(data.getTime())) {
     throw new TypeError("Informe uma data válida.");
@@ -47,7 +49,7 @@ export function idAgendamento(usuarioId, data, hora) {
   return `${usuarioId}_${data}_${hora}`;
 }
 
-export function validarHorarioAgendamento(data, hora, agora = new Date()) {
+export function validarHorarioAgendamento(data, hora, agora = new Date(), funcionamento = FUNCIONAMENTO_PADRAO) {
   const partes = decomporData(data);
   if (!partes || !/^([01]\d|2[0-3]):[0-5]\d$/.test(hora) || !(agora instanceof Date) || Number.isNaN(agora.getTime())) {
     return { valido: false, mensagem: "Informe uma data e um horário válidos." };
@@ -59,19 +61,8 @@ export function validarHorarioAgendamento(data, hora, agora = new Date()) {
     return { valido: false, mensagem: "Escolha um horário futuro." };
   }
 
-  const diaSemana = dataHora.getDay();
-  if (diaSemana === 0) {
-    return { valido: false, mensagem: "A academia não abre aos domingos." };
-  }
-
-  const minutosDoDia = horas * 60 + minutos;
-  const abre = diaSemana === 6 ? 8 * 60 : 6 * 60;
-  const fecha = diaSemana === 6 ? 14 * 60 : 22 * 60;
-  if (minutosDoDia < abre || minutosDoDia >= fecha) {
-    const faixa = diaSemana === 6 ? "08h às 14h" : "06h às 22h";
-    return { valido: false, mensagem: `Escolha um horário dentro do atendimento: ${faixa}.` };
-  }
+  const operacao = verificarFuncionamento(data, hora, funcionamento);
+  if (!operacao.aberto) return { valido: false, mensagem: operacao.mensagem };
 
   return { valido: true, mensagem: "" };
 }
-

@@ -1,7 +1,7 @@
 import { calcularImcValor } from "./calculos.mjs";
 
-window.calcularIMC = function calcularIMC() {
-  const resultado = document.getElementById("resultadoIMC") || document.getElementById("resultado");
+function calcularIMC() {
+  const resultado = document.getElementById("resultadoIMC");
   if (!resultado) return;
 
   try {
@@ -15,4 +15,9 @@ window.calcularIMC = function calcularIMC() {
     resultado.textContent = "Informe peso e altura válidos.";
     resultado.className = "mensagem erro";
   }
-};
+}
+
+document.getElementById("imcForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  calcularIMC();
+});

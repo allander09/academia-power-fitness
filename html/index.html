@@ -45,11 +45,20 @@
         <li><a href="#imc">IMC</a></li>
         <li><a href="#agendamento">Agendamento</a></li>
         <li><a href="#contato">Contato</a></li>
-        <li><a href="login.html">Entrar</a></li>
-        <li><a href="painel.html">Área do aluno</a></li>
       </ul>
     </nav>
-    <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    <div class="controles-cabecalho">
+      <div class="conta-cabecalho">
+        <a id="contaEntrar" class="conta-entrar" href="login.html">Entrar</a>
+        <button id="contaBotao" class="conta-botao" type="button" aria-label="Abrir minha conta" aria-expanded="false" aria-controls="contaMenu" hidden><span id="contaIniciais" aria-hidden="true">PF</span></button>
+        <div id="contaMenu" class="conta-menu" hidden>
+          <strong id="contaNome">Minha conta</strong><span id="contaEmail"></span><small id="contaPerfil"></small>
+          <a id="contaArea" href="painel.html">Abrir meu painel</a><a href="painel.html">Perfil e privacidade</a>
+          <button id="contaSair" type="button">Sair da conta</button><p id="contaFeedback" aria-live="polite"></p>
+        </div>
+      </div>
+    <button class="menu-mobile" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuPrincipal"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
   </header>
 
   <main id="inicio">
@@ -73,7 +82,7 @@
       <div class="item"><strong>Orientação</strong><span>Acompanhamento profissional</span></div>
       <div class="item"><strong>Variedade</strong><span>Treinos para diferentes objetivos</span></div>
       <div class="item"><strong>Flexibilidade</strong><span>Planos e modalidades adaptáveis</span></div>
-      <div class="item"><strong>Segunda a sábado</strong><span>Horários para encaixar na rotina</span></div>
+      <div class="item"><strong id="resumoFuncionamento">Horários flexíveis</strong><span>Funcionamento configurado pela academia</span></div>
     </section>
 
     <section id="servicos" class="container">
@@ -97,11 +106,13 @@
 
     <section id="planos" class="planos">
       <div class="container">
+        <div class="marca-planos" aria-label="Power Fitness">
+          <img src="../assets/favicon.svg" alt="" width="48" height="48">
+          <span><strong>POWER</strong> FITNESS</span>
+        </div>
         <h2>Nossos planos</h2>
         <div class="cards-planos">
-          <article class="plano"><h3>Básico</h3><p class="preco">R$ 89,90<small>/mês</small></p><ul><li>Musculação</li><li>Avaliação física</li></ul><button type="button" class="escolher-plano" data-plano="Plano Básico" data-valor="R$ 89,90/mês">Escolher</button></article>
-          <article class="plano destaque-plano"><span class="selo">Mais escolhido</span><h3>Premium</h3><p class="preco">R$ 149,90<small>/mês</small></p><ul><li>Musculação</li><li>Funcional</li><li>Cardio</li></ul><button type="button" class="escolher-plano" data-plano="Plano Premium" data-valor="R$ 149,90/mês">Escolher</button></article>
-          <article class="plano"><h3>VIP</h3><p class="preco">R$ 199,90<small>/mês</small></p><ul><li>Todos os serviços</li><li>Personal trainer</li></ul><button type="button" class="escolher-plano" data-plano="Plano VIP" data-valor="R$ 199,90/mês">Escolher</button></article>
+          <p>Carregando planos da academia…</p>
         </div>
       </div>
     </section>
@@ -110,9 +121,7 @@
       <h2>Nossa equipe</h2>
       <p class="subtitulo">Profissionais preparados para orientar cada etapa do seu treino.</p>
       <div class="cards-professores">
-        <article class="professor"><img class="foto-professor" src="../assets/images/professor-carlos.webp" alt="Retrato de Carlos Silva, professor de musculação" width="640" height="640" loading="lazy"><h3>Carlos Silva</h3><p>Musculação</p></article>
-        <article class="professor"><img class="foto-professor" src="../assets/images/professora-ana.webp" alt="Retrato de Ana Souza, professora de treinamento funcional" width="640" height="640" loading="lazy"><h3>Ana Souza</h3><p>Treinamento funcional</p></article>
-        <article class="professor"><img class="foto-professor" src="../assets/images/professor-lucas.webp" alt="Retrato de Lucas Martins, professor de condicionamento físico" width="640" height="640" loading="lazy"><h3>Lucas Martins</h3><p>Condicionamento físico</p></article>
+        <p>Carregando equipe da academia…</p>
       </div>
     </section>
 
@@ -129,16 +138,16 @@
     </section>
 
     <section id="horarios" class="secao-clara">
-      <div class="container"><h2>Horários</h2><div class="tabela-responsiva"><table><thead><tr><th>Horário</th><th>Segunda a sexta</th></tr></thead><tbody><tr><td>06:00</td><td>Musculação</td></tr><tr><td>08:00</td><td>Funcional</td></tr><tr><td>18:00</td><td>Cardio</td></tr><tr><td>20:00</td><td>Cross training</td></tr></tbody></table></div></div>
+      <div class="container horarios-container"><h2>Horários de funcionamento</h2><div class="tabela-responsiva quadro-horarios"><table><thead><tr><th>Dia</th><th>Funcionamento</th></tr></thead><tbody><tr><td colspan="2">Carregando horários da academia…</td></tr></tbody></table></div></div>
     </section>
 
     <section id="imc" class="container secao-formulario">
       <h2>Calculadora de IMC</h2><p class="aviso">O resultado é apenas informativo e não substitui avaliação profissional.</p>
-      <div class="form-card"><label for="peso">Peso em kg</label><input type="number" id="peso" min="1" step="0.1" placeholder="Ex.: 75"><label for="altura">Altura em metros</label><input type="number" id="altura" min="0.5" max="3" step="0.01" placeholder="Ex.: 1,75"><button type="button" onclick="calcularIMC()">Calcular IMC</button><p id="resultadoIMC" class="mensagem" aria-live="polite"></p></div>
+      <form id="imcForm" class="form-card" novalidate><label for="peso">Peso em kg</label><input type="text" id="peso" name="peso" inputmode="decimal" autocomplete="off" placeholder="Ex.: 75,5" required><label for="altura">Altura em metros</label><input type="text" id="altura" name="altura" inputmode="decimal" autocomplete="off" placeholder="Ex.: 1,75" required><button type="submit">Calcular IMC</button><p id="resultadoIMC" class="mensagem" aria-live="polite"></p></form>
     </section>
 
     <section class="secao-clara secao-formulario">
-      <div class="container"><h2>Calcule sua mensalidade</h2><div class="form-card"><label for="plano">Plano</label><select id="plano"><option value="89.90">Básico — R$ 89,90</option><option value="149.90">Premium — R$ 149,90</option><option value="199.90">VIP — R$ 199,90</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1"><button type="button" onclick="calcularMensalidade()">Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></div></div>
+      <div class="container"><h2>Calcule sua mensalidade</h2><form id="mensalidadeForm" class="form-card"><label for="plano">Plano</label><select id="plano" disabled><option value="">Carregando planos…</option></select><label for="meses">Quantidade de meses</label><input type="number" id="meses" min="1" max="36" value="1" required><button type="submit" disabled>Calcular</button><p id="resultadoMensalidade" class="mensagem" aria-live="polite"></p></form></div>
     </section>
 
     <section id="agendamento" class="container secao-formulario">
@@ -147,18 +156,18 @@
         <label for="nomeAgendamento">Nome</label><input type="text" id="nomeAgendamento" name="nome" autocomplete="name" minlength="3" required>
         <label for="emailAgendamento">E-mail</label><input type="email" id="emailAgendamento" name="email" autocomplete="email" required><small id="emailAgendamentoAjuda" class="ajuda-campo">Ao entrar, será usado o e-mail verificado da sua conta.</small>
         <label for="dataAgendamento">Data</label><input type="date" id="dataAgendamento" name="data" required>
-        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Plano Básico</option><option>Plano Premium</option><option>Plano VIP</option><option>Ainda não decidi</option></select>
-        <label for="horaAgendamento">Horário</label><select id="horaAgendamento" name="hora" required><option value="">Selecione um horário</option><option value="06:00">06:00</option><option value="08:00">08:00</option><option value="18:00">18:00</option><option value="20:00">20:00</option></select>
+        <label for="planoAgendamento">Plano de interesse</label><select id="planoAgendamento" name="plano"><option>Ainda não decidi</option></select>
+        <label for="horaAgendamento">Horário</label><select id="horaAgendamento" name="hora" aria-describedby="horarioAgendamentoAjuda" required disabled><option value="">Escolha a data primeiro</option></select><small id="horarioAgendamentoAjuda" class="ajuda-campo">Os horários disponíveis dependem do dia escolhido.</small>
         <button type="submit">Solicitar aula experimental</button><p id="mensagemAgendamento" class="mensagem" aria-live="polite"></p>
       </form>
     </section>
 
     <section id="contato" class="secao-clara secao-formulario">
-      <div class="container"><h2>Contato</h2><form id="formContato" class="form-card"><label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" required><label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" required><label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel"><label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea><label class="consentimento"><input type="checkbox" required> Concordo com o uso dos dados para resposta, conforme a <a href="privacidade.html">Política de Privacidade</a>.</label><button type="submit">Enviar mensagem</button><p id="mensagemContato" class="mensagem" aria-live="polite"></p></form></div>
+      <div class="container"><h2>Contato</h2><form id="formContato" class="form-card"><label for="contatoNome">Nome</label><input type="text" id="contatoNome" name="nome" autocomplete="name" minlength="3" maxlength="100" required><label for="contatoEmail">E-mail</label><input type="email" id="contatoEmail" name="email" autocomplete="email" maxlength="254" required><label for="contatoTelefone">Telefone</label><input type="tel" id="contatoTelefone" name="telefone" autocomplete="tel" maxlength="20"><label for="contatoMensagem">Mensagem</label><textarea id="contatoMensagem" name="mensagem" rows="5" minlength="10" maxlength="1000" required></textarea><label class="consentimento"><input type="checkbox" required> Li as informações sobre o uso dos dados para resposta na <a href="privacidade.html">Política de Privacidade</a>.</label><button type="submit">Enviar mensagem</button><p id="mensagemContato" class="mensagem" aria-live="polite"></p></form></div>
     </section>
   </main>
 
-  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Contato</h3><p><a href="#contato">Envie uma mensagem pelo formulário</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Atendimento</h3><p>Segunda a sexta: 06h às 22h</p><p>Sábado: 08h às 14h</p><p><a href="privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
+  <footer><div class="footer-container container"><div><h2>POWER FITNESS</h2><p>Sua evolução começa aqui.</p></div><div><h3>Contato</h3><p><a href="#contato">Envie uma mensagem pelo formulário</a></p><p>Respondemos pelo e-mail informado no envio.</p></div><div><h3>Atendimento</h3><div id="funcionamentoRodape"><p>Segunda a sexta: 06:00 às 22:00</p><p>Sábado: 08:00 às 14:00</p><p>Domingo: Fechado</p></div><p><a href="privacidade.html">Política de Privacidade</a></p></div></div><p class="copyright">© 2026 Power Fitness — Todos os direitos reservados.</p></footer>
 
   <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="tituloPlano"><div class="modal-content"><button type="button" class="fechar" id="fecharModal" aria-label="Fechar modal">&times;</button><h2 id="tituloPlano"></h2><p id="descricaoPlano"></p><a class="btn" id="irAgendamento" href="#agendamento">Solicitar aula</a></div></div>
 
@@ -166,8 +175,10 @@
   <script src="../js/modal.js"></script>
   <script type="module" src="../js/imc.js"></script>
   <script type="module" src="../js/mensalidade.js"></script>
+  <script type="module" src="../js/conta.js"></script>
   <script type="module" src="../js/agendamento.js"></script>
   <script type="module" src="../js/contato.js"></script>
   <script type="module" src="../js/conteudo-dinamico.js"></script>
+  <script type="module" src="../js/ambiente.js"></script>
 </body>
 </html>

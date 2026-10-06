@@ -1,46 +1,108 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "hosting": {
     "public": ".",
     "ignore": [
       "firebase.json",
-      "firestore.rules",
-      "README.md",
-      "DOCUMENTACAO.md",
-      "SECURITY.md",
-      "package.json",
+      "firestore*",
+      "**/*.md",
+      "package*.json",
+      "functions/**",
+      "scripts/**",
+      "integration/**",
       "tests/**",
+      "node_modules/**",
+      "upload/**",
+      "output/**",
+      "tmp/**",
+      "generated_images/**",
       ".github/**",
-      "**/.*"
+      "**/.*",
+      "**/*.log"
     ],
-    "cleanUrls": true,
+    "cleanUrls": false,
     "redirects": [
-      { "source": "/", "destination": "/html/", "type": 301 }
+      {
+        "source": "/",
+        "destination": "/html/",
+        "type": 301
+      }
     ],
     "headers": [
       {
         "source": "**",
         "headers": [
-          { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "X-Frame-Options", "value": "DENY" },
-          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-          { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(), microphone=(), geolocation=()"
+          }
         ]
       },
       {
         "source": "**/*.@(js|mjs|css)",
         "headers": [
-          { "key": "Cache-Control", "value": "public,max-age=3600" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
         ]
       },
       {
         "source": "**/*.@(webp|png|svg)",
         "headers": [
-          { "key": "Cache-Control", "value": "public,max-age=86400" }
+          {
+            "key": "Cache-Control",
+            "value": "public,max-age=86400"
+          }
         ]
       }
     ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        "test",
+        "*.log"
+      ]
+    }
+  ],
+  "emulators": {
+    "firestore": {
+      "host": "127.0.0.1",
+      "port": 8080
+    },
+    "auth": {
+      "host": "127.0.0.1",
+      "port": 9099
+    },
+    "ui": {
+      "enabled": false
+    },
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5001
+    },
+    "hosting": {
+      "host": "127.0.0.1",
+      "port": 5000
+    }
   }
 }

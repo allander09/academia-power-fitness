@@ -1,137 +1,63 @@
-# Power Fitness
+# Power Fitness 2.5
 
-Aplicação web para uma academia, desenvolvida com HTML, CSS, JavaScript e Firebase.
+Sistema web para apresentação da academia, solicitação de aulas experimentais e operação de uma única academia. Desenvolvido com HTML, CSS, JavaScript e Firebase, com painéis separados para aluno, professor e administrador.
 
 ## Funcionalidades
 
-### Público
+- Site público com serviços, planos, equipe, galeria, horários e contato.
+- IMC com vírgula ou ponto decimal e simulador ligado aos planos publicados.
+- Conta no cabeçalho, painel por perfil e saída da sessão.
+- Cadastro, verificação de e-mail, recuperação de senha e atualização do perfil.
+- Agendamento validado no servidor, plano publicado ou interesse ainda não definido, proteção contra duplicidade e confirmação transacional de vagas.
+- Lista de espera; cancelamento pelo aluno ou administrador devolve a primeira pessoa da fila para análise.
+- Professor com atividades próprias e presença, recebendo apenas os campos necessários e identificador aleatório da aula.
+- Administração de planos, equipe, atividades, capacidade, funcionamento e permissões dos professores.
+- Exportação de dados vinculados à conta, pedido de exclusão e execução administrativa da exclusão no banco ativo e Authentication.
+- Identificação do controlador e prazos de revisão de dados configuráveis no painel.
+- Auditoria das operações e testes de regras, concorrência e autenticação no Firebase Emulator Suite.
 
-- apresentação de serviços, planos, equipe e horários;
-- calculadora de IMC e mensalidade;
-- formulário de contato persistido no Firestore;
-- conteúdo de planos, professores e horários administrável.
+## Instalação e verificação
 
-### Aluno
-
-- cadastro com confirmação de senha e consentimento;
-- autenticação por e-mail e senha;
-- verificação de e-mail e recuperação de senha;
-- atualização de nome e telefone;
-- solicitação de aula experimental com data e horário;
-- bloqueio de solicitação ativa duplicada com identificador estável no Firestore;
-- validação de data futura e do horário de atendimento;
-- consulta e cancelamento dos próprios agendamentos.
-
-### Administração
-
-- acesso apenas com e-mail verificado e UID autorizado;
-- indicadores de alunos, agendamentos e contatos;
-- busca de alunos;
-- confirmação e cancelamento de agendamentos;
-- acompanhamento de mensagens;
-- cadastro, edição, ativação e desativação de planos, professores e horários.
-
-## Tecnologias
-
-- HTML5, CSS3 e JavaScript com módulos;
-- Firebase Authentication, Cloud Firestore, App Check e Hosting;
-- reCAPTCHA Enterprise;
-- Node.js Test Runner;
-- GitHub Actions.
-
-## Executar localmente
-
-O endereço publicado é **https://powerfitness-2a4a4.web.app/**. A raiz redireciona para a página principal.
-
-Use um servidor local porque o projeto utiliza módulos JavaScript. No VS Code, abra a raiz pelo Live Server.
+Requisitos: Node.js 22 e Java 21 para os emuladores.
 
 ```bash
-npm test
+npm ci
+npm ci --prefix functions
 npm run check
+npm test
+npm run test:integration
 ```
 
-## Configurar o Firebase
+Para testar o site completo sem credenciais de produção, execute `npm run demo` e abra `http://127.0.0.1:5000/html/`. A carga inicial fornece contas fictícias dos três perfis e reservas para testar a fila. Veja [TESTAR.md](TESTAR.md) para as contas, o clone no VS Code e o roteiro. Os testes usam exclusivamente o projeto `demo-power-fitness` nos emuladores.
 
-O projeto esperado é `powerfitness-2a4a4`.
+Live Server em outra porta continua ligado ao projeto real e exige o token de desenvolvimento registrado no App Check. `file://` não executa corretamente os módulos. A demonstração local não substitui os testes no domínio publicado.
 
-1. Ative Authentication por e-mail e senha.
-2. Crie o Cloud Firestore.
-3. Registre o app web no App Check com reCAPTCHA Enterprise.
-4. Cadastre o token de depuração usado em desenvolvimento local.
-5. Configure os domínios autorizados.
-6. Publique Hosting e regras:
+## Implantação
+
+Leia [ENTREGA.md](ENTREGA.md) antes de publicar e faça backup/migração quando houver dados antigos. Esta versão inclui **Cloud Functions** e precisa do plano **Blaze** para a implantação das funções. Custos de infraestrutura pertencem ao titular da conta Firebase, conforme uso; alertas de orçamento não são um bloqueio automático de gastos. Publique nesta ordem e execute a aceitação após a atualização completa.
 
 ```bash
-npm install -g firebase-tools
-firebase login
-firebase deploy
+npx firebase login
+npx firebase deploy --project powerfitness-2a4a4 --only functions
+npx firebase deploy --project powerfitness-2a4a4 --only firestore
+npx firebase deploy --project powerfitness-2a4a4 --only hosting
 ```
 
-7. Teste o domínio publicado, inclusive o acesso pela raiz `/`.
-8. Verifique as métricas do App Check e só então aplique a proteção ao Firestore e Authentication.
+Em uma instalação vendida, utilize o projeto Firebase do comprador e substitua o ID, a configuração web e a chave pública do App Check. Nunca coloque chave privada de conta de serviço no repositório.
 
-A configuração web e a chave pública do App Check podem permanecer no cliente. Senhas, chaves privadas e tokens de depuração nunca devem ser publicados.
+O primeiro administrador deve criar uma conta, verificar o e-mail e receber, no Console Firestore, o documento `admins/UID_EXATO` com `ativo: true`. O site não permite promover a própria conta.
 
-## Criar o primeiro administrador
+## Documentos
 
-O painel não permite que um usuário transforme a própria conta em administrador.
+- [DOCUMENTACAO.md](DOCUMENTACAO.md): telas, operações, dados e comportamento.
+- [SECURITY.md](SECURITY.md): controles técnicos e operação de segurança.
+- [REVISAO_2_5.md](REVISAO_2_5.md): evidências e roteiro de aceitação.
+- [ENTREGA.md](ENTREGA.md): implantação, transferência ao comprador e responsabilidades.
+- [TESTAR.md](TESTAR.md): demonstração completa local, contas fictícias e roteiro no VS Code.
+- [TESTE_COLEGAS.md](TESTE_COLEGAS.md): como liberar o link e registrar a avaliação no domínio publicado.
 
-1. Cadastre e verifique a conta normalmente.
-2. Copie o UID em **Firebase Console → Authentication → Usuários**.
-3. No Firestore, crie a coleção `admins`.
-4. Crie um documento cujo ID seja exatamente o UID.
-5. Adicione o campo `ativo` do tipo booleano com valor `true`.
-6. Entre novamente e acesse `html/admin.html`.
+## Escopo de venda
 
-Não existe senha administrativa separada. O administrador usa o e-mail e a senha da conta correspondente ao UID autorizado.
+Entrega de um sistema para uma academia, com personalização, implantação, fonte e documentação conforme o contrato. Não inclui pagamentos online, cobrança de mensalidades, controle contábil, catraca, prescrição de treino, notificações automáticas nem várias academias no mesmo banco. O suporte mensal é um serviço separado; a ausência desse pacote não elimina obrigações de correção e garantia aplicáveis.
 
-## Estrutura principal
-
-- `html/index.html`: página pública;
-- `html/login.html`: autenticação;
-- `html/formularios.html`: cadastro;
-- `html/painel.html`: área do aluno;
-- `html/admin.html`: administração;
-- `js/firebase-services.js`: Firebase e App Check;
-- `js/validacoes.mjs`: regras reutilizáveis e testáveis;
-- `firestore.rules`: regras de acesso;
-- `tests/`: testes automatizados;
-- `.github/workflows/ci.yml`: validação contínua;
-- `DOCUMENTACAO.md`: documentação funcional e operacional.
-
-## Limitações comerciais
-
-- não há pagamento, matrícula financeira, controle de presença ou prescrição de treino;
-- o sistema atende uma única academia por projeto Firebase;
-- os dados e contatos exibidos devem ser personalizados antes da venda;
-- a política de privacidade deve identificar o controlador real e ser revisada para o cliente;
-- o bloqueio impede duplicidade por aluno, mas a capacidade total por horário ainda depende da confirmação do administrador;
-- configure backup, alertas e suporte antes de armazenar dados reais.
-
-## Melhorias da versão 2.2.0
-
-- agendamento idempotente para evitar duplicidades por cliques rápidos ou abas diferentes;
-- retorno automático ao formulário após o login iniciado pelo agendamento;
-- preenchimento do nome e do e-mail autenticado no formulário;
-- datas e status legíveis na área do aluno e no painel administrativo;
-- regras que validam proprietário, e-mail da conta, timestamps e conteúdo público ativo;
-- navegação por teclado melhorada no menu e no modal;
-- remoção de telefone, e-mail e estatísticas fictícias da página pública;
-- redirecionamento do domínio raiz para o site.
-
-## Segurança
-
-Consulte [SECURITY.md](SECURITY.md). Não envie senhas, chaves privadas, tokens de depuração ou dados pessoais ao repositório.
-
-## Documentação
-
-Consulte [DOCUMENTACAO.md](DOCUMENTACAO.md) para instalação, perfis, banco de dados, testes e entrega.
-
-## Pendências para uso comercial
-
-A política de privacidade ainda precisa receber a identificação legal e o canal do controlador real. Planos, preços, equipe, horários, imagens e regras comerciais devem ser confirmados pela academia contratante.
-
-## Observação de saúde
-
-O cálculo de IMC é apenas informativo e não substitui avaliação de um profissional de saúde.
-
+A presença refere-se à aula agendada, não a controle de entrada por catraca. A solicitação não garante vaga até a confirmação. A versão precisa passar pela aceitação no projeto Firebase de destino antes da entrega comercial; testes locais não certificam conformidade jurídica nem ausência absoluta de falhas.
