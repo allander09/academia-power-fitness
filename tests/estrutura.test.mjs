@@ -39,7 +39,7 @@ test("os controles usados pelos módulos existem no HTML", () => {
       "mensalidadeForm", "resultadoMensalidade", "resumoFuncionamento", "funcionamentoRodape"
     ],
     "html/agenda.html": [
-      "agendamentoForm", "mensagemAgendamento", "opcoesAtividade", "opcoesProfessor",
+      "agendamentoForm", "mensagemAgendamento", "tipoAgendamento", "cpfExperimentalGrupo", "cpfExperimental", "opcoesAtividade", "opcoesProfessor",
       "dataAgendamento", "horarioAgendamentoAjuda", "opcoesHorario", "planoAgendamento",
       "confirmacaoAgendamento", "detalhesConfirmacao", "voltarEtapa", "avancarEtapa",
       "confirmarAgendamento"

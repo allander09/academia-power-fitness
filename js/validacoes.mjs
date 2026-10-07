@@ -27,6 +27,21 @@ export function normalizarBusca(valor = "") {
     .toLowerCase();
 }
 
+export function normalizarCpf(cpf = "") {
+  return String(cpf).replace(/\D/g, "");
+}
+
+export function cpfValido(cpf = "") {
+  const digitos = normalizarCpf(cpf);
+  if (!/^\d{11}$/.test(digitos) || /^(\d)\1{10}$/.test(digitos)) return false;
+  const calcular = (tamanho) => {
+    const soma = [...digitos.slice(0, tamanho)].reduce((total, numero, indice) => total + Number(numero) * (tamanho + 1 - indice), 0);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+  return calcular(9) === Number(digitos[9]) && calcular(10) === Number(digitos[10]);
+}
+
 function decomporData(data) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return null;
   const [ano, mes, dia] = data.split("-").map(Number);

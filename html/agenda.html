@@ -62,6 +62,16 @@
 
         <fieldset class="agenda-etapa ativa" data-etapa="1">
           <legend>Atividade</legend>
+          <label for="tipoAgendamento">Tipo de agendamento</label>
+          <select id="tipoAgendamento" name="tipoAgendamento">
+            <option value="normal">Agendar aula</option>
+            <option value="experimental">Agendar aula experimental</option>
+          </select>
+          <div id="cpfExperimentalGrupo" hidden>
+            <label for="cpfExperimental">CPF para aula experimental</label>
+            <input id="cpfExperimental" name="cpf" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">
+            <p class="ajuda-campo">Usamos o CPF somente para impedir mais de uma aula experimental por pessoa. O servidor grava apenas um identificador protegido.</p>
+          </div>
           <p>Escolha o tipo de aula que deseja agendar.</p>
           <div id="opcoesAtividade" class="grade-opcoes" aria-live="polite">Carregando atividades...</div>
         </fieldset>
@@ -82,16 +92,6 @@
 
         <fieldset class="agenda-etapa" data-etapa="4" hidden>
           <legend>Confirmação</legend>
-          <label for="tipoAgendamento">Tipo de agendamento</label>
-          <select id="tipoAgendamento" name="tipoAgendamento">
-            <option value="normal">Aula normal</option>
-            <option value="experimental">Agendar aula experimental</option>
-          </select>
-          <div id="cpfExperimentalGrupo" hidden>
-            <label for="cpfExperimental">CPF para aula experimental</label>
-            <input id="cpfExperimental" name="cpfExperimental" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00">
-            <p class="ajuda-campo">O CPF é usado para garantir que cada pessoa tenha apenas uma aula experimental.</p>
-          </div>
           <label for="planoAgendamento">Modalidade ou plano</label>
           <select id="planoAgendamento" name="plano"><option>Ainda não decidi</option></select>
           <div class="revisao-agendamento">

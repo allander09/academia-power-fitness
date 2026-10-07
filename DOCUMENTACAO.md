@@ -35,6 +35,10 @@ Uma conta de aluno não pode escolher papéis privilegiados. O primeiro administ
 11. Cancelar uma reserva confirmada promove o primeiro pedido da fila para `pendente`. A academia confirma a nova vaga.
 12. Presença só pode ser registrada em reserva confirmada pelo professor vinculado ou administrador.
 
+Para aula experimental, a tela exibe a opção **Agendar aula experimental** e solicita CPF. O servidor valida o CPF novamente, gera um HMAC-SHA256 com `CPF_HASH_SECRET` e usa esse hash como bloqueio em `controles_experimentais`; o CPF puro não é persistido. Se já existir bloqueio para o mesmo CPF, a Function recusa o novo agendamento.
+
+Ao registrar um agendamento, a Function cria um documento na coleção `mail` com o conteúdo da confirmação. O envio depende da extensão oficial Firebase **Trigger Email** ou solução equivalente configurada para ouvir essa coleção. Sem a extensão, o documento fica enfileirado, mas nenhum e-mail sai.
+
 Capacidade pertence a cada atividade, inclusive quando duas atividades têm a mesma hora. Uma pessoa não pode ter duas solicitações ativas no mesmo horário. Não existe garantia de vaga na solicitação. Não existe controle de duração/sobreposição entre horários diferentes.
 
 ## Alterações da atividade
@@ -54,7 +58,9 @@ A página inicia com estados de carregamento, sem preços e equipe fictícios co
 | `professores_acesso/{UID}` | Permissão de professor; manutenção por administrador |
 | `agendamentos` | Reservas; aluno proprietário e administrador leem documentos; servidor altera |
 | `turmas` | Coordenação transacional; só servidor |
+| `controles_experimentais` | Bloqueio técnico de CPF protegido por HMAC para impedir repetição de aula experimental; só servidor |
 | `contatos` | Solicitações do Fale Conosco, tipo, assunto, mensagem e ciência de privacidade; leitura administrativa |
+| `mail` | Fila de confirmação por e-mail criada pelo servidor para a extensão Firebase Trigger Email |
 | `planos`, `professores`, `horarios` | Conteúdo ativo público; atividades alteradas pelo servidor |
 | `configuracoes/funcionamento` | Funcionamento semanal e capacidade padrão |
 | `configuracoes/privacidade` | Controlador, canal e prazos de revisão configuráveis |
@@ -80,5 +86,7 @@ O bloqueio de sessão antiga permanece por segurança; seu prazo mínimo é 24 h
 ## Arquitetura e validação
 
 Frontend estático com SDK Firebase modular 12.17.1; Functions em Node.js 22, região `southamerica-east1`, App Check obrigatório e autenticação verificada nas operações críticas. A região das funções não altera automaticamente a região de Auth ou do banco existente. Firestore Rules impedem escrita direta nas reservas e atividades.
+
+Em produção, App Check usa reCAPTCHA Enterprise. Em desenvolvimento local, o modo recomendado é `npm run demo` em `http://127.0.0.1:5000/html/`, usando emuladores e sem dados reais. Se for necessário testar uma página local fora da porta 5000 contra o Firebase real, registre o debug token exibido no console em **Firebase Console → App Check → Apps → Manage debug tokens**. Também é possível salvar um token já registrado em `localStorage.powerFitnessAppCheckDebugToken`; isso só é lido em `localhost`/`127.0.0.1` e não desativa App Check em produção.
 
 `npm run check` verifica a sintaxe de site/servidor/scripts. `npm test` verifica cálculo, datas, regras de decisão e estrutura. `npm run test:integration` executa cenários com Firestore e Authentication emulados, incluindo isolamento, falsificação, duplicidade, concorrência, presença e exclusão. Consulte REVISAO_2_5.md para aceitação e limites.

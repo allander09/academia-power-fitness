@@ -55,6 +55,7 @@ function renderizarAgendamentos(documentos) {
     card.append(
       criar("strong", dados.hora ? `${formatarDataISO(dados.data)} às ${dados.hora}` : formatarDataISO(dados.data)),
       criar("span", `Atividade: ${dados.atividade || "Aula"}`),
+      criar("span", `Tipo: ${dados.tipoAgendamento === "experimental" ? "Aula experimental" : "Aula"}`),
       criar("span", `Professor: ${dados.professorNome || "A definir"}`),
       criar("span", `Plano: ${dados.plano || "Não informado"}`),
       status,

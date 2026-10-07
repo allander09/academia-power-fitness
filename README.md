@@ -12,6 +12,8 @@ Sistema web para apresentação da academia, agendamento de aulas e operação d
 - Cadastro, verificação de e-mail, recuperação de senha e atualização do perfil.
 - Agendamento de aula em etapas, com atividade, professor cadastrado, data, horário, plano publicado ou interesse ainda não definido.
 - Disponibilidade consultada nas Cloud Functions e validada novamente no servidor, com proteção contra professor inativo, duplicidade e confirmação transacional de vagas.
+- Aula experimental com CPF validado no backend e armazenado apenas como hash HMAC para bloquear duplicidade.
+- Confirmação de agendamento enfileirada na coleção `mail`, compatível com a extensão Firebase Trigger Email.
 - Lista de espera; cancelamento pelo aluno ou administrador devolve a primeira pessoa da fila para análise.
 - Professor com atividades próprias e presença, recebendo apenas os campos necessários e identificador aleatório da aula.
 - Administração de planos, equipe, atividades, capacidade, funcionamento e permissões dos professores.
@@ -35,6 +37,8 @@ Para testar o site completo sem credenciais de produção, execute `npm run demo
 
 Live Server em `localhost`/`127.0.0.1` usa o modo de depuração do App Check e o projeto real, sem desativar a proteção de produção. Na primeira execução, o Firebase exibirá no Console do navegador um **App Check debug token**; registre esse token em Firebase Console → Segurança → App Check → Apps → Gerenciar tokens de depuração. Não coloque o token no GitHub. `file://` não executa corretamente os módulos. A demonstração local com `npm run demo` continua sendo a opção recomendada para testes sem dados reais. A configuração de produção mantém reCAPTCHA Enterprise e App Check obrigatório.
 
+Para testar localmente contra o Firebase real fora dos emuladores, registre o App Check debug token no Console Firebase. Não coloque debug token, `.env` ou segredo de CPF no repositório.
+
 ## Implantação
 
 Leia [ENTREGA.md](ENTREGA.md) antes de publicar e faça backup/migração quando houver dados antigos. Esta versão inclui **Cloud Functions** e precisa do plano **Blaze** para a implantação das funções. Custos de infraestrutura pertencem ao titular da conta Firebase, conforme uso; alertas de orçamento não são um bloqueio automático de gastos. Publique nesta ordem e execute a aceitação após a atualização completa.
@@ -47,6 +51,8 @@ npx firebase deploy --project powerfitness-2a4a4 --only hosting
 ```
 
 Em uma instalação vendida, utilize o projeto Firebase do comprador e substitua o ID, a configuração web e a chave pública do App Check. Nunca coloque chave privada de conta de serviço no repositório.
+
+A aula experimental exige `CPF_HASH_SECRET` nas Cloud Functions antes do uso real. Gere um valor longo e aleatório e configure fora do código. Para envio de confirmação, instale/configure a extensão Firebase Trigger Email ou solução equivalente lendo a coleção `mail`.
 
 O primeiro administrador deve criar uma conta, verificar o e-mail e receber, no Console Firestore, o documento `admins/UID_EXATO` com `ativo: true`. O site não permite promover a própria conta.
 

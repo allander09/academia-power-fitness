@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import { usarEmuladores } from "../js/ambiente-local.mjs";
 import { ambienteDemo } from "../functions/ambiente.mjs";
 
-test("teste local exige HTTP, loopback e a porta reservada", () => {
+test("teste local exige HTTP, loopback e porta reservada ou opt-in explícito", () => {
   const local = { protocol: "http:", hostname: "127.0.0.1", port: "5000" };
   assert.equal(usarEmuladores(local), true);
   assert.equal(usarEmuladores({ ...local, hostname: "localhost" }), true);
-  for (const alteracao of [{ protocol: "https:" }, { hostname: "powerfitness-2a4a4.web.app" }, { hostname: "192.168.1.10" }, { port: "5500" }]) assert.equal(usarEmuladores({ ...local, ...alteracao }), false);
+  assert.equal(usarEmuladores({ ...local, port: "5500", search: "?emuladores=1" }), true);
+  for (const alteracao of [{ protocol: "https:" }, { hostname: "powerfitness-2a4a4.web.app" }, { hostname: "192.168.1.10" }, { port: "5500" }]) assert.equal(usarEmuladores({ ...local, search: "", ...alteracao }), false);
   assert.equal(usarEmuladores(null), false);
 });
 

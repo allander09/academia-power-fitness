@@ -3,7 +3,7 @@ import { collection, doc, getDoc, getDocs, query, where } from "https://www.gsta
 import { chamarBackend, mensagemBackend } from "./backend.js";
 import { auth, db } from "./firebase-services.js";
 import { mensagemAuth } from "./auth-utils.js";
-import { dataLocalISO, formatarDataISO } from "./validacoes.mjs";
+import { cpfValido, dataLocalISO, formatarDataISO, normalizarCpf } from "./validacoes.mjs";
 
 const form = document.getElementById("agendamentoForm");
 const mensagem = document.getElementById("mensagemAgendamento");
@@ -61,6 +61,13 @@ function atualizarResumo() {
       : "Confira as informações antes de confirmar.";
     revisao.textContent += escolha.horarioId ? " Tipo: " + revisaoTipo + "." : "";
   }
+}
+
+function atualizarTipoAgendamento() {
+  escolha.tipoAgendamento = tipoAgendamento?.value === "experimental" ? "experimental" : "normal";
+  if (cpfExperimentalGrupo) cpfExperimentalGrupo.hidden = escolha.tipoAgendamento !== "experimental";
+  if (cpfExperimental) cpfExperimental.required = escolha.tipoAgendamento === "experimental";
+  atualizarResumo();
 }
 
 function irParaEtapa(numero) {
@@ -220,6 +227,7 @@ async function carregarInicial() {
 }
 
 function validarEtapa() {
+  if (etapaAtual === 1 && escolha.tipoAgendamento === "experimental" && !cpfValido(cpfExperimental?.value || "")) return "Informe um CPF válido para a aula experimental.";
   if (etapaAtual === 1 && !escolha.atividade) return "Escolha uma atividade para continuar.";
   if (etapaAtual === 2 && !escolha.professorUid) return "Escolha um professor para continuar.";
   if (etapaAtual === 3) {
@@ -228,6 +236,12 @@ function validarEtapa() {
   }
   return "";
 }
+
+tipoAgendamento?.addEventListener("change", atualizarTipoAgendamento);
+
+cpfExperimental?.addEventListener("input", () => {
+  escolha.cpf = normalizarCpf(cpfExperimental.value);
+});
 
 botaoAvancar?.addEventListener("click", async () => {
   const erro = validarEtapa();
@@ -258,15 +272,6 @@ plano?.addEventListener("change", () => {
   atualizarResumo();
 });
 
-function atualizarTipoAgendamento() {
-  escolha.tipoAgendamento = tipoAgendamento?.value === "experimental" ? "experimental" : "normal";
-  if (cpfExperimentalGrupo) cpfExperimentalGrupo.hidden = escolha.tipoAgendamento !== "experimental";
-  if (cpfExperimental) cpfExperimental.required = escolha.tipoAgendamento === "experimental";
-  atualizarResumo();
-}
-
-tipoAgendamento?.addEventListener("change", atualizarTipoAgendamento);
-
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const erro = validarEtapa();
@@ -289,7 +294,7 @@ form?.addEventListener("submit", async (event) => {
     }
     await getIdToken(usuario, true);
     const cpf = (cpfExperimental?.value || "").replace(/\D/g, "");
-    if (escolha.tipoAgendamento === "experimental" && cpf.length !== 11) {
+    if (escolha.tipoAgendamento === "experimental" && !cpfValido(cpf)) {
       mostrarMensagem("Informe um CPF válido para agendar a aula experimental.");
       return;
     }
@@ -320,4 +325,5 @@ form?.addEventListener("submit", async (event) => {
   }
 });
 
+atualizarTipoAgendamento();
 carregarInicial();

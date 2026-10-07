@@ -9,9 +9,11 @@ Uma academia por projeto Firebase. A entrega comercial compreende o código, a c
 1. Projeto Firebase pertencente ao comprador, conta de faturamento Blaze para Functions e responsáveis identificados. A ativação de faturamento é feita pelo titular da conta após revisar custos.
 2. Firestore criado em região deliberadamente escolhida, Authentication por e-mail/senha e app web registrado.
 3. Domínios autorizados no Authentication e reCAPTCHA/App Check, inclusive o domínio final.
-4. Dados reais e autorizados: nome, logo, cores, planos, preços, equipe, fotos, contato e funcionamento.
-5. Controlador, canal de privacidade, finalidades/bases legais e conservação revisados pela academia; fornecedores e transferências internacionais avaliados.
-6. Rotina de backup, acesso, descarte e incidentes, com responsável no cliente.
+4. Segredo `CPF_HASH_SECRET` configurado nas Functions para proteger a regra de aula experimental.
+5. Extensão Firebase Trigger Email, SMTP ou solução equivalente configurada para consumir a coleção `mail`, se a confirmação por e-mail for usada.
+6. Dados reais e autorizados: nome, logo, cores, planos, preços, equipe, fotos, contato e funcionamento.
+7. Controlador, canal de privacidade, finalidades/bases legais e conservação revisados pela academia; fornecedores e transferências internacionais avaliados.
+8. Rotina de backup, acesso, descarte e incidentes, com responsável no cliente.
 
 Não é necessário contratar suporte mensal do desenvolvedor para comprar o sistema. A operação acima permanece necessária e pode ser feita pelo comprador ou outro responsável técnico.
 
@@ -31,7 +33,7 @@ npm run test:integration
 npx firebase login
 ```
 
-Para a instalação original o projeto é `powerfitness-2a4a4`; para venda use o ID do projeto do comprador. Copie a configuração pública do app web para `js/firebase-config.js` e a chave pública reCAPTCHA para `js/firebase-services.js`. Atualize canonical, Open Graph, URL de demonstração e manifest para o domínio final. Não publique chave privada nem senha.
+Para a instalação original o projeto é `powerfitness-2a4a4`; para venda use o ID do projeto do comprador. Copie a configuração pública do app web para `js/firebase-config.js` e a chave pública reCAPTCHA para `js/firebase-services.js`. Atualize canonical, Open Graph, URL de demonstração e manifest para o domínio final. Não publique chave privada, senha, debug token ou `CPF_HASH_SECRET`.
 
 Antes de substituir a versão publicada, faça backup. A versão 2.5 modifica o contrato de gravação: agendamentos, presença e atividades passam pelo servidor. **Não publique apenas o HTML ou apenas as regras.** Em janela de implantação controlada, publique Functions primeiro, índices/regras depois e Hosting por último, e execute a aceitação imediatamente. As chamadas novas dependem das funções e as regras novas bloqueiam a interface antiga. Evite alterações de agenda durante a troca e comunique a janela ao responsável.
 

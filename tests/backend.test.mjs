@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { atividadeDisponivel, dataHoraFutura, dadosParaProfessor, decidirStatus } from "../functions/domain.mjs";
+import { atividadeDisponivel, cpfValido, dataHoraFutura, dadosParaProfessor, decidirStatus, normalizarCpf } from "../functions/domain.mjs";
 
 test("o servidor valida datas reais e o fuso brasileiro até o fim do dia", () => {
   const agora = new Date("2026-10-04T10:00:00Z");
@@ -30,4 +30,11 @@ test("a disponibilidade exige atividade ativa, dia e funcionamento compatíveis"
   assert.equal(atividadeDisponivel({ ...atividade, ativo: false }, "2026-10-05"), false);
   assert.equal(atividadeDisponivel(atividade, "2026-10-06"), false);
   assert.equal(atividadeDisponivel(atividade, "2026-10-05", { dias: { segunda: { modo: "fechado" } } }), false);
+});
+
+test("CPF é normalizado e validado para aula experimental", () => {
+  assert.equal(normalizarCpf("529.982.247-25"), "52998224725");
+  assert.equal(cpfValido("529.982.247-25"), true);
+  assert.equal(cpfValido("111.111.111-11"), false);
+  assert.equal(cpfValido("123"), false);
 });
