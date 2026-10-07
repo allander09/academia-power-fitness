@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { atividadeDisponivel, dataHoraFutura, dadosParaProfessor, decidirStatus, STATUS_ATIVOS } from "./domain.mjs";
 
 export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = () => new Date() }) {
@@ -7,6 +7,20 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
   const texto = (valor, minimo = 1, maximo = 150) => typeof valor === "string" && valor.trim().length >= minimo && valor.length <= maximo;
   const idValido = valor => texto(valor) && !valor.includes("/");
   const timestamp = () => FieldValue.serverTimestamp();
+  const normalizarCPF = valor => String(valor || "").replace(/\\D/g, "");
+  const cpfValido = valor => {
+    const cpf = normalizarCPF(valor);
+    if (cpf.length !== 11 || /^([0-9])\\1{10}$/.test(cpf)) return false;
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i);
+    let digito = (soma * 10) % 11; if (digito === 10) digito = 0;
+    if (digito !== Number(cpf[9])) return false;
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += Number(cpf[i]) * (11 - i);
+    digito = (soma * 10) % 11; if (digito === 10) digito = 0;
+    return digito === Number(cpf[10]);
+  };
+  const hashCPF = cpf => createHash("sha256").update(cpf).digest("hex");
 
   async function usuario(request) {
     if (!request.auth) falha("unauthenticated", "Entre na sua conta.");
@@ -86,12 +100,12 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
 
   async function solicitarAgendamento(request) {
     const conta = await usuario(request);
-    const { data, horarioId, plano } = request.data || {};
+    const { data, horarioId, plano } = request.data || {};\n    const tipoAgendamento = request.data?.tipoAgendamento === "experimental" ? "experimental" : "normal";\n    const cpfExperimental = tipoAgendamento === "experimental" ? normalizarCPF(request.data?.cpf) : "";\n    if (tipoAgendamento === "experimental" && !cpfValido(cpfExperimental)) falha("invalid-argument", "Informe um CPF válido para a aula experimental.");
     const professorEscolhido = typeof request.data?.professorUid === "string" ? request.data.professorUid.trim() : "";
     if (!idValido(horarioId) || !texto(plano, 3, 100)) falha("invalid-argument", "Selecione uma atividade e um plano válidos.");
     return db.runTransaction(async transacao => {
       await permissoes(conta, transacao);
-      const [perfil, horario, funcionamento, planos, turmaSnapshot] = await Promise.all([
+      const bloqueioExperimental = cpfExperimental ? ref("controles_experimentais", hashCPF(cpfExperimental)) : null;\n      const [perfil, horario, funcionamento, planos, turmaSnapshot, lockSnapshot] = await Promise.all([
         transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento")),
         plano.trim() === "Ainda não decidi" ? null : transacao.get(db.collection("planos").where("nome", "==", plano.trim())),
         transacao.get(db.collection("agendamentos").where("data", "==", data).where("horarioId", "==", horarioId))
@@ -108,7 +122,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       } else if (professorEscolhido) {
         falha("failed-precondition", "Este horário não possui professor vinculado.");
       }
-      const capacidade = capacidadeDaAtividade(atividade, funcionamento.data());
+      if (tipoAgendamento === "experimental" && lockSnapshot?.exists) falha("already-exists", "Este CPF já possui uma aula experimental registrada.");\n      const capacidade = capacidadeDaAtividade(atividade, funcionamento.data());
       if (turmaSnapshot.docs.filter(item => item.data().status === "confirmado").length >= capacidade) falha("resource-exhausted", "Este horário está sem vagas disponíveis.");
       const identificador = `${conta.uid}_${data}_${atividade.hora}`;
       const referencia = ref("agendamentos", identificador);
@@ -120,7 +134,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       const dados = {
         usuarioId: conta.uid, nome: perfil.data().nome, email: conta.email, data, hora: atividade.hora,
         horarioId, atividade: atividade.atividade, plano: plano.trim(), professorUid,
-        professorNome: atividade.professorNome || "", status: "pendente", presenca: "nao_registrada",
+        professorNome: atividade.professorNome || "", tipoAgendamento, status: "pendente", presenca: "nao_registrada",
         aulaId: randomUUID(), criadoEm: timestamp(), atualizadoEm: timestamp()
       };
       transacao.set(referencia, dados);
