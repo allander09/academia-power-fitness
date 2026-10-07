@@ -7,10 +7,10 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
   const texto = (valor, minimo = 1, maximo = 150) => typeof valor === "string" && valor.trim().length >= minimo && valor.length <= maximo;
   const idValido = valor => texto(valor) && !valor.includes("/");
   const timestamp = () => FieldValue.serverTimestamp();
-  const normalizarCPF = valor => String(valor || "").replace(/\\D/g, "");
+  const normalizarCPF = valor => String(valor || "").replace(/\D/g, "");
   const cpfValido = valor => {
     const cpf = normalizarCPF(valor);
-    if (cpf.length !== 11 || /^([0-9])\\1{10}$/.test(cpf)) return false;
+    if (cpf.length !== 11 || /^([0-9])\1{10}$/.test(cpf)) return false;
     let soma = 0;
     for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i);
     let digito = (soma * 10) % 11; if (digito === 10) digito = 0;
