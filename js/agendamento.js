@@ -15,11 +15,14 @@ const botaoAvancar = document.getElementById("avancarEtapa");
 const botaoConfirmar = document.getElementById("confirmarAgendamento");
 const confirmacao = document.getElementById("confirmacaoAgendamento");
 const detalhesConfirmacao = document.getElementById("detalhesConfirmacao");
+const tipoAgendamento = document.getElementById("tipoAgendamento");
+const cpfExperimental = document.getElementById("cpfExperimental");
+const cpfExperimentalGrupo = document.getElementById("cpfExperimentalGrupo");
 
 let etapaAtual = 1;
 let disponibilidade = [];
 let disponibilidadeData = [];
-const escolha = { atividade: "", professorUid: "", professorNome: "", horarioId: "", hora: "", data: "", plano: "Ainda não decidi" };
+const escolha = { atividade: "", professorUid: "", professorNome: "", horarioId: "", hora: "", data: "", plano: "Ainda não decidi", tipoAgendamento: "normal", cpf: "" };
 
 const rotulosIndisponivel = {
   fora_funcionamento: "Fora do funcionamento",
@@ -50,11 +53,13 @@ function atualizarResumo() {
   resumo("resumoData", escolha.data ? formatarDataISO(escolha.data) : "Escolha a data");
   resumo("resumoHorario", escolha.hora || "Escolha o horário");
   resumo("resumoPlano", escolha.plano || "Ainda não definido");
+  const revisaoTipo = escolha.tipoAgendamento === "experimental" ? "Aula experimental" : "Aula normal";
   const revisao = document.getElementById("textoRevisao");
   if (revisao) {
     revisao.textContent = escolha.horarioId
       ? `${escolha.atividade} com ${escolha.professorNome || "professor a definir"}, em ${formatarDataISO(escolha.data)} às ${escolha.hora}.`
       : "Confira as informações antes de confirmar.";
+    revisao.textContent += escolha.horarioId ? " Tipo: " + revisaoTipo + "." : "";
   }
 }
 
@@ -253,6 +258,15 @@ plano?.addEventListener("change", () => {
   atualizarResumo();
 });
 
+function atualizarTipoAgendamento() {
+  escolha.tipoAgendamento = tipoAgendamento?.value === "experimental" ? "experimental" : "normal";
+  if (cpfExperimentalGrupo) cpfExperimentalGrupo.hidden = escolha.tipoAgendamento !== "experimental";
+  if (cpfExperimental) cpfExperimental.required = escolha.tipoAgendamento === "experimental";
+  atualizarResumo();
+}
+
+tipoAgendamento?.addEventListener("change", atualizarTipoAgendamento);
+
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const erro = validarEtapa();
@@ -274,17 +288,25 @@ form?.addEventListener("submit", async (event) => {
       return;
     }
     await getIdToken(usuario, true);
+    const cpf = (cpfExperimental?.value || "").replace(/\D/g, "");
+    if (escolha.tipoAgendamento === "experimental" && cpf.length !== 11) {
+      mostrarMensagem("Informe um CPF válido para agendar a aula experimental.");
+      return;
+    }
     const retorno = await chamarBackend("solicitarAgendamento", {
       data: escolha.data,
       horarioId: escolha.horarioId,
       professorUid: escolha.professorUid,
-      plano: plano?.value || "Ainda não decidi"
+      plano: plano?.value || "Ainda não decidi",
+      tipoAgendamento: escolha.tipoAgendamento,
+      cpf: escolha.tipoAgendamento === "experimental" ? cpf : undefined
     });
     detalhesConfirmacao.className = "detalhes-confirmacao";
     detalhesConfirmacao.innerHTML = `<div><span>Atividade</span><strong>${escolha.atividade}</strong></div>
       <div><span>Professor</span><strong>${escolha.professorNome}</strong></div>
       <div><span>Data</span><strong>${formatarDataISO(escolha.data)}</strong></div>
-      <div><span>Horário</span><strong>${escolha.hora}</strong></div>`;
+      <div><span>Horário</span><strong>${escolha.hora}</strong></div>
+      <div><span>Tipo</span><strong>${escolha.tipoAgendamento === "experimental" ? "Aula experimental" : "Aula normal"}</strong></div>`;
     confirmacao.hidden = false;
     etapas.forEach(etapa => { etapa.hidden = true; etapa.classList.remove("ativa"); });
     document.querySelector(".agenda-acoes").hidden = true;
