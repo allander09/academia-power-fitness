@@ -145,6 +145,15 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
         aulaId: randomUUID(), criadoEm: timestamp(), atualizadoEm: timestamp()
       };
       transacao.set(referencia, dados);
+      transacao.set(ref("mail", "agendamento_" + identificador), {
+        to: [conta.email],
+        message: {
+          subject: tipoAgendamento === "experimental" ? "Power Fitness — aula experimental solicitada" : "Power Fitness — agendamento solicitado",
+          text: "Seu agendamento foi registrado. Atividade: " + atividade.atividade + ". Data: " + data + ". Horário: " + atividade.hora + ". Situação: aguardando confirmação da academia."
+        },
+        agendamentoId: identificador,
+        criadoEm: timestamp()
+      }, { merge: true });
       if (bloqueioExperimental) {
         transacao.create(bloqueioExperimental, {
           criadoEm: timestamp(),
