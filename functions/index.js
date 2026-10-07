@@ -8,9 +8,17 @@ import { ambienteDemo } from "./ambiente.mjs";
 
 initializeApp();
 setGlobalOptions({ region: "southamerica-east1", maxInstances: 3, timeoutSeconds: 300, memory: "256MiB" });
+const cors = [
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?$/,
+  "https://powerfitness-2a4a4.web.app",
+  "https://powerfitness-2a4a4.firebaseapp.com"
+];
+const callable = nome => onCall({
+  enforceAppCheck: !ambienteDemo(),
+  cors,
+}, request => servico[nome](request));
+
 const servico = criarServico({ db: getFirestore(), auth: getAuth(), FieldValue, Timestamp, Erro: HttpsError });
-// App Check é obrigatório em produção. O projeto fictício local não possui reCAPTCHA.
-const callable = nome => onCall({ enforceAppCheck: !ambienteDemo() }, request => servico[nome](request));
 export const listarDisponibilidadeAgendamento = callable("listarDisponibilidadeAgendamento");
 export const solicitarAgendamento = callable("solicitarAgendamento");
 export const alterarAgendamento = callable("alterarAgendamento");

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { atividadeDisponivel, dataHoraFutura, dadosParaProfessor, decidirStatus, STATUS_ATIVOS } from "./domain.mjs";
 
 export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = () => new Date() }) {
@@ -7,13 +7,27 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
   const texto = (valor, minimo = 1, maximo = 150) => typeof valor === "string" && valor.trim().length >= minimo && valor.length <= maximo;
   const idValido = valor => texto(valor) && !valor.includes("/");
   const timestamp = () => FieldValue.serverTimestamp();
+  const normalizarCPF = valor => String(valor || "").replace(/\D/g, "");
+  const cpfValido = valor => {
+    const cpf = normalizarCPF(valor);
+    if (cpf.length !== 11 || /^([0-9])\1{10}$/.test(cpf)) return false;
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += Number(cpf[i]) * (10 - i);
+    let digito = (soma * 10) % 11; if (digito === 10) digito = 0;
+    if (digito !== Number(cpf[9])) return false;
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += Number(cpf[i]) * (11 - i);
+    digito = (soma * 10) % 11; if (digito === 10) digito = 0;
+    return digito === Number(cpf[10]);
+  };
+  const hashCPF = cpf => createHash("sha256").update(cpf).digest("hex");
 
   async function usuario(request) {
     if (!request.auth) falha("unauthenticated", "Entre na sua conta.");
     const conta = await auth.getUser(request.auth.uid).catch(() => null);
     if (!conta || conta.disabled) falha("permission-denied", "Esta conta não está disponível.");
     if (!conta.emailVerified || request.auth.token.email_verified !== true) falha("failed-precondition", "Verifique seu e-mail para continuar.");
-    return { uid: conta.uid, email: conta.email };
+    return { uid: conta.uid, email: conta.email, nome: conta.displayName || conta.email?.split("@")[0] || "Administrador" };
   }
 
   async function permissoes(conta, transacao) {
@@ -87,18 +101,24 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
   async function solicitarAgendamento(request) {
     const conta = await usuario(request);
     const { data, horarioId, plano } = request.data || {};
+    const tipoAgendamento = request.data?.tipoAgendamento === "experimental" ? "experimental" : "normal";
+    const cpfExperimental = tipoAgendamento === "experimental" ? normalizarCPF(request.data?.cpf) : "";
+    if (tipoAgendamento === "experimental" && !cpfValido(cpfExperimental)) falha("invalid-argument", "Informe um CPF válido para a aula experimental.");
     const professorEscolhido = typeof request.data?.professorUid === "string" ? request.data.professorUid.trim() : "";
     if (!idValido(horarioId) || !texto(plano, 3, 100)) falha("invalid-argument", "Selecione uma atividade e um plano válidos.");
     return db.runTransaction(async transacao => {
-      await permissoes(conta, transacao);
-      const [perfil, horario, funcionamento, planos, turmaSnapshot] = await Promise.all([
+      const papeis = await permissoes(conta, transacao);
+      const bloqueioExperimental = cpfExperimental ? ref("controles_experimentais", hashCPF(cpfExperimental)) : null;
+      const [perfil, horario, funcionamento, planos, turmaSnapshot, lockSnapshot] = await Promise.all([
         transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento")),
         plano.trim() === "Ainda não decidi" ? null : transacao.get(db.collection("planos").where("nome", "==", plano.trim())),
-        transacao.get(db.collection("agendamentos").where("data", "==", data).where("horarioId", "==", horarioId))
+        transacao.get(db.collection("agendamentos").where("data", "==", data).where("horarioId", "==", horarioId)),
+        bloqueioExperimental ? transacao.get(bloqueioExperimental) : null
       ]);
       if (planos && !planos.docs.some(item => item.data().ativo === true)) falha("failed-precondition", "Este plano não está disponível. Atualize a página e escolha um plano publicado ou Ainda não decidi.");
       const atividade = horario.data();
-      if (!perfil.exists || !texto(perfil.data().nome, 3, 100)) falha("failed-precondition", "Complete seu perfil antes de agendar.");
+      if (!perfil.exists && !papeis.admin) falha("failed-precondition", "Complete seu perfil antes de agendar.");
+      if (perfil.exists && !texto(perfil.data().nome, 3, 100) && !papeis.admin) falha("failed-precondition", "Complete seu perfil antes de agendar.");
       if (!atividadeDisponivel(atividade, data, funcionamento.data()) || !dataHoraFutura(data, atividade?.hora, agora())) falha("failed-precondition", "Escolha uma atividade disponível em uma data futura.");
       const professorUid = atividade.professorUid || "";
       if (professorUid) {
@@ -108,6 +128,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       } else if (professorEscolhido) {
         falha("failed-precondition", "Este horário não possui professor vinculado.");
       }
+      if (tipoAgendamento === "experimental" && lockSnapshot?.exists) falha("already-exists", "Este CPF já possui uma aula experimental registrada.");
       const capacidade = capacidadeDaAtividade(atividade, funcionamento.data());
       if (turmaSnapshot.docs.filter(item => item.data().status === "confirmado").length >= capacidade) falha("resource-exhausted", "Este horário está sem vagas disponíveis.");
       const identificador = `${conta.uid}_${data}_${atividade.hora}`;
@@ -118,13 +139,30 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       if (existente.exists && STATUS_ATIVOS.includes(existente.data().status)) falha("already-exists", "Você já tem uma solicitação ativa nesta data e horário.");
       if (historico.docs.some(item => item.data().data === data && item.data().hora === atividade.hora && STATUS_ATIVOS.includes(item.data().status))) falha("already-exists", "Você já tem uma solicitação ativa nesta data e horário.");
       const dados = {
-        usuarioId: conta.uid, nome: perfil.data().nome, email: conta.email, data, hora: atividade.hora,
+        usuarioId: conta.uid, nome: perfil.data()?.nome || conta.nome, email: conta.email, data, hora: atividade.hora,
         horarioId, atividade: atividade.atividade, plano: plano.trim(), professorUid,
-        professorNome: atividade.professorNome || "", status: "pendente", presenca: "nao_registrada",
+        professorNome: atividade.professorNome || "", tipoAgendamento, status: "pendente", presenca: "nao_registrada",
         aulaId: randomUUID(), criadoEm: timestamp(), atualizadoEm: timestamp()
       };
       transacao.set(referencia, dados);
-      return { id: identificador, status: "pendente" };
+      transacao.set(ref("mail", "agendamento_" + identificador), {
+        to: [conta.email],
+        message: {
+          subject: tipoAgendamento === "experimental" ? "Power Fitness — aula experimental solicitada" : "Power Fitness — agendamento solicitado",
+          text: "Seu agendamento foi registrado. Atividade: " + atividade.atividade + ". Data: " + data + ". Horário: " + atividade.hora + ". Situação: aguardando confirmação da academia."
+        },
+        agendamentoId: identificador,
+        criadoEm: timestamp()
+      }, { merge: true });
+      if (bloqueioExperimental) {
+        transacao.create(bloqueioExperimental, {
+          criadoEm: timestamp(),
+          usuarioId: conta.uid,
+          tipo: "experimental",
+          cpfHash: hashCPF(cpfExperimental)
+        });
+      }
+      return { id: identificador, status: "pendente", tipoAgendamento };
     });
   }
 
