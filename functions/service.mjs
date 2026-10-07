@@ -27,7 +27,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
     const conta = await auth.getUser(request.auth.uid).catch(() => null);
     if (!conta || conta.disabled) falha("permission-denied", "Esta conta não está disponível.");
     if (!conta.emailVerified || request.auth.token.email_verified !== true) falha("failed-precondition", "Verifique seu e-mail para continuar.");
-    return { uid: conta.uid, email: conta.email };
+    return { uid: conta.uid, email: conta.email, nome: conta.displayName || conta.email?.split("@")[0] || "Administrador" };
   }
 
   async function permissoes(conta, transacao) {
@@ -107,7 +107,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
     const professorEscolhido = typeof request.data?.professorUid === "string" ? request.data.professorUid.trim() : "";
     if (!idValido(horarioId) || !texto(plano, 3, 100)) falha("invalid-argument", "Selecione uma atividade e um plano válidos.");
     return db.runTransaction(async transacao => {
-      await permissoes(conta, transacao);
+      const papeis = await permissoes(conta, transacao);
       const bloqueioExperimental = cpfExperimental ? ref("controles_experimentais", hashCPF(cpfExperimental)) : null;
       const [perfil, horario, funcionamento, planos, turmaSnapshot, lockSnapshot] = await Promise.all([
         transacao.get(ref("usuarios", conta.uid)), transacao.get(ref("horarios", horarioId)), transacao.get(ref("configuracoes", "funcionamento")),
@@ -117,7 +117,8 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       ]);
       if (planos && !planos.docs.some(item => item.data().ativo === true)) falha("failed-precondition", "Este plano não está disponível. Atualize a página e escolha um plano publicado ou Ainda não decidi.");
       const atividade = horario.data();
-      if (!perfil.exists || !texto(perfil.data().nome, 3, 100)) falha("failed-precondition", "Complete seu perfil antes de agendar.");
+      if (!perfil.exists && !papeis.admin) falha("failed-precondition", "Complete seu perfil antes de agendar.");
+      if (perfil.exists && !texto(perfil.data().nome, 3, 100) && !papeis.admin) falha("failed-precondition", "Complete seu perfil antes de agendar.");
       if (!atividadeDisponivel(atividade, data, funcionamento.data()) || !dataHoraFutura(data, atividade?.hora, agora())) falha("failed-precondition", "Escolha uma atividade disponível em uma data futura.");
       const professorUid = atividade.professorUid || "";
       if (professorUid) {
@@ -138,7 +139,7 @@ export function criarServico({ db, auth, FieldValue, Timestamp, Erro, agora = ()
       if (existente.exists && STATUS_ATIVOS.includes(existente.data().status)) falha("already-exists", "Você já tem uma solicitação ativa nesta data e horário.");
       if (historico.docs.some(item => item.data().data === data && item.data().hora === atividade.hora && STATUS_ATIVOS.includes(item.data().status))) falha("already-exists", "Você já tem uma solicitação ativa nesta data e horário.");
       const dados = {
-        usuarioId: conta.uid, nome: perfil.data().nome, email: conta.email, data, hora: atividade.hora,
+        usuarioId: conta.uid, nome: perfil.data()?.nome || conta.nome, email: conta.email, data, hora: atividade.hora,
         horarioId, atividade: atividade.atividade, plano: plano.trim(), professorUid,
         professorNome: atividade.professorNome || "", tipoAgendamento, status: "pendente", presenca: "nao_registrada",
         aulaId: randomUUID(), criadoEm: timestamp(), atualizadoEm: timestamp()
