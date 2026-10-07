@@ -13,12 +13,11 @@ const cors = [
   "https://powerfitness-2a4a4.web.app",
   "https://powerfitness-2a4a4.firebaseapp.com"
 ];
+const servico = criarServico({ db: getFirestore(), auth: getAuth(), FieldValue, Timestamp, Erro: HttpsError, segredoCpf: process.env.CPF_HASH_SECRET || "" });
 const callable = nome => onCall({
   enforceAppCheck: !ambienteDemo(),
   cors,
 }, request => servico[nome](request));
-
-const servico = criarServico({ db: getFirestore(), auth: getAuth(), FieldValue, Timestamp, Erro: HttpsError });
 export const listarDisponibilidadeAgendamento = callable("listarDisponibilidadeAgendamento");
 export const solicitarAgendamento = callable("solicitarAgendamento");
 export const alterarAgendamento = callable("alterarAgendamento");

@@ -3,13 +3,11 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gst
 import { connectAuthEmulator, getAuth } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import { connectFirestoreEmulator, getFirestore } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
-import { emuladoresLocais } from "./ambiente-local.mjs";
+import { emuladoresLocais, tokenDebugAppCheck } from "./ambiente-local.mjs";
 
 const appCheckSiteKey = "6LfWcn0tAAAAAJXiyctX7W5MWoXK_SRVrozJZOfW";
-const localDebugAppCheck = !emuladoresLocais
-  && typeof window !== "undefined"
-  && window.location.protocol === "http:"
-  && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const debugToken = tokenDebugAppCheck();
+const localDebugAppCheck = Boolean(debugToken);
 
 const configuracao = emuladoresLocais
   ? { apiKey: "demo-power-fitness", authDomain: "demo-power-fitness.firebaseapp.com", projectId: "demo-power-fitness", appId: "demo-power-fitness" }
@@ -21,7 +19,7 @@ export const app = getApps().length ? getApp() : initializeApp(configuracao);
 // pelo SDK e deve ser registrado no Firebase Console; nenhum token é gravado no
 // repositório. Em produção, a validação continua usando reCAPTCHA Enterprise.
 if (localDebugAppCheck) {
-  globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  globalThis.FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken;
 }
 
 export const appCheck = emuladoresLocais ? null : initializeAppCheck(app, {

@@ -318,6 +318,7 @@ function renderizarAgendamentos(documentos) {
       celula(dados.nome),
       celula(formatarDataISO(dados.data)),
       celula(dados.hora),
+      celula(dados.tipoAgendamento === "experimental" ? "Experimental" : "Aula"),
       celula(dados.atividade || horario.atividade),
       celula(dados.professorNome || horario.professorNome || "Não definido"),
       celula(dados.plano),

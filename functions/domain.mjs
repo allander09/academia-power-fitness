@@ -37,3 +37,18 @@ export function decidirStatus(dados, status, turma, capacidade) {
   if (status === "recusado" && dados.status === "confirmado") throw new Error("Cancele uma aula já confirmada.");
   return status;
 }
+
+export function normalizarCpf(cpf = "") {
+  return String(cpf).replace(/\D/g, "");
+}
+
+export function cpfValido(cpf = "") {
+  const digitos = normalizarCpf(cpf);
+  if (!/^\d{11}$/.test(digitos) || /^(\d)\1{10}$/.test(digitos)) return false;
+  const calcular = (tamanho) => {
+    const soma = [...digitos.slice(0, tamanho)].reduce((total, numero, indice) => total + Number(numero) * (tamanho + 1 - indice), 0);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+  return calcular(9) === Number(digitos[9]) && calcular(10) === Number(digitos[10]);
+}

@@ -103,6 +103,21 @@ test("criação de agendamento respeita capacidade sem depender do navegador", a
   await rejeita(agendar("aluno2"), "resource-exhausted");
 });
 
+test("aula experimental exige CPF válido, bloqueia duplicidade e não grava CPF puro", async () => {
+  await rejeita(servico.solicitarAgendamento(request("aluno1", { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", tipoAgendamento: "experimental", cpf: "111.111.111-11", plano: "Essencial" })), "invalid-argument");
+  const primeira = await servico.solicitarAgendamento(request("aluno1", { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", tipoAgendamento: "experimental", cpf: "529.982.247-25", plano: "Essencial" }));
+  await rejeita(servico.solicitarAgendamento(request("aluno2", { data: "2026-10-05", horarioId: "atividade", professorUid: "professor", tipoAgendamento: "experimental", cpf: "52998224725", plano: "Essencial" })), "already-exists");
+  const dados = (await db.doc(`agendamentos/${primeira.id}`).get()).data();
+  assert.equal(dados.tipoAgendamento, "experimental");
+  assert.equal(Object.hasOwn(dados, "cpf"), false);
+  assert.equal(Object.hasOwn(dados, "cpfHash"), false);
+  const controles = await db.collection("controles_experimentais").get();
+  assert.equal(controles.size, 1);
+  assert.match(controles.docs[0].id, /^[a-f0-9]{64}$/);
+  assert.equal(controles.docs[0].data().cpfHash, controles.docs[0].id);
+  assert.equal((await db.collection("mail").get()).size, 1);
+});
+
 test("duas solicitações simultâneas do mesmo aluno geram só um registro", async () => {
   const resultados = await Promise.allSettled([agendar("aluno1"), agendar("aluno1")]);
   assert.equal(resultados.filter(item => item.status === "fulfilled").length, 1);
