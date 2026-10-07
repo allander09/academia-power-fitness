@@ -1,12 +1,11 @@
 import { getApp, getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js";
 import { connectAuthEmulator, getAuth } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { connectFirestoreEmulator, getFirestore } from "https://www.gstatic.com/firebasejs/12.17.17/firebase-firestore.js";
+import { connectFirestoreEmulator, getFirestore } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 import { emuladoresLocais, PROJETO_DEMO } from "./ambiente-local.mjs";
 
 const appCheckSiteKey = "6LfWcn0tAAAAAJXiyctX7W5MWoXK_SRVrozJZOfW";
-const localHosts = new Set(["localhost", "127.0.0.1"]);
 const configuracao = emuladoresLocais
   ? { apiKey: "demo-power-fitness", authDomain: "demo-power-fitness.firebaseapp.com", projectId: PROJETO_DEMO, appId: "demo-power-fitness" }
   : firebaseConfig;
