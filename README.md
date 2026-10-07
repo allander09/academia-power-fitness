@@ -33,7 +33,7 @@ npm run test:integration
 
 Para testar o site completo sem credenciais de produção, execute `npm run demo` e abra `http://127.0.0.1:5000/html/`. A carga inicial fornece contas fictícias dos três perfis e reservas para testar a fila. Veja [TESTAR.md](TESTAR.md) para as contas, o clone no VS Code e o roteiro. Os testes usam exclusivamente o projeto `demo-power-fitness` nos emuladores.
 
-Live Server em outra porta continua ligado ao projeto real e exige o token de desenvolvimento registrado no App Check. `file://` não executa corretamente os módulos. A demonstração local não substitui os testes no domínio publicado.
+Live Server em `localhost`/`127.0.0.1` usa o modo de depuração do App Check e o projeto real, sem desativar a proteção de produção. Na primeira execução, o Firebase exibirá no Console do navegador um **App Check debug token**; registre esse token em Firebase Console → Segurança → App Check → Apps → Gerenciar tokens de depuração. Não coloque o token no GitHub. `file://` não executa corretamente os módulos. A demonstração local com `npm run demo` continua sendo a opção recomendada para testes sem dados reais. A configuração de produção mantém reCAPTCHA Enterprise e App Check obrigatório.
 
 ## Implantação
 
